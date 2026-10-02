@@ -167,6 +167,11 @@ export const dictionaries = {
             bungalow: "Bungalov Konaklama",
         },
         submit: "WhatsApp ile Rezervasyon",
+        vehicles: {
+            eyebrow: "PREMİUM FİLO",
+            title: "Öne Çıkan Araçlarımız",
+            subtitle: "Şoförlü VIP transfer, havalimanı karşılama ve özel tur programları için son model araç filomuz.",
+        },
     },
 
     EN: {
@@ -279,6 +284,11 @@ export const dictionaries = {
             bungalow: "Bungalow Stay",
         },
         submit: "Book via WhatsApp",
+        vehicles: {
+            eyebrow: "PREMIUM FLEET",
+            title: "Featured Vehicles",
+            subtitle: "Latest model fleet for chauffeured VIP transfer, airport pickup and private tour programs.",
+        },
     },
 
     AR: {
@@ -391,6 +401,11 @@ export const dictionaries = {
             bungalow: "إقامة البنغالو",
         },
         submit: "احجز عبر واتساب",
+        vehicles: {
+            eyebrow: "أسطول مميز",
+            title: "سياراتنا المميزة",
+            subtitle: "أسطول من أحدث الموديلات للنقل VIP مع سائق واستقبال المطار وبرامج الجولات الخاصة.",
+        },
     },
 };
 
