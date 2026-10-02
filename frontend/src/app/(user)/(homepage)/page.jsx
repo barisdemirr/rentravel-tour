@@ -1,23 +1,30 @@
 "use client";
 
-import Icon from "@/components/ui/Icon";
-import Eyebrow from "@/components/ui/Eyebrow";
-import LanguageMenu from "@/components/ui/LanguageMenu";
-import Reveal from "@/components/ui/Reveal";
+import { useState, useCallback } from "react";
+import Navbar from "@/components/layout/Navbar";
+import MobileDrawer from "@/components/layout/MobileDrawer";
+import Footer from "@/components/layout/Footer";
 
 export default function HomePage() {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const openMenu = useCallback(() => setMenuOpen(true), []);
+    const closeMenu = useCallback(() => setMenuOpen(false), []);
+
     return (
-        <main className="min-h-screen bg-surface p-10">
-            <div className="mx-auto max-w-2xl space-y-6">
-                <Eyebrow>Test Eyebrow</Eyebrow>
-                <Icon name="star" fill className="text-[32px] text-crimson-vivid" />
-                <LanguageMenu />
-                <Reveal>
-                    <p className="rounded-2xl bg-surface-white p-6 shadow-sm">
-                        Reveal testi — sayfayı kaydır, animasyonla gelmeli.
+        <>
+            <Navbar onOpenMenu={openMenu} />
+            <MobileDrawer open={menuOpen} onClose={closeMenu} />
+            <main className="min-h-screen bg-surface pt-20">
+                <div className="mx-auto max-w-3xl px-6 py-20 text-center">
+                    <h1 className="font-headline-lg text-headline-lg uppercase text-charcoal-dark">
+                        Aşama 3 tamam
+                    </h1>
+                    <p className="mt-4 font-body-lg text-body-lg text-secondary">
+                        Navbar, mobil menü ve footer hazır. Sonraki aşamada hero ve rezervasyon gelecek.
                     </p>
-                </Reveal>
-            </div>
-        </main>
+                </div>
+            </main>
+            <Footer />
+        </>
     );
 }

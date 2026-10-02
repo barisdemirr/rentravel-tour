@@ -16,6 +16,8 @@ export const dictionaries = {
             langSelect: "Dil Seçimi",
             vipForm: "VIP Talep Formu",
             skipToContent: "İçeriğe geç",
+            dailyTours: "Günübirlik Turlar",
+            cultureTours: "Konaklamalı Kültür Turları",
         },
         hero: {
             slides: [
@@ -175,6 +177,8 @@ export const dictionaries = {
             langSelect: "Language",
             vipForm: "VIP Request Form",
             skipToContent: "Skip to content",
+            dailyTours: "Daily Tours",
+            cultureTours: "Cultural Stays",
         },
         hero: {
             slides: [
@@ -278,6 +282,8 @@ export const dictionaries = {
             langSelect: "اللغة",
             vipForm: "نموذج طلب VIP",
             skipToContent: "تخطي إلى المحتوى",
+            dailyTours: "جولات يومية",
+            cultureTours: "جولات ثقافية مع إقامة",
         },
         hero: {
             slides: [
