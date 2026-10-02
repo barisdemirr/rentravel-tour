@@ -453,3 +453,59 @@ export const featuredBungalows = [
         reviews: "98",
     },
 ];
+
+
+/* ─────────────────────────────────────────────
+   MÜŞTERİ YORUMLARI (Google'dan gerçek yorumlar)
+   Not: Yorum metinleri orijinaldir, çevrilmez.
+   ───────────────────────────────────────────── */
+export const testimonials = [
+    {
+        id: "gb",
+        name: "Görkem Birinci",
+        initials: "GB",
+        lang: "TR",
+        dir: "ltr",
+        text: "Turumuzun en başından en sonuna kadar geçen zaman dilimi içersinde ilgi ve alakalarından dolayı teşekkür ederim harika bir deneyimdi",
+    },
+    {
+        id: "oa",
+        name: "Özlem Ağlamış",
+        initials: "ÖA",
+        lang: "TR",
+        dir: "ltr",
+        text: "Harika bir gezi deneyimiydi. Her şey için teşekkürler 🥰",
+    },
+    {
+        id: "bc",
+        name: "Be Creative",
+        initials: "BC",
+        lang: "AR",
+        dir: "rtl",
+        text: "احلى شركة وخدمات ممتازة ببساطة شركة تستحق الثقة والاحترام",
+    },
+    {
+        id: "hk",
+        name: "hassan kafi Jeylani",
+        initials: "HK",
+        lang: "EN",
+        dir: "ltr",
+        text: "Thank you for all services in trabzon.",
+    },
+    {
+        id: "bm",
+        name: "B Mazlum",
+        initials: "BM",
+        lang: "DE",
+        dir: "ltr",
+        text: "Wir hatten als Gruppe sehr viel Spaß mit Rentravel in Trabzon. Super Mitarbeiter, tolles Team und sehr freundlich. Wir kommen gerne wieder.",
+    },
+    {
+        id: "hb",
+        name: "Hamza Birincioğlu",
+        initials: "HB",
+        lang: "TR",
+        dir: "ltr",
+        text: "Çok iyi bir turizm şirketi her zaman onların turlarına gidiyorum hiç mağdur olmadım herkese tavsiye ediyorum",
+    },
+];
