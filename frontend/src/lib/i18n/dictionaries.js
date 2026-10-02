@@ -182,6 +182,11 @@ export const dictionaries = {
             title: "Konaklamalı Kültür Turları",
             subtitle: "Otel konaklaması dahil, tarih ve kültür dolu çok günlü özel programlar.",
         },
+        bungalows: {
+            eyebrow: "ÖZEL KONAKLAMA",
+            title: "Öne Çıkan Bungalovlar",
+            subtitle: "Karadeniz'in en özel noktalarında, doğayla iç içe lüks bungalov ve dağ evleri.",
+        },
     },
 
     EN: {
@@ -309,6 +314,12 @@ export const dictionaries = {
             title: "Cultural Tours with Accommodation",
             subtitle: "Multi-day cultural programs including hotel accommodation and expert guides.",
         },
+        bungalows: {
+            eyebrow: "PRIVATE STAYS",
+            title: "Featured Bungalows",
+            subtitle: "Luxury bungalows and mountain houses in the most special spots of the Black Sea.",
+        },
+
     },
 
     AR: {
@@ -435,6 +446,11 @@ export const dictionaries = {
             eyebrow: "ثقافة مع إقامة",
             title: "جولات ثقافية مع إقامة",
             subtitle: "برامج ثقافية متعددة الأيام تشمل الإقامة الفندقية والمرشدين الخبراء.",
+        },
+        bungalows: {
+            eyebrow: "إقامات خاصة",
+            title: "البنغالو المميزة",
+            subtitle: "بنغالو فاخرة وبيوت جبلية في أجمل مواقع البحر الأسود على تواصل مع الطبيعة.",
         },
     },
 };
