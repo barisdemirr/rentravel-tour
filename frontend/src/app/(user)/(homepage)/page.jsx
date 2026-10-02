@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import Navbar from "@/components/layout/Navbar";
 import MobileDrawer from "@/components/layout/MobileDrawer";
 import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/sections/HeroSection";
+import BookingSection from "@/components/sections/BookingSection";
 
 export default function HomePage() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -14,15 +16,9 @@ export default function HomePage() {
         <>
             <Navbar onOpenMenu={openMenu} />
             <MobileDrawer open={menuOpen} onClose={closeMenu} />
-            <main className="min-h-screen bg-surface pt-20">
-                <div className="mx-auto max-w-3xl px-6 py-20 text-center">
-                    <h1 className="font-headline-lg text-headline-lg uppercase text-charcoal-dark">
-                        Aşama 3 tamam
-                    </h1>
-                    <p className="mt-4 font-body-lg text-body-lg text-secondary">
-                        Navbar, mobil menü ve footer hazır. Sonraki aşamada hero ve rezervasyon gelecek.
-                    </p>
-                </div>
+            <main id="main" className="w-full bg-surface pt-20">
+                <HeroSection />
+                <BookingSection />
             </main>
             <Footer />
         </>

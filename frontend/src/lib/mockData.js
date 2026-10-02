@@ -1,0 +1,86 @@
+import { IMG } from "./constants";
+
+/* ─────────────────────────────────────────────
+   MOCK DATA — Backend hazır olunca bu dosya silinecek.
+   Her veri "servisten geliyormuş gibi" buradan çekilir.
+   ───────────────────────────────────────────── */
+
+export const heroSlides = [
+    {
+        id: "karadeniz",
+        image: IMG.hero1,
+        badge: "Özel Karadeniz ve Doğa Rotaları",
+        line1: "Karadeniz'in Büyüsünü",
+        accent: "Zirvede",
+        rest: "Yaşayın",
+        text: "Rentravel Turizm güvencesi ve TÜRSAB {tursabNo} no'lu belge ile kişiye özel, konforlu ve unutulmaz seyahat deneyimleri.",
+        cta: "Hemen Keşfet",
+        alt: "VIP Rezervasyon Hattı",
+        altIcon: "call",
+        altKind: "phone",
+    },
+    {
+        id: "yayla",
+        image: IMG.hero2,
+        badge: "Kaçkarlar Bulut Denizi Keşfi",
+        line1: "Yayla Rotalarında",
+        accent: "Ayrıcalıklı",
+        rest: "Konfor",
+        text: "Özel 4x4 araçlar, profesyonel rehberler ve seçkin misafirlere özel rota ayrıntılarıyla Kaçkarlar'ı keşfedin.",
+        cta: "Yayla Turlarını İncele",
+        alt: "WhatsApp VIP Danışman",
+        altFallback: "Danışmanımızı Arayın",
+        altIcon: "chat",
+        altKind: "whatsapp",
+    },
+    {
+        id: "vip-filo",
+        image: IMG.hero3,
+        badge: "Havalimanı & Bölge Protokolü",
+        line1: "VIP Şoförlü",
+        accent: "Filo",
+        rest: "Hizmeti",
+        text: "Trabzon Havalimanı karşılama, iş heyetleri ve özel aile turları için konforlu, kesintisiz transfer hizmeti.",
+        cta: "Filoyu Görüntüle",
+        alt: "Anında Transfer İste",
+        altIcon: "phone_in_talk",
+        altKind: "phone",
+    },
+    {
+        id: "kapadokya",
+        image: IMG.hero4,
+        badge: "Yurtiçi Prestij Koleksiyonu",
+        line1: "Kapadokya'dan",
+        accent: "Batum'a",
+        rest: "Özel Rotalar",
+        text: "Transfer, otel konaklaması ve balon rezervasyonları tek elden, Rentravel titizliğiyle hazırlanır.",
+        cta: "Paketleri İncele",
+        alt: "Kişiye Özel Program",
+        altIcon: "support_agent",
+        altKind: "phone",
+    },
+];
+
+/* Rezervasyon tab'ları için seçenekler */
+export const bookingOptions = {
+    dailyTours: [
+        "Uzungöl & Hapsiyaş Köprüsü Turu",
+        "Ayder Yaylası & Fırtına Vadisi",
+        "Sümela Manastırı & Zigana Hamsiköy",
+        "Batum (Gürcistan) Günübirlik",
+        "Pokut & Sal Yaylası Bulut Denizi",
+    ],
+    cultureTours: [
+        "Kapadokya Balon & Vadi Masalı (3 Gün)",
+        "Karadeniz & Gürcistan Kültür Turu (5 Gün)",
+        "Doğu Karadeniz Yayla & Şehir Turu (4 Gün)",
+    ],
+    accommodationTypes: [
+        "5 Yıldızlı Otel",
+        "Butik Dağ Oteli",
+        "Mağara Otel",
+        "Konak (Butik Pansiyon)",
+    ],
+};
+
+export const SLIDE_DURATION = 4500;

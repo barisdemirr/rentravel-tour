@@ -160,6 +160,13 @@ export const dictionaries = {
                 kvkk: "KVKK Aydınlatma Metni",
             },
         },
+        tabs: {
+            car: "Araç Kiralama",
+            daily: "Günübirlik Turlar",
+            culture: "Konaklamalı Kültür Turları",
+            bungalow: "Bungalov Konaklama",
+        },
+        submit: "WhatsApp ile Rezervasyon",
     },
 
     EN: {
@@ -265,6 +272,13 @@ export const dictionaries = {
             rights: "All rights reserved.",
             legal: { privacy: "Privacy Policy", terms: "Terms of Use", kvkk: "KVKK Disclosure" },
         },
+        tabs: {
+            car: "Car Rental",
+            daily: "Daily Tours",
+            culture: "Cultural Tours with Stay",
+            bungalow: "Bungalow Stay",
+        },
+        submit: "Book via WhatsApp",
     },
 
     AR: {
@@ -370,6 +384,13 @@ export const dictionaries = {
             rights: "جميع الحقوق محفوظة.",
             legal: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", kvkk: "إفصاح KVKK" },
         },
+        tabs: {
+            car: "تأجير السيارات",
+            daily: "جولات يومية",
+            culture: "جولات ثقافية مع إقامة",
+            bungalow: "إقامة البنغالو",
+        },
+        submit: "احجز عبر واتساب",
     },
 };
 
