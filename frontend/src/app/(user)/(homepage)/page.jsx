@@ -1,37 +1,30 @@
 "use client";
 
-import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { featuredVehicles } from "@/lib/mockData";
-import Eyebrow from "@/components/ui/Eyebrow";
-import Reveal from "@/components/ui/Reveal";
-import AutoSlider from "@/components/ui/AutoSlider";
-import VehicleCard from "@/components/cards/VehicleCard";
+import { useState, useCallback } from "react";
+import Navbar from "@/components/layout/Navbar";
+import MobileDrawer from "@/components/layout/MobileDrawer";
+import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/sections/HeroSection";
+import BookingSection from "@/components/sections/BookingSection";
+import FeaturedVehicles from "@/components/sections/FeaturedVehicles";
+import DailyTours from "@/components/sections/DailyTours";
 
-export default function FeaturedVehicles() {
-    const { t } = useLanguage();
+export default function HomePage() {
+    const [menuOpen, setMenuOpen] = useState(false);
+    const openMenu = useCallback(() => setMenuOpen(true), []);
+    const closeMenu = useCallback(() => setMenuOpen(false), []);
 
     return (
-        <section id="araclar" className="w-full bg-surface py-20">
-            <div className="mx-auto max-w-[1440px] px-margin md:px-margin-tablet lg:px-margin-desktop">
-                <Reveal className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-                    <div className="flex flex-col gap-3">
-                        <Eyebrow>{t.vehicles?.eyebrow || "PREMIUM FİLO"}</Eyebrow>
-                        <h2 className="font-headline-lg-mobile text-headline-lg-mobile uppercase tracking-tight text-charcoal-dark md:font-headline-lg md:text-headline-lg">
-                            {t.vehicles?.title || "Öne Çıkan Araçlarımız"}
-                        </h2>
-                        <p className="max-w-2xl font-body-md text-body-md text-secondary">
-                            {t.vehicles?.subtitle ||
-                                "Şoförlü VIP transfer, havalimanı karşılama ve özel tur programları için son model araç filomuz."}
-                        </p>
-                    </div>
-                </Reveal>
-
-                <AutoSlider ariaLabel="Öne çıkan araçlar">
-                    {featuredVehicles.map((vehicle) => (
-                        <VehicleCard key={vehicle.id} vehicle={vehicle} />
-                    ))}
-                </AutoSlider>
-            </div>
-        </section>
+        <>
+            <Navbar onOpenMenu={openMenu} />
+            <MobileDrawer open={menuOpen} onClose={closeMenu} />
+            <main id="main" className="w-full bg-surface pt-20">
+                <HeroSection />
+                <BookingSection />
+                <FeaturedVehicles />
+                <DailyTours />
+            </main>
+            <Footer />
+        </>
     );
 }

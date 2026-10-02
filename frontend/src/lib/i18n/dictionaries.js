@@ -172,6 +172,11 @@ export const dictionaries = {
             title: "Öne Çıkan Araçlarımız",
             subtitle: "Şoförlü VIP transfer, havalimanı karşılama ve özel tur programları için son model araç filomuz.",
         },
+        dailyTours: {
+            eyebrow: "GÜNÜBİRLİK ROTALAR",
+            title: "Popüler Günübirlik Turlar",
+            subtitle: "Uzman rehberler eşliğinde, tek günde Karadeniz'in en özel noktalarını keşfedin.",
+        },
     },
 
     EN: {
@@ -289,6 +294,11 @@ export const dictionaries = {
             title: "Featured Vehicles",
             subtitle: "Latest model fleet for chauffeured VIP transfer, airport pickup and private tour programs.",
         },
+        dailyTours: {
+            eyebrow: "DAILY ROUTES",
+            title: "Popular Daily Tours",
+            subtitle: "Discover the most special spots of the Black Sea in a single day with expert guides.",
+        },
     },
 
     AR: {
@@ -405,6 +415,11 @@ export const dictionaries = {
             eyebrow: "أسطول مميز",
             title: "سياراتنا المميزة",
             subtitle: "أسطول من أحدث الموديلات للنقل VIP مع سائق واستقبال المطار وبرامج الجولات الخاصة.",
+        },
+        dailyTours: {
+            eyebrow: "مسارات يومية",
+            title: "الجولات اليومية الشائعة",
+            subtitle: "اكتشف أجمل معالم البحر الأسود في يوم واحد مع مرشدين خبراء.",
         },
     },
 };

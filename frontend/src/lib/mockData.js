@@ -162,3 +162,90 @@ export const featuredVehicles = [
         features: ["Şoförlü", "Masaj Koltuk", "Mini Bar", "Wi-Fi"],
     },
 ];
+
+
+/* ─────────────────────────────────────────────
+   POPÜLER GÜNÜBİRLİK TURLAR
+   ───────────────────────────────────────────── */
+export const dailyTours = [
+    {
+        id: "uzungol",
+        slug: "uzungol-hapsiyas-turu",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD1D0XXAum_ewc1Pl91y7rYHu183gLG_4H3gIY7ic-urvpYdtvHMCHo2nCCp7xMfwotr4fTHojc__lpmtPKkeWOgM5Y5AkzkIk04QnhtcYZykOmfCTGh9VSGcB5PCOc73VGhzvuyiq1bXVydi0gRZIusnPggRmW6YRlhopl-5lNIWx731KnAc5u0pmOAO42zOVH-_ubCyodbKscd9kapa4gC-lyIxKrQsQ0t03PZicnSUjf6ge1rBD-ow",
+        badge: "En Çok Tercih Edilen",
+        badgeTone: "primary",
+        duration: "Günübirlik",
+        transport: "VIP Minibüs",
+        transportIcon: "directions_bus",
+        title: "Uzungöl & Hapsiyaş Köprüsü Turu",
+        description:
+            "Trabzon kalkışlı, Kiremitli Köprü, Çay Fabrikası ve Uzungöl Seyir Terası ile doğanın ve yerel kültürün kalbine yolculuk.",
+        price: "₺750",
+        rating: "4.9",
+        reviews: "420+",
+    },
+    {
+        id: "ayder",
+        slug: "ayder-firtina-vadisi",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBfxXTQ0-MQfLyWZgg2ZhtDdZK9yVpMn1h8hWWkGrrKJWO9pHcUi4sjuCNMyoP2hmrDCJIZ6-ApbavvBo-8yDIkczWgSNS9DlF0oCGpSmG_tgxkL7swF17qAmjN5lK5nLKtlKwaVTnhi9oV_CWftgNn7CLVy9pMJuD_3GFwGucDMTA_y4x-2It9ZIiPvqAli4zf-1IvedO2cLlogmaRA_6eBBMbopl4e5M6k7IaKpj5FH7EgT_VDdjWIA",
+        badge: "Popüler",
+        badgeTone: "dark",
+        duration: "Günübirlik",
+        transport: "Butik Tur",
+        transportIcon: "verified",
+        title: "Ayder Yaylası & Fırtına Vadisi",
+        description:
+            "Fırtına Deresi Zipline, Tarihi Taş Kemer Köprüler, Şenyuva Köyü, Zilkale ve Gelintülü Şelalesi keşfi.",
+        price: "₺850",
+        rating: "5.0",
+        reviews: "380+",
+    },
+    {
+        id: "sumela",
+        slug: "sumela-zigana-hamsikoy",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBIEvrUBlTm1NbHXasCdbC16y2jpK9wMCUOlYTZoI2l2ufHdMUjZmjSoX0K3LMu4KbPXOhJDtob-hlNuVknaaa9tcnwkz0m4cTs1flAjlsIaDSdQIkq70pS3XJXCJn7y7A4QDyBLywENfmeMAJkxpckf5mlCeRSNWVbSXE4IVS9L2tz1j8YIR2JF9oB0PoNfINUuwtveWwhHnntoF38vYf--wtxW0Mr6nm_yy741suQb9diVTKnR6LQSw",
+        badge: "Kültür & Tarih",
+        badgeTone: "vivid",
+        duration: "Günübirlik",
+        transport: "Tarih & Doğa",
+        transportIcon: "museum",
+        title: "Sümela Manastırı & Zigana Hamsiköy",
+        description:
+            "Kayalara oyulmuş bin yıllık manastır, Zigana Geçidi panoraması ve meşhur fırın Hamsiköy sütlacı lezzetiyle unutulmaz rota.",
+        price: "₺800",
+        rating: "4.9",
+        reviews: "510+",
+    },
+    {
+        id: "batum",
+        slug: "batum-gunubirlik",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBr3mhxtw6Kzvz0oP38fP6Ug5f7DbX3ICOYnDa0p_G6Cn3B59oHj1nkXYw29ql2_YP8SAwlbBvyXXhCwbf12vVOeJBY5MfasOlclTf1amhYSQxtoAGBPMj9KA8YJgZxcvYGloJLrH-9k_TTga1iE4rlywxk1nPm6Nh1vV0XZKyHafVvB0sYOqW4tKNs2njime8W7UUXQ8kU44u9NhvooxLmytu8xKpd6kfiMtvZ8HpTDC9JfGCYMU_3Pw",
+        badge: "Yurtdışı / Kimlikle",
+        badgeTone: "dark",
+        duration: "1 Gün",
+        transport: "Kimlik Kartıyla",
+        transportIcon: "badge",
+        title: "Batum (Gürcistan) Günübirlik Turu",
+        description:
+            "Kimlik kartı ile kolay geçiş, Botanik Bahçesi, Ali ve Nino Heykeli, Piazza Meydanı ve zengin Gürcü mutfağı.",
+        price: "₺1.200",
+        rating: "4.8",
+        reviews: "290+",
+    },
+    {
+        id: "pokut",
+        slug: "pokut-sal-yaylasi",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCVU0Aggodbdlxg3Q6NukkZLmqqGWybIpJI1GNTrVzvSYBSjlrXr_6lok60CLPMuVdaeiD_3wYCAEt_R458j2LhvbClD04PURp8Gh46eBmPq-bkMLvTlo51tMXlt54EDiwhsUkqM6lvuMEvte1hyryHTxpl1P4ituykTtuWuQNMwhel97lb38NQP3DhGeLvWCmJ8PH-a-BTO94CbUqBx1zS2Md4PFVVWaiPAjUhHH7TyKsShwiodhg6ZQ",
+        badge: "Macera & Safari",
+        badgeTone: "primary",
+        duration: "1 Gün",
+        transport: "4x4 Jeep Safari",
+        transportIcon: "minor_crash",
+        title: "Pokut & Sal Yaylası Bulut Denizi",
+        description:
+            "2.050 metre rakımda bulutların üstünde gün batımı, endemik yayla bitki örtüsü ve yöresel tulum eşliğinde çay saati.",
+        price: "₺1.450",
+        rating: "5.0",
+        reviews: "210+",
+    },
+];
