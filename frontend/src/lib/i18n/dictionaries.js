@@ -177,6 +177,11 @@ export const dictionaries = {
             title: "Popüler Günübirlik Turlar",
             subtitle: "Uzman rehberler eşliğinde, tek günde Karadeniz'in en özel noktalarını keşfedin.",
         },
+        cultureTours: {
+            eyebrow: "KONAKLAMALI KÜLTÜR",
+            title: "Konaklamalı Kültür Turları",
+            subtitle: "Otel konaklaması dahil, tarih ve kültür dolu çok günlü özel programlar.",
+        },
     },
 
     EN: {
@@ -299,6 +304,11 @@ export const dictionaries = {
             title: "Popular Daily Tours",
             subtitle: "Discover the most special spots of the Black Sea in a single day with expert guides.",
         },
+        cultureTours: {
+            eyebrow: "CULTURE WITH STAY",
+            title: "Cultural Tours with Accommodation",
+            subtitle: "Multi-day cultural programs including hotel accommodation and expert guides.",
+        },
     },
 
     AR: {
@@ -420,6 +430,11 @@ export const dictionaries = {
             eyebrow: "مسارات يومية",
             title: "الجولات اليومية الشائعة",
             subtitle: "اكتشف أجمل معالم البحر الأسود في يوم واحد مع مرشدين خبراء.",
+        },
+        cultureTours: {
+            eyebrow: "ثقافة مع إقامة",
+            title: "جولات ثقافية مع إقامة",
+            subtitle: "برامج ثقافية متعددة الأيام تشمل الإقامة الفندقية والمرشدين الخبراء.",
         },
     },
 };
