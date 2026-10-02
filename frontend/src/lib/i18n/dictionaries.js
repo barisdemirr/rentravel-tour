@@ -154,6 +154,8 @@ export const dictionaries = {
             desc: "Yurtiçi ve yurtdışı turlar, tatil ve şehir otelleri, doğa ve yayla turları ile VIP transfer hizmetleri sunan TÜRSAB belgeli seyahat acentesi.",
             vipConcierge: "VIP Concierge",
             rights: "Tüm hakları saklıdır.",
+            paymentMethods: "Güvenli Ödeme Yöntemleri",
+            tursabEyebrow: "Resmi Doğrulama",
             legal: {
                 privacy: "Gizlilik Politikası",
                 terms: "Kullanım Koşulları",
@@ -290,6 +292,8 @@ export const dictionaries = {
             desc: "A TÜRSAB-licensed travel agency offering domestic and international tours, holiday and city hotels, nature and plateau tours, and VIP transfer services.",
             vipConcierge: "VIP Concierge",
             rights: "All rights reserved.",
+            paymentMethods: "Secure Payment Methods",
+            tursabEyebrow: "Official Verification",
             legal: { privacy: "Privacy Policy", terms: "Terms of Use", kvkk: "KVKK Disclosure" },
         },
         tabs: {
@@ -423,6 +427,8 @@ export const dictionaries = {
             desc: "وكالة سفر مرخصة من TÜRSAB تقدم جولات محلية ودولية وفنادق العطلات والمدن وجولات الطبيعة والهضاب وخدمات النقل VIP.",
             vipConcierge: "كونسيرج VIP",
             rights: "جميع الحقوق محفوظة.",
+            paymentMethods: "طرق دفع آمنة",
+            tursabEyebrow: "تحقق رسمي",
             legal: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", kvkk: "إفصاح KVKK" },
         },
         tabs: {

@@ -5,6 +5,8 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SITE, IMG } from "@/lib/constants";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
+import TursabBadge from "../ui/TursabBadge";
+import PaymentLogos from "../ui/PaymentLogos";
 
 export default function Footer() {
     const { t } = useLanguage();
@@ -32,8 +34,9 @@ export default function Footer() {
     return (
         <footer className="w-full bg-[#0D1017] pb-8 pt-16 text-surface-white">
             <div className="mx-auto max-w-[1440px] px-margin md:px-margin-tablet lg:px-margin-desktop">
+                {/* ÜST BLOK */}
                 <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12">
-                    {/* Marka + açıklama */}
+                    {/* Marka + TÜRSAB */}
                     <div className="flex flex-col gap-4 lg:col-span-4">
                         <div className="flex items-center gap-2">
                             <SafeImage
@@ -48,6 +51,9 @@ export default function Footer() {
                         <p className="max-w-sm font-body-sm text-body-sm text-secondary-fixed-dim">
                             {t.footer.desc}
                         </p>
+
+                        {/* TÜRSAB rozeti — küçültülmüş */}
+                        <TursabBadge />
                     </div>
 
                     {/* Hızlı erişim */}
@@ -117,7 +123,15 @@ export default function Footer() {
                     </nav>
                 </div>
 
-                {/* Alt satır */}
+                {/* ÖDEME YÖNTEMLERİ */}
+                <div className="mb-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] px-5 py-4 sm:flex-row">
+                    <span className="font-label-uppercase text-label-uppercase text-secondary-fixed-dim">
+                        {t.footer?.paymentMethods || "Güvenli Ödeme Yöntemleri"}
+                    </span>
+                    <PaymentLogos />
+                </div>
+
+                {/* ALT SATIR */}
                 <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 font-label-sm text-label-sm text-secondary-fixed-dim sm:flex-row">
                     <p>© {year} Rentravel Turizm. {t.footer.rights}</p>
                     <div className="flex flex-wrap items-center justify-center gap-4">
