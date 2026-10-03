@@ -4,8 +4,8 @@ import { use, useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Icon from "@/components/ui/Icon";
-import Reveal from "@/components/ui/Reveal";
 import SafeImage from "@/components/ui/SafeImage";
+import Lightbox from "@/components/ui/Lightbox";
 import { bungalows, getBungalowDetail } from "@/lib/mockData";
 
 /* ───────── Yardımcılar ───────── */
@@ -36,7 +36,6 @@ const fmtTL = (n) => `${Number(n).toLocaleString("tr-TR")} ₺`;
 
 /* ───────── Sayfa ───────── */
 export default function BungalovDetayPage({ params }) {
-    /* Next 15: params Promise. use() ile aç */
     const resolved = typeof params?.then === "function" ? use(params) : params;
     const slug = resolved?.slug;
 
@@ -46,7 +45,10 @@ export default function BungalovDetayPage({ params }) {
     );
     const detail = useMemo(() => getBungalowDetail(slug), [slug]);
 
-    /* Hydration uyumsuzluğu için */
+    /* Lightbox state */
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+
     const [mounted, setMounted] = useState(false);
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
@@ -68,6 +70,17 @@ export default function BungalovDetayPage({ params }) {
     const nights = dayDiff(checkIn, checkOut);
     const nightlyRate = priceNum(bungalow);
     const subtotal = nightlyRate * nights;
+
+    /* Lightbox images — string array → {src} objesi */
+    const lightboxImages = useMemo(
+        () => (detail?.gallery || []).map((src) => ({ src })),
+        [detail]
+    );
+
+    const openLightbox = (i) => {
+        setLightboxIndex(i);
+        setLightboxOpen(true);
+    };
 
     /* WhatsApp mesajı */
     const buildWhatsappHref = () => {
@@ -91,7 +104,7 @@ export default function BungalovDetayPage({ params }) {
             try {
                 await navigator.share({ title, url });
             } catch {
-                /* kullanıcı iptal etti */
+                /* iptal */
             }
         } else {
             try {
@@ -99,7 +112,7 @@ export default function BungalovDetayPage({ params }) {
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
             } catch {
-                /* sessiz geç */
+                /* sessiz */
             }
         }
     };
@@ -110,199 +123,204 @@ export default function BungalovDetayPage({ params }) {
     };
 
     return (
-        <div className="mx-auto w-full max-w-[1280px] px-4 py-6 md:px-8 md:py-8">
-            {/* ─────── BASİT BREADCRUMB ─────── */}
-            <nav
-                aria-label="Ekmek kırıntısı"
-                className="mb-5 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap font-label-md text-label-md text-secondary"
-            >
-                <Link href="/" className="transition-colors hover:text-crimson-vivid">
-                    Anasayfa
-                </Link>
-                <Icon name="chevron_right" className="text-[14px]" />
-                <Link
-                    href="/bungalov-konaklama"
-                    className="transition-colors hover:text-crimson-vivid"
+        <>
+            <div className="mx-auto w-full max-w-[1280px] px-4 py-6 md:px-8 md:py-8">
+                {/* ─────── BREADCRUMB ─────── */}
+                <nav
+                    aria-label="Ekmek kırıntısı"
+                    className="mb-5 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap font-label-md text-label-md text-secondary"
                 >
-                    Bungalov
-                </Link>
-                <Icon name="chevron_right" className="text-[14px]" />
-                <span className="font-semibold text-charcoal-dark">
-                    {bungalow.title}
-                </span>
-            </nav>
+                    <Link href="/" className="transition-colors hover:text-crimson-vivid">
+                        Anasayfa
+                    </Link>
+                    <Icon name="chevron_right" className="text-[14px]" />
+                    <Link
+                        href="/bungalov-konaklama"
+                        className="transition-colors hover:text-crimson-vivid"
+                    >
+                        Bungalov
+                    </Link>
+                    <Icon name="chevron_right" className="text-[14px]" />
+                    <span className="font-semibold text-charcoal-dark">
+                        {bungalow.title}
+                    </span>
+                </nav>
 
-            {/* ─────── PROPERTY HEADER ─────── */}
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-3 py-0.5 font-label-md text-label-md font-semibold text-on-primary-fixed-variant">
-                            <Icon name="verified" className="text-[14px]" />
-                            TÜRSAB 15869
-                        </span>
-                        <span className="rounded-full bg-canvas-offwhite px-3 py-0.5 font-label-md text-label-md text-secondary">
-                            {detail.ratingLabel}
-                        </span>
+                {/* ─────── PROPERTY HEADER ─────── */}
+                <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary-fixed px-3 py-0.5 font-label-md text-label-md font-semibold text-on-primary-fixed-variant">
+                                <Icon name="verified" className="text-[14px]" />
+                                TÜRSAB 15869
+                            </span>
+                            <span className="rounded-full bg-canvas-offwhite px-3 py-0.5 font-label-md text-label-md text-secondary">
+                                {detail.ratingLabel}
+                            </span>
+                        </div>
+
+                        <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-charcoal-dark md:font-headline-lg md:text-headline-lg">
+                            {bungalow.title}
+                        </h1>
+
+                        <div className="flex items-center gap-2 font-body-sm text-body-sm text-secondary">
+                            <Icon name="location_on" className="text-[18px] text-crimson-vivid" />
+                            <span>{bungalow.location}</span>
+                        </div>
                     </div>
 
-                    <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-charcoal-dark md:font-headline-lg md:text-headline-lg">
-                        {bungalow.title}
-                    </h1>
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={handleShare}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-surface-variant bg-surface-white px-4 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors hover:bg-canvas-offwhite"
+                        >
+                            <Icon name="share" className="text-[18px]" />
+                            <span>{copied ? "Kopyalandı!" : "Paylaş"}</span>
+                        </button>
 
-                    <div className="flex items-center gap-2 font-body-sm text-body-sm text-secondary">
-                        <Icon name="location_on" className="text-[18px] text-crimson-vivid" />
-                        <span>{bungalow.location}</span>
+                        <div className="flex items-center gap-3 rounded-2xl bg-charcoal-dark px-4 py-2.5 text-white shadow-md">
+                            <div className="flex flex-col leading-tight">
+                                <span className="font-label-md text-label-md font-bold">
+                                    {detail.ratingLabel}
+                                </span>
+                                <span className="font-body-sm text-body-sm opacity-80">
+                                    {detail.ratingCount} Değerlendirme
+                                </span>
+                            </div>
+                            <span className="rounded-xl bg-white px-2.5 py-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
+                                {detail.ratingScore.toFixed(1)}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                {/* Sağ butonlar */}
-                <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={handleShare}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-surface-variant bg-surface-white px-4 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors hover:bg-canvas-offwhite"
-                    >
-                        <Icon name="share" className="text-[18px]" />
-                        <span>{copied ? "Kopyalandı!" : "Paylaş"}</span>
-                    </button>
+                {/* ─────── GALERİ ─────── */}
+                <Gallery
+                    images={detail.gallery}
+                    label={detail.galleryLabel}
+                    totalPhotos={detail.totalPhotos}
+                    title={bungalow.title}
+                    onImageClick={openLightbox}
+                />
 
-                    {/* Rating puan kutusu */}
-                    <div className="flex items-center gap-3 rounded-2xl bg-charcoal-dark px-4 py-2.5 text-white shadow-md">
-                        <div className="flex flex-col leading-tight">
-                            <span className="font-label-md text-label-md font-bold">
-                                {detail.ratingLabel}
-                            </span>
-                            <span className="font-body-sm text-body-sm opacity-80">
-                                {detail.ratingCount} Değerlendirme
-                            </span>
+                {/* ─────── STICKY ANCHOR PILLS ─────── */}
+                <AnchorPills />
+
+                {/* ─────── 2 KOLON ─────── */}
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+                    <div className="flex flex-col gap-6 lg:col-span-8">
+                        <FeatureStrip features={detail.featureStrip} />
+                        <NarrativeBlock
+                            title="Özel Dağ Sığınağınız"
+                            paragraphs={detail.description}
+                        />
+                        <BreakfastCard breakfast={detail.breakfast} />
+                        <AmenitiesBlock amenities={detail.amenities} />
+                        <LocationBlock
+                            distances={detail.distances}
+                            note={detail.locationNote}
+                        />
+                        <RulesBlock rules={detail.rules} />
+                    </div>
+
+                    <div className="lg:col-span-4">
+                        <div className="lg:sticky lg:top-28">
+                            <BookingWidget
+                                bungalow={bungalow}
+                                checkIn={checkIn}
+                                setCheckIn={setCheckIn}
+                                checkOut={checkOut}
+                                setCheckOut={setCheckOut}
+                                guests={guests}
+                                setGuests={setGuests}
+                                nights={nights}
+                                nightlyRate={nightlyRate}
+                                subtotal={subtotal}
+                                whatsappHref={buildWhatsappHref()}
+                                onReservation={handleReservation}
+                                reservationSent={reservationSent}
+                                mounted={mounted}
+                            />
                         </div>
-                        <span className="rounded-xl bg-white px-2.5 py-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                            {detail.ratingScore.toFixed(1)}
-                        </span>
                     </div>
                 </div>
             </div>
 
-            {/* ─────── MOSAİK GALERİ ─────── */}
-            <Gallery
-                images={detail.gallery}
-                label={detail.galleryLabel}
-                totalPhotos={detail.totalPhotos}
-                title={bungalow.title}
+            {/* LIGHTBOX */}
+            <Lightbox
+                images={lightboxImages}
+                index={lightboxIndex}
+                open={lightboxOpen}
+                onClose={() => setLightboxOpen(false)}
+                onIndexChange={setLightboxIndex}
             />
+        </>
+    );
+}
 
-            {/* ─────── STICKY ANCHOR PILLS ─────── */}
-            <AnchorPills />
+/* ─────────────────────────────────────────────
+   GALERİ
+   ───────────────────────────────────────────── */
 
-            {/* ─────── İÇERİK + REZERVASYON (2 KOLON) ─────── */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-                {/* SOL KOLON */}
-                <div className="flex flex-col gap-6 lg:col-span-8">
-                    {/* Feature Strip */}
-                    <FeatureStrip features={detail.featureStrip} />
+function Gallery({ images, label, totalPhotos, title, onImageClick }) {
+    const [hero, ...rest] = images;
 
-                    {/* Uzun Açıklama */}
-                    <NarrativeBlock
-                        title="Özel Dağ Sığınağınız"
-                        paragraphs={detail.description}
-                    />
-
-                    {/* Kahvaltı Kartı */}
-                    <BreakfastCard breakfast={detail.breakfast} />
-
-                    {/* Olanaklar */}
-                    <AmenitiesBlock amenities={detail.amenities} />
-
-                    {/* Konum */}
-                    <LocationBlock
-                        distances={detail.distances}
-                        note={detail.locationNote}
-                    />
-
-                    {/* Kurallar */}
-                    <RulesBlock rules={detail.rules} />
+    return (
+        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-12">
+            {/* Sol büyük */}
+            <button
+                type="button"
+                onClick={() => onImageClick?.(0)}
+                className="group relative h-[260px] cursor-zoom-in overflow-hidden rounded-3xl bg-canvas-offwhite md:col-span-7 md:h-[440px] lg:h-[480px]"
+            >
+                <SafeImage
+                    src={hero}
+                    alt={`${title} — Ana görsel`}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-charcoal-dark/75 px-3 py-1.5 font-label-md text-label-md text-white backdrop-blur-md transition-transform group-hover:scale-105 md:bottom-4 md:left-4">
+                    <Icon name="photo_camera" className="text-[16px] text-crimson-vivid" />
+                    <span>{label}</span>
                 </div>
+            </button>
 
-                {/* SAĞ KOLON — STICKY BOOKING WIDGET */}
-                <div className="lg:col-span-4">
-                    <div className="lg:sticky lg:top-28">
-                        <BookingWidget
-                            bungalow={bungalow}
-                            checkIn={checkIn}
-                            setCheckIn={setCheckIn}
-                            checkOut={checkOut}
-                            setCheckOut={setCheckOut}
-                            guests={guests}
-                            setGuests={setGuests}
-                            nights={nights}
-                            nightlyRate={nightlyRate}
-                            subtotal={subtotal}
-                            whatsappHref={buildWhatsappHref()}
-                            onReservation={handleReservation}
-                            reservationSent={reservationSent}
-                            mounted={mounted}
-                        />
-                    </div>
-                </div>
+            {/* Sağ 2x2 grid */}
+            <div className="grid h-[260px] grid-cols-2 gap-3 md:col-span-5 md:h-[440px] lg:h-[480px]">
+                {rest.slice(0, 4).map((img, i) => {
+                    const isLast = i === 3;
+                    return (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => onImageClick?.(i + 1)}
+                            className="group relative cursor-zoom-in overflow-hidden rounded-2xl bg-canvas-offwhite"
+                        >
+                            <SafeImage
+                                src={img}
+                                alt={`${title} — Görsel ${i + 2}`}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            {isLast && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-charcoal-dark/45 backdrop-blur-[2px] transition-colors group-hover:bg-charcoal-dark/55">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-white px-4 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark shadow-md transition-transform group-hover:scale-110">
+                                        <Icon name="photo_library" className="text-[16px]" />
+                                        <span>Tüm Fotoğraflar ({totalPhotos})</span>
+                                    </span>
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
 }
 
 /* ─────────────────────────────────────────────
-   ALT BİLEŞENLER
+   STICKY ANCHOR PILLS
    ───────────────────────────────────────────── */
 
-function Gallery({ images, label, totalPhotos, title }) {
-    /* İlk resim büyük, sonraki 4 küçük */
-    const [hero, ...rest] = images;
-
-    return (
-        <div className="mb-6 grid grid-cols-1 gap-3 md:grid-cols-12">
-            {/* Sol büyük */}
-            <div className="relative h-[260px] overflow-hidden rounded-3xl bg-canvas-offwhite md:col-span-7 md:h-[440px] lg:h-[480px]">
-                <SafeImage
-                    src={hero}
-                    alt={`${title} — Ana görsel`}
-                    className="h-full w-full object-cover"
-                />
-                <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-charcoal-dark/75 px-3 py-1.5 font-label-md text-label-md text-white backdrop-blur-md md:bottom-4 md:left-4">
-                    <Icon name="photo_camera" className="text-[16px] text-crimson-vivid" />
-                    <span>{label}</span>
-                </div>
-            </div>
-
-            {/* Sağ 2x2 grid */}
-            <div className="grid h-[260px] grid-cols-2 gap-3 md:col-span-5 md:h-[440px] lg:h-[480px]">
-                {rest.slice(0, 4).map((img, i) => (
-                    <div
-                        key={i}
-                        className="relative overflow-hidden rounded-2xl bg-canvas-offwhite"
-                    >
-                        <SafeImage
-                            src={img}
-                            alt={`${title} — Görsel ${i + 2}`}
-                            className="h-full w-full object-cover"
-                        />
-                        {i === 3 && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-charcoal-dark/45 backdrop-blur-[2px]">
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center gap-1.5 rounded-full bg-surface-white px-4 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark shadow-md transition-all hover:bg-crimson-vivid hover:text-on-primary"
-                                >
-                                    <Icon name="photo_library" className="text-[16px]" />
-                                    <span>Tüm Fotoğraflar ({totalPhotos})</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
-
-/* Sticky anchor pills — aktif bölüm koyu gri */
 function AnchorPills() {
     const [active, setActive] = useState("genel-bilgiler");
 
@@ -344,7 +362,7 @@ function AnchorPills() {
 
     return (
         <div className="sticky top-20 z-30 mb-6 bg-surface/90 py-1.5 backdrop-blur-md">
-            <div className="flex items-center gap-2 overflow-x-auto rounded-full bg-canvas-offwhite p-1.5 shadow-sm">
+            <div className="no-scrollbar flex items-center gap-2 overflow-x-auto rounded-full bg-canvas-offwhite p-1.5 shadow-sm">
                 {pills.map((p) => {
                     const isActive = active === p.id;
                     return (
@@ -365,6 +383,10 @@ function AnchorPills() {
     );
 }
 
+/* ─────────────────────────────────────────────
+   FEATURE STRIP
+   ───────────────────────────────────────────── */
+
 function FeatureStrip({ features }) {
     return (
         <div
@@ -374,9 +396,12 @@ function FeatureStrip({ features }) {
             {features.map((f) => (
                 <div
                     key={f.label}
-                    className="flex flex-col items-center rounded-2xl p-2 text-center transition-colors hover:bg-canvas-offwhite"
+                    className="group flex flex-col items-center rounded-2xl p-2 text-center transition-colors hover:bg-canvas-offwhite"
                 >
-                    <Icon name={f.icon} className="mb-1 text-[26px] text-crimson-vivid" />
+                    <Icon
+                        name={f.icon}
+                        className="mb-1 text-[26px] text-crimson-vivid transition-transform group-hover:scale-110"
+                    />
                     <span className="font-label-md text-label-md font-bold text-charcoal-dark">
                         {f.label}
                     </span>
@@ -388,6 +413,10 @@ function FeatureStrip({ features }) {
         </div>
     );
 }
+
+/* ─────────────────────────────────────────────
+   NARRATIVE
+   ───────────────────────────────────────────── */
 
 function NarrativeBlock({ title, paragraphs }) {
     return (
@@ -415,17 +444,21 @@ function NarrativeBlock({ title, paragraphs }) {
     );
 }
 
+/* ─────────────────────────────────────────────
+   BREAKFAST
+   ───────────────────────────────────────────── */
+
 function BreakfastCard({ breakfast }) {
     return (
         <div
             id="kahvalti"
             className="flex scroll-mt-24 flex-col items-center gap-6 overflow-hidden rounded-3xl bg-canvas-offwhite p-6 shadow-sm sm:flex-row md:p-8"
         >
-            <div className="h-48 w-full shrink-0 overflow-hidden rounded-2xl bg-canvas-offwhite sm:w-1/3">
+            <div className="group/bf h-48 w-full shrink-0 overflow-hidden rounded-2xl bg-canvas-offwhite sm:w-1/3">
                 <SafeImage
                     src={breakfast.image}
                     alt={breakfast.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover/bf:scale-105"
                 />
             </div>
             <div className="flex w-full flex-col gap-2">
@@ -443,7 +476,7 @@ function BreakfastCard({ breakfast }) {
                     {breakfast.tags.map((t) => (
                         <span
                             key={t}
-                            className="rounded-full bg-surface-white px-3 py-1 font-label-md text-label-md text-charcoal-dark"
+                            className="rounded-full bg-surface-white px-3 py-1 font-label-md text-label-md text-charcoal-dark transition-transform hover:-translate-y-0.5"
                         >
                             {t}
                         </span>
@@ -453,6 +486,10 @@ function BreakfastCard({ breakfast }) {
         </div>
     );
 }
+
+/* ─────────────────────────────────────────────
+   AMENITIES
+   ───────────────────────────────────────────── */
 
 function AmenitiesBlock({ amenities }) {
     return (
@@ -475,9 +512,9 @@ function AmenitiesBlock({ amenities }) {
                 {amenities.map((a) => (
                     <div
                         key={a.title}
-                        className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-canvas-offwhite"
+                        className="group flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-canvas-offwhite"
                     >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-canvas-offwhite text-crimson-vivid">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-canvas-offwhite text-crimson-vivid transition-colors group-hover:bg-crimson-vivid group-hover:text-white">
                             <Icon name={a.icon} className="text-[22px]" />
                         </div>
                         <div className="flex min-w-0 flex-col">
@@ -495,6 +532,10 @@ function AmenitiesBlock({ amenities }) {
     );
 }
 
+/* ─────────────────────────────────────────────
+   LOCATION
+   ───────────────────────────────────────────── */
+
 function LocationBlock({ distances, note }) {
     return (
         <div
@@ -508,7 +549,6 @@ function LocationBlock({ distances, note }) {
                 </h2>
             </div>
 
-            {/* Basit görsel placeholder — harita embed sonra */}
             <div className="relative mb-4 flex h-48 items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite md:h-56">
                 <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-surface-white/95 px-3 py-1.5 font-label-md text-label-md shadow-sm backdrop-blur-md">
                     <Icon name="near_me" className="text-[16px] text-crimson-vivid" />
@@ -516,9 +556,7 @@ function LocationBlock({ distances, note }) {
                 </div>
                 <div className="flex flex-col items-center gap-2 text-secondary">
                     <Icon name="map" className="text-[36px] text-crimson-vivid/60" />
-                    <span className="font-label-md text-label-md">
-                        Harita yakında
-                    </span>
+                    <span className="font-label-md text-label-md">Harita yakında</span>
                 </div>
             </div>
 
@@ -526,7 +564,7 @@ function LocationBlock({ distances, note }) {
                 {distances.map((d) => (
                     <div
                         key={d.place}
-                        className="flex flex-col items-center rounded-2xl bg-canvas-offwhite p-3 text-center"
+                        className="flex flex-col items-center rounded-2xl bg-canvas-offwhite p-3 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-crimson-vivid/5 hover:shadow-sm"
                     >
                         <span className="font-label-md text-label-md font-bold text-charcoal-dark">
                             {d.place}
@@ -540,6 +578,10 @@ function LocationBlock({ distances, note }) {
         </div>
     );
 }
+
+/* ─────────────────────────────────────────────
+   RULES
+   ───────────────────────────────────────────── */
 
 function RulesBlock({ rules }) {
     return (
@@ -570,7 +612,10 @@ function RulesBlock({ rules }) {
     );
 }
 
-/* Rezervasyon widget — koyu gri fiyat kutusu */
+/* ─────────────────────────────────────────────
+   BOOKING WIDGET
+   ───────────────────────────────────────────── */
+
 function BookingWidget({
     bungalow,
     checkIn,
@@ -589,7 +634,7 @@ function BookingWidget({
 }) {
     return (
         <div className="rounded-3xl border border-surface-variant/60 bg-surface-white p-5 shadow-[0_16px_36px_-6px_rgba(15,17,21,0.08)] md:p-6">
-            {/* FİYAT — koyu gri kart */}
+            {/* FİYAT */}
             <div className="mb-5 flex items-center justify-between rounded-2xl bg-charcoal-dark px-5 py-4 text-white shadow-md">
                 <div className="flex items-baseline gap-1.5">
                     <span className="font-headline-md text-headline-md font-extrabold text-white md:font-price-lg md:text-price-lg">
@@ -606,7 +651,7 @@ function BookingWidget({
                 )}
             </div>
 
-            {/* TARİH + KİŞİ FORMU */}
+            {/* TARİH + KİŞİ */}
             <div className="mb-5 flex flex-col gap-3">
                 <div className="grid grid-cols-2 gap-3">
                     <div className="flex flex-col gap-1 rounded-xl bg-canvas-offwhite p-3">
@@ -703,7 +748,7 @@ function BookingWidget({
                     href={whatsappHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-colors hover:bg-crimson-vivid"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-all hover:bg-crimson-vivid hover:scale-[1.01] active:scale-[0.98]"
                 >
                     <Icon name="chat" className="text-[20px]" />
                     <span>WhatsApp ile Rezervasyon</span>
@@ -711,7 +756,7 @@ function BookingWidget({
                 <button
                     type="button"
                     onClick={onReservation}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-charcoal-dark py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-md transition-colors hover:bg-charcoal-surface"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-charcoal-dark py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-md transition-colors hover:bg-charcoal-surface active:scale-[0.98]"
                 >
                     <Icon name="calendar_month" className="text-[20px]" />
                     <span>Rezervasyon Talep Et</span>
