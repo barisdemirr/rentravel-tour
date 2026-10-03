@@ -1,6 +1,6 @@
 namespace Rentravel.Shared;
 
-public enum ErrorType { Validation, NotFound, Conflict }
+public enum ErrorType { Validation, NotFound, Conflict, Unauthorized }
 
 public record Error(ErrorType Type, string Message, Dictionary<string, string[]>? Details = null)
 {
@@ -9,6 +9,7 @@ public record Error(ErrorType Type, string Message, Dictionary<string, string[]>
 
     public static Error NotFound(string message) => new(ErrorType.NotFound, message);
     public static Error Conflict(string message) => new(ErrorType.Conflict, message);
+    public static Error Unauthorized(string message) => new(ErrorType.Unauthorized, message);
 }
 
 public class Result

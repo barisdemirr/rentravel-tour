@@ -13,6 +13,7 @@ public static class ResultHttpExtensions
         ErrorType.Validation => Results.ValidationProblem(error.Details ?? new(), title: error.Message),
         ErrorType.NotFound => Results.Problem(error.Message, statusCode: 404, title: "Bulunamadı"),
         ErrorType.Conflict => Results.Problem(error.Message, statusCode: 409, title: "Çakışma"),
+        ErrorType.Unauthorized => Results.Problem(error.Message, statusCode: 401, title: "Yetkisiz"),
         _ => Results.Problem(error.Message)
     };
 }
