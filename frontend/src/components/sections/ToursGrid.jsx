@@ -1,15 +1,12 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE } from "@/lib/motion";
-import { useRef } from "react";
 import Icon from "../ui/Icon";
 import TourCard from "../cards/TourCard";
 
 export default function ToursGrid({ tours, variant, perPage, onPageChange }) {
-    const firstRender = useRef(true);
-
     const [page, setPage] = useState(1);
     const [dir, setDir] = useState(1);
 
@@ -23,18 +20,12 @@ export default function ToursGrid({ tours, variant, perPage, onPageChange }) {
         if (next < 1 || next > totalPages) return;
         setDir(next > page ? 1 : -1);
         setPage(next);
+        /* Sadece kullanıcı pagination'a bastığında scroll et */
+        onPageChange?.();
     };
 
     const startIdx = (page - 1) * perPage + 1;
     const endIdx = Math.min(page * perPage, tours.length);
-
-    useEffect(() => {
-        if (firstRender.current) {
-            firstRender.current = false;
-            return;
-        }
-        onPageChange?.();
-    }, [page]);
 
     return (
         <div className="flex flex-col gap-10">
@@ -86,8 +77,8 @@ export default function ToursGrid({ tours, variant, perPage, onPageChange }) {
                                     onClick={() => goTo(n)}
                                     aria-current={isActive ? "page" : undefined}
                                     className={`flex h-10 w-10 items-center justify-center rounded-full font-headline-sm text-headline-sm font-bold transition-all ${isActive
-                                        ? "bg-primary-container text-on-primary shadow-md shadow-primary-container/25"
-                                        : "border border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid hover:text-crimson-vivid"
+                                            ? "bg-primary-container text-on-primary shadow-md shadow-primary-container/25"
+                                            : "border border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid hover:text-crimson-vivid"
                                         }`}
                                 >
                                     {n}
