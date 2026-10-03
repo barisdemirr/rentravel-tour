@@ -6,6 +6,10 @@ namespace Rentravel.Infrastructure.Database;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+
+    public DbSet<VehicleSegment> VehicleSegments => Set<VehicleSegment>();
+
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

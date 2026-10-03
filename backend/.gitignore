@@ -64,6 +64,7 @@ project.assets.json
 # Canlı veritabanı şifreleri / gizli anahtarlar içeren yerel ayarlar
 appsettings.Production.json
 appsettings.*.local.json
+appsettings.Development.json
 secrets.json
 
 # Sertifikalar & Anahtarlar
