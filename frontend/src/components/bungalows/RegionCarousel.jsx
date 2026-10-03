@@ -2,12 +2,23 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
-import { BUNGALOW_REGIONS, bungalows } from "@/lib/mockData";
 import SafeImage from "@/components/ui/SafeImage";
 
 const AUTO_INTERVAL = 4000;
 
-export default function RegionCarousel({ value, onChange }) {
+/* Dil fallback */
+const localized = (field, lang = "tr") => {
+    if (!field) return "";
+    if (typeof field === "string") return field;
+    return field[lang] || field.tr || "";
+};
+
+export default function RegionCarousel({
+    regions = [],
+    bungalows = [],
+    value,
+    onChange,
+}) {
     const containerRef = useRef(null);
     const pillsRef = useRef(null);
     const barRef = useRef(null);
@@ -19,17 +30,19 @@ export default function RegionCarousel({ value, onChange }) {
 
     const activeIndex = Math.max(
         0,
-        BUNGALOW_REGIONS.findIndex((r) => r.value === value)
+        regions.findIndex((r) => r.key === value)
     );
 
-    /* Her bölgenin ilk bungalovunu thumbnail olarak al */
+    /* Backend'den gelen bölgeye thumbnail ekle (null ise o bölgedeki ilk bungalovun görseli) */
     const regionsWithThumbs = useMemo(
         () =>
-            BUNGALOW_REGIONS.map((r) => {
-                const first = bungalows.find((b) => b.region === r.value);
-                return { ...r, thumbnail: first?.image };
+            regions.map((r) => {
+                const thumb =
+                    r.thumbnail?.url ||
+                    bungalows.find((b) => b.region === r.key)?.image;
+                return { ...r, thumbnailUrl: thumb };
             }),
-        []
+        [regions, bungalows]
     );
 
     useEffect(() => {
@@ -56,7 +69,7 @@ export default function RegionCarousel({ value, onChange }) {
         bar.style.transition = "none";
         bar.style.transform = "scaleX(0)";
 
-        if (reduce || paused || tabHidden || !inView) return;
+        if (reduce || paused || tabHidden || !inView || regions.length === 0) return;
 
         void bar.offsetWidth;
 
@@ -64,15 +77,15 @@ export default function RegionCarousel({ value, onChange }) {
         bar.style.transform = "scaleX(1)";
 
         const timeout = setTimeout(() => {
-            const next = (activeIndex + 1) % BUNGALOW_REGIONS.length;
-            onChange(BUNGALOW_REGIONS[next].value);
+            const next = (activeIndex + 1) % regions.length;
+            onChange(regions[next].key);
         }, AUTO_INTERVAL);
 
         return () => {
             clearTimeout(timeout);
             bar.style.transition = "none";
         };
-    }, [activeIndex, paused, tabHidden, inView, reduce, onChange]);
+    }, [activeIndex, paused, tabHidden, inView, reduce, onChange, regions]);
 
     const handleSelect = useCallback(
         (nextValue) => {
@@ -88,6 +101,11 @@ export default function RegionCarousel({ value, onChange }) {
         },
         [value, onChange]
     );
+
+    /* Backend boş dönerse hiç render etme */
+    if (!regions || regions.length === 0) {
+        return null;
+    }
 
     return (
         <div
@@ -107,17 +125,17 @@ export default function RegionCarousel({ value, onChange }) {
                 className="no-scrollbar flex items-center gap-2 overflow-x-auto sm:gap-2.5"
             >
                 {regionsWithThumbs.map((region) => {
-                    const isActive = region.value === value;
+                    const isActive = region.key === value;
                     return (
-                        <li key={region.value} className="shrink-0">
+                        <li key={region.id} className="shrink-0">
                             <button
                                 type="button"
-                                data-region={region.value}
-                                onClick={() => handleSelect(region.value)}
+                                data-region={region.key}
+                                onClick={() => handleSelect(region.key)}
                                 aria-current={isActive ? "true" : undefined}
                                 className={`relative flex items-center gap-2 overflow-hidden rounded-full py-1.5 pl-1.5 pr-3.5 transition-colors ${isActive
-                                        ? "bg-primary-container text-on-primary shadow-sm"
-                                        : "bg-canvas-offwhite text-charcoal-dark hover:bg-surface-variant"
+                                    ? "bg-primary-container text-on-primary shadow-sm"
+                                    : "bg-canvas-offwhite text-charcoal-dark hover:bg-surface-variant"
                                     }`}
                             >
                                 {isActive && (
@@ -130,16 +148,24 @@ export default function RegionCarousel({ value, onChange }) {
                                 )}
 
                                 <span className="relative z-10 h-7 w-7 shrink-0 overflow-hidden rounded-full border border-white/60">
-                                    <SafeImage
-                                        src={region.thumbnail}
-                                        alt=""
-                                        aria-hidden="true"
-                                        className="h-full w-full object-cover"
-                                    />
+                                    {region.thumbnailUrl ? (
+                                        <SafeImage
+                                            src={region.thumbnailUrl}
+                                            alt=""
+                                            aria-hidden="true"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="flex h-full w-full items-center justify-center bg-canvas-offwhite">
+                                            <span className="material-symbols-outlined text-[14px] text-secondary">
+                                                image
+                                            </span>
+                                        </span>
+                                    )}
                                 </span>
 
                                 <span className="relative z-10 whitespace-nowrap pr-1 font-label-md text-label-md font-semibold">
-                                    {region.shortLabel}
+                                    {localized(region.shortLabel)}
                                 </span>
                             </button>
                         </li>
