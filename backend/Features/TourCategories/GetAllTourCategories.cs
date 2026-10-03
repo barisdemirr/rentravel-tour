@@ -29,7 +29,25 @@ public static class GetAllTourCategories
     {
         public void MapEndpoint(IEndpointRouteBuilder app) =>
             app.MapGet("/api/tour-categories",
-                async (TourCategoryScope? scope, Handler handler, CancellationToken ct) =>
-                    Results.Ok(await handler.Handle(scope, ct)));
+                async (string? scope, Handler handler, CancellationToken ct) =>
+                {
+                    TourCategoryScope? parsed = null;
+
+                    if (!string.IsNullOrWhiteSpace(scope))
+                    {
+                        if (!Enum.TryParse<TourCategoryScope>(scope, ignoreCase: true, out var value)
+                            || !Enum.IsDefined(value))
+                        {
+                            return Results.ValidationProblem(new Dictionary<string, string[]>
+                            {
+                                ["scope"] = ["scope geçersiz (Daily, Culture, Both)."]
+                            });
+                        }
+
+                        parsed = value;
+                    }
+
+                    return Results.Ok(await handler.Handle(parsed, ct));
+                });
     }
 }
