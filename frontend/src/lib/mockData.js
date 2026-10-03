@@ -1393,3 +1393,105 @@ export const bungalowDetails = {
 export function getBungalowDetail(slug) {
     return bungalowDetails[slug] || null;
 }
+
+
+
+/* ─────────────────────────────────────────────
+   ARAÇ DETAY VERİLERİ
+   ───────────────────────────────────────────── */
+
+/* Araç kiralama detayları — slug → detay */
+export const vehicleDetails = {
+    "fiat-egea-cross-multijet-lounge": {
+        /* mevcut araçlardan biriyle eşleşsin diye id değil slug kullanıyoruz */
+    },
+};
+
+/* Detay alanları */
+export const VEHICLE_EXTRAS = [
+    {
+        key: "youngDriver",
+        icon: "school",
+        title: "Genç Sürücü Paketi",
+        description: "19-21 yaş arası ve 1 yıldan az ehliyetli sürücüler için güvence protokolü",
+        dailyPrice: 750,
+        tooltip: "19-21 yaş aralığındaki sürücülerin kiralamasını güvenceye alır",
+    },
+    {
+        key: "extraDriver",
+        icon: "person_add",
+        title: "Ek Sürücü Yetkilendirme",
+        description: "Sözleşmeye resmi ikinci sürücü ekleme hakkı ve eşit kasko teminatı",
+        dailyPrice: 250,
+        tooltip: "İkinci sürücünün de kasko teminatına dahil edilmesi",
+    },
+    {
+        key: "babySeat",
+        icon: "child_friendly",
+        title: "Bebek & Çocuk Güvenlik Koltuğu",
+        description: "ECE R44/04 standartlarında sterilize edilmiş ergonomik koltuk",
+        dailyPrice: 150,
+        tooltip: "0-36 kg arası uyumlu ECE onaylı koltuk",
+    },
+    {
+        key: "miniDamage",
+        icon: "shield_with_heart",
+        title: "Mini Hasar Güvence Paketi",
+        description: "Polis tutanağı gerekmeksizin ₺10.000'ye kadar beyanla doğrudan koruma",
+        dailyPrice: 400,
+        tooltip: "Küçük çizik ve hasarlarda tutanaksız beyan imkanı",
+    },
+];
+
+/* Detay verisi üretici — her araç için eksik alanları varsayılanlarla doldurur */
+export function getVehicleDetail(slug) {
+    const vehicle = vehicles.find((v) => v.slug === slug);
+    if (!vehicle) return null;
+
+    const dailyRate = parseInt(String(vehicle.dailyPrice).replace(/\D/g, ""), 10) || 1650;
+
+    return {
+        vehicle,
+        dailyRate,
+        /* Tanıtım alt yazısı */
+        guaranteeNote: "veya benzeri model garantisi",
+        /* Specs bento grid — 6 hücre */
+        specs: [
+            { icon: "swap_driving_apps_wheel", label: "Vites Türü", value: vehicle.specs?.[0]?.value || "Manuel Vites" },
+            { icon: "groups", label: "Kapasite", value: vehicle.specs?.[2]?.value || "5 Koltuklu" },
+            { icon: "local_gas_station", label: "Yakıt Tipi", value: vehicle.specs?.[1]?.value || "Benzin / Dizel" },
+            { icon: "luggage", label: "Bagaj Hacmi", value: "520 Litre" },
+            { icon: "ac_unit", label: "İklimlendirme", value: "Dijital Klima" },
+            { icon: "verified_user", label: "Kasko Statüsü", value: "Tam Muafiyetsiz" },
+        ],
+        /* Teslimat bilgisi */
+        delivery: {
+            icon: "flight_land",
+            label: "Araç Teslim Şekli",
+            title: "Trabzon Havalimanı (TZX)",
+            description: "Terminal içi rent a car desk karşılama & 7/24 ücretsiz teslimat",
+        },
+        office: {
+            icon: "storefront",
+            label: "Ofis Bilgileri",
+            title: "Rentravel Trabzon Merkez",
+            description: "Konaklar Mah. Alper Sk. No:13 Ortahisar (Havalimanı Karşısı)",
+        },
+        /* Kiralama koşulları */
+        conditions: {
+            deposit: "5.000",
+            depositReturn: "İade: 3 İş Günü",
+            kmLimit: "1.500 KM / Periyot",
+            extraKm: "Ek KM: 3,50 ₺",
+        },
+        /* Sürücü gereksinimleri */
+        driverRequirements: [
+            { label: "Min. Sürücü Yaşı", value: "21 Yaş", sub: "Ekonomi Sınıfı" },
+            { label: "Min. Ehliyet Süresi", value: "1 Yıl", sub: "B Sınıfı Ehliyet" },
+            { label: "Genç Sürücü Yaşı", value: "19 - 21 Yaş", sub: "Paketle Uygun", highlight: true },
+            { label: "Ek Sürücü İzni", value: "+1 Sürücü", sub: "Sözleşmeli Ekleme" },
+        ],
+        /* Ekstra hizmetler */
+        extras: VEHICLE_EXTRAS,
+    };
+}
