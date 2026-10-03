@@ -10,12 +10,6 @@ import NavLink from "../ui/NavLink";
 import LanguageMenu from "../ui/LanguageMenu";
 import SafeImage from "../ui/SafeImage";
 
-/* Turlar dropdown içeriği */
-const TOUR_LINKS = [
-    { key: "daily", href: "/tur-rezervasyonu?type=daily" },
-    { key: "culture", href: "/tur-rezervasyonu?type=culture" },
-];
-
 export default function Navbar({ onOpenMenu }) {
     const { t } = useLanguage();
     const pathname = usePathname();
@@ -42,11 +36,20 @@ export default function Navbar({ onOpenMenu }) {
         { label: t.nav.contact, href: "/iletisim" },
     ];
 
-    // Turlar dropdown item'ları dile göre
+    /* Turlar dropdown item'ları — dile göre */
     const tourLinks = [
-        { label: t.nav.dailyTours || "Günübirlik Turlar", href: "/tur-rezervasyonu?type=daily" },
-        { label: t.nav.cultureTours || "Konaklamalı Kültür Turları", href: "/tur-rezervasyonu?type=culture" },
+        {
+            label: t.nav.dailyTours || "Günübirlik Turlar",
+            href: "/gunubirlik-turlar",
+        },
+        {
+            label: t.nav.cultureTours || "Konaklamalı Kültür Turları",
+            href: "/konaklamali-turlar",
+        },
     ];
+
+    /* Turlar dropdown'ı, iki linkten biri aktifse aktif sayılır */
+    const toursActive = tourLinks.some((l) => isActive(l.href));
 
     return (
         <header
@@ -90,12 +93,14 @@ export default function Navbar({ onOpenMenu }) {
                         <button
                             type="button"
                             aria-haspopup="true"
-                            className={`group/nav relative inline-flex items-center gap-1 rounded-lg px-2 py-2 font-label-uppercase text-label-uppercase uppercase transition-colors duration-300 ${isActive("/tur-rezervasyonu")
-                                    ? "text-primary-container"
-                                    : "text-on-surface-variant"
+                            className={`group/nav relative inline-flex items-center gap-1 rounded-lg px-2 py-2 font-label-uppercase text-label-uppercase uppercase transition-colors duration-300 ${toursActive ? "text-primary-container" : "text-on-surface-variant"
                                 }`}
-                            onMouseEnter={(e) => { e.currentTarget.style.color = HOVER_RED; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = ""; }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = HOVER_RED;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = "";
+                            }}
                         >
                             <span className="relative z-10 flex items-center gap-1">
                                 <span>{t.nav.tours}</span>
@@ -106,9 +111,7 @@ export default function Navbar({ onOpenMenu }) {
                             </span>
                             <span
                                 aria-hidden="true"
-                                className={`pointer-events-none absolute bottom-0 left-0 h-[2px] w-full origin-left rounded-full bg-crimson-vivid transition-transform duration-300 ease-out ${isActive("/tur-rezervasyonu")
-                                        ? "scale-x-100"
-                                        : "scale-x-0 group-hover/nav:scale-x-100"
+                                className={`pointer-events-none absolute bottom-0 left-0 h-[2px] w-full origin-left rounded-full bg-crimson-vivid transition-transform duration-300 ease-out ${toursActive ? "scale-x-100" : "scale-x-0 group-hover/nav:scale-x-100"
                                     }`}
                                 style={{ backgroundColor: "currentColor" }}
                             />
@@ -118,7 +121,10 @@ export default function Navbar({ onOpenMenu }) {
                                 <Link
                                     key={l.href}
                                     href={l.href}
-                                    className="block rounded-lg px-3 py-2.5 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid"
+                                    className={`block rounded-lg px-3 py-2.5 font-label-md text-label-md transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid ${isActive(l.href)
+                                            ? "text-crimson-vivid"
+                                            : "text-on-surface-variant"
+                                        }`}
                                 >
                                     {l.label}
                                 </Link>
@@ -138,8 +144,12 @@ export default function Navbar({ onOpenMenu }) {
                             type="button"
                             aria-haspopup="true"
                             className="group/nav relative inline-flex items-center gap-1 rounded-lg px-2 py-2 font-label-uppercase text-label-uppercase uppercase text-on-surface-variant transition-colors duration-300"
-                            onMouseEnter={(e) => { e.currentTarget.style.color = HOVER_RED; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.color = ""; }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = HOVER_RED;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = "";
+                            }}
                         >
                             <span className="relative z-10 flex items-center gap-1">
                                 <span>{t.nav.corporate}</span>
@@ -159,7 +169,9 @@ export default function Navbar({ onOpenMenu }) {
                                 <Link
                                     key={l.href}
                                     href={l.href}
-                                    className={`block rounded-lg px-3 py-2.5 font-label-md text-label-md transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid ${isActive(l.href) ? "text-primary-container" : "text-on-surface-variant"
+                                    className={`block rounded-lg px-3 py-2.5 font-label-md text-label-md transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid ${isActive(l.href)
+                                            ? "text-primary-container"
+                                            : "text-on-surface-variant"
                                         }`}
                                 >
                                     {l.label}

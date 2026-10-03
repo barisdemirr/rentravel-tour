@@ -5,12 +5,18 @@ import { TONES } from "@/lib/tones";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
 
-export default function TourCard({ tour, variant = "daily" }) {
-    // variant === "culture" olduğunda "Konaklama" bilgisi de gösterilir
+export default function TourCard({ tour, variant = "daily", mode = "slider" }) {
     const isCulture = variant === "culture";
 
+    const wrapperCls =
+        mode === "grid"
+            ? "w-full h-full" // grid içinde otomatik genişlik
+            : "w-[300px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]"; // slider modu
+
     return (
-        <article className="group flex h-full w-[300px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl sm:w-[340px] lg:w-[360px]">
+        <article
+            className={`group flex ${wrapperCls} flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl`}
+        >
             {/* Görsel */}
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal-dark">
                 <SafeImage
@@ -36,7 +42,7 @@ export default function TourCard({ tour, variant = "daily" }) {
             </div>
 
             {/* İçerik */}
-            <div className="flex flex-1 flex-col gap-4 p-5">
+            <div className="flex flex-1 flex-col gap-3 p-5">
                 {/* Meta satırı */}
                 <div className="flex items-center justify-between font-label-sm text-label-sm text-secondary">
                     <span className="flex items-center gap-1.5">
@@ -54,7 +60,7 @@ export default function TourCard({ tour, variant = "daily" }) {
 
                 {/* Başlık + açıklama */}
                 <div className="flex flex-col gap-2">
-                    <h3 className="font-headline-sm text-headline-sm uppercase leading-tight text-charcoal-dark transition-colors group-hover:text-crimson-vivid">
+                    <h3 className="font-headline-sm text-headline-sm uppercase leading-tight text-charcoal-dark transition-colors group-hover:text-crimson-vivid line-clamp-1">
                         {tour.title}
                     </h3>
                     <p className="line-clamp-2 font-body-sm text-body-sm text-secondary">
@@ -75,23 +81,21 @@ export default function TourCard({ tour, variant = "daily" }) {
                 )}
 
                 {/* Fiyat + CTA */}
-                <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+                <div className="mt-auto flex items-center justify-between gap-3 border-t border-surface-variant/50 pt-3">
                     <div>
                         <div className="font-label-uppercase text-label-uppercase text-secondary">
                             Kişi Başı
                         </div>
                         <div className="font-headline-md text-headline-md font-bold text-crimson-vivid">
                             {tour.price}
-                            <span className="ml-1 font-body-sm text-body-sm font-normal text-secondary">
-                                'den başlayan
-                            </span>
                         </div>
                     </div>
                     <Link
                         href={`/turlar/${tour.slug}`}
-                        className="inline-flex items-center justify-center rounded-xl bg-charcoal-dark px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
+                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-charcoal-dark px-3.5 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
                     >
-                        Detaylar
+                        <span>İncele</span>
+                        <Icon name="arrow_forward" className="text-[14px]" />
                     </Link>
                 </div>
             </div>

@@ -1,5 +1,6 @@
-import "@/styles/globals.css"
+import "@/styles/globals.css";
 import { Providers } from "./providers";
+import UserShell from "./UserShell";
 
 export const viewport = {
     width: "device-width",
@@ -36,7 +37,7 @@ export const metadata = {
     },
 };
 
-export default function RootLayout({ children }) {
+export default function UserRootLayout({ children }) {
     return (
         <html lang="tr">
             <head>
@@ -46,7 +47,9 @@ export default function RootLayout({ children }) {
                 />
             </head>
             <body>
-                <Providers>{children}</Providers>
+                <Providers>
+                    <UserShell>{children}</UserShell>
+                </Providers>
             </body>
         </html>
     );
