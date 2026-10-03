@@ -10,7 +10,7 @@ public static class UpdateTourCategory
 {
     public record Command(
         string Key, LocalizedText Label, string Icon,
-        TourCategoryScope AppliesTo, int OrderIndex, bool IsActive);
+        TourCategoryScope? AppliesTo, int OrderIndex, bool IsActive);
 
     public class Handler(AppDbContext db)
     {
@@ -26,7 +26,8 @@ public static class UpdateTourCategory
                 .Required("key", key).MaxLength("key", key, 50)
                 .Required("icon", cmd.Icon).MaxLength("icon", cmd.Icon, 100)
                 .Required("label.tr", cmd.Label?.Tr)
-                .Must("appliesTo", Enum.IsDefined(cmd.AppliesTo), "appliesTo geçersiz (Daily, Culture, Both).");
+                .Must("appliesTo", cmd.AppliesTo is { } scope && Enum.IsDefined(scope),
+                        "appliesTo zorunlu ve geçerli olmalı (Daily, Culture, Both).");
 
             if (!validator.IsValid) return validator.ToFailure<TourCategoryDto>();
 
@@ -36,7 +37,7 @@ public static class UpdateTourCategory
             category.Key = key;
             category.Label = cmd.Label!;
             category.Icon = cmd.Icon.Trim();
-            category.AppliesTo = cmd.AppliesTo;
+            category.AppliesTo = cmd.AppliesTo!.Value;
             category.OrderIndex = cmd.OrderIndex;
             category.IsActive = cmd.IsActive;
 

@@ -9,7 +9,7 @@ namespace Rentravel.Features.TourCategories;
 
 public static class CreateTourCategory
 {
-    public record Command(string Key, LocalizedText Label, string Icon, TourCategoryScope AppliesTo, int OrderIndex);
+    public record Command(string Key, LocalizedText Label, string Icon, TourCategoryScope? AppliesTo, int OrderIndex);
 
     public class Handler(AppDbContext db)
     {
@@ -21,7 +21,8 @@ public static class CreateTourCategory
                 .Required("key", key).MaxLength("key", key, 50)
                 .Required("icon", cmd.Icon).MaxLength("icon", cmd.Icon, 100)
                 .Required("label.tr", cmd.Label?.Tr)
-                .Must("appliesTo", Enum.IsDefined(cmd.AppliesTo), "appliesTo geçersiz (Daily, Culture, Both).");
+                .Must("appliesTo", cmd.AppliesTo is { } scope && Enum.IsDefined(scope),
+                   "appliesTo zorunlu ve geçerli olmalı (Daily, Culture, Both).");
 
             if (!validator.IsValid) return validator.ToFailure<TourCategoryDto>();
 
@@ -33,7 +34,7 @@ public static class CreateTourCategory
                 Key = key,
                 Label = cmd.Label!,
                 Icon = cmd.Icon.Trim(),
-                AppliesTo = cmd.AppliesTo,
+                AppliesTo = cmd.AppliesTo!.Value,
                 OrderIndex = cmd.OrderIndex
             };
 
