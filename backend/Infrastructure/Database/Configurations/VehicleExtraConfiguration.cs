@@ -10,7 +10,10 @@ public class VehicleExtraConfiguration : IEntityTypeConfiguration<VehicleExtra>
     {
         builder.ToTable("VehicleExtras");
 
-        builder.Property(x => x.Key).HasMaxLength(50).IsRequired();
+        builder.Property(x => x.Key)
+    .HasMaxLength(50)
+    .IsRequired()
+    .UseCollation("SQL_Latin1_General_CP1_CI_AS");
         builder.Property(x => x.Icon).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Title).HasJsonConversion();
         builder.Property(x => x.Description).HasJsonConversion();

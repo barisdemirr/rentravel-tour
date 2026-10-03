@@ -199,7 +199,8 @@ namespace rentravel.Migrations
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(50)")
+                        .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
