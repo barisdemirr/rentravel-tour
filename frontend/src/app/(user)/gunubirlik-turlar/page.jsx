@@ -137,10 +137,6 @@ export default function DailyToursPage() {
                             Günübirlik Karadeniz Keşifleri & Turlar
                         </h1>
 
-                        <p className="max-w-xl font-body-lg text-body-lg leading-relaxed text-surface-white/85">
-                            Trabzon kalkışlı uzman kokartlı rehberler, son model VIP araçlar ve %100 kesin kalkış garantisiyle Karadeniz'i doya doya yaşayın.
-                        </p>
-
                         <div className="flex flex-wrap items-center gap-4 pt-2 font-label-md text-label-md text-surface-white/90">
                             <span className="flex items-center gap-1.5">
                                 <Icon name="verified" fill className="text-[18px] text-crimson-vivid" />

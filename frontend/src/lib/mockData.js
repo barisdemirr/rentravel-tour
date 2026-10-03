@@ -843,3 +843,173 @@ export const dailyTours = [
 
 /* Sayfa boyutu — grid düzeni (desktop 4x3, tablet 3x3, mobile 2x3) */
 export const TOURS_PER_PAGE = 12;
+
+
+
+
+/* ─────────────────────────────────────────────
+   ARAÇ KİRALAMA FİLOSU
+   ───────────────────────────────────────────── */
+
+/* Segment seçenekleri — araç kiralama sayfasında filtre pill'leri için */
+export const VEHICLE_SEGMENTS = [
+    { value: "all", label: "Tüm Araçlar", icon: "apps" },
+    { value: "vip", label: "VIP Vito / Minivan", icon: "airport_shuttle" },
+    { value: "suv", label: "Konfor SUV", icon: "directions_car" },
+    { value: "sedan", label: "Ekonomik Sedan", icon: "car_rental" },
+    { value: "4x4", label: "4x4 Yayla Araçları", icon: "terrain" },
+];
+
+export const vehicles = [
+    {
+        id: "vito-vip",
+        slug: "mercedes-vito-vip-9-1",
+        name: "Mercedes-Benz Vito Tourer VIP 9+1",
+        segment: "vip",
+        tagline: "Geniş deri koltuklu, buzdolaplı ve TV donanımlı lüks Karadeniz tur aracı",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBE4Xu4F0Vy24FWWtTpEi4uHzrhgqQwqs33gyRvzMDibkFK386mfvNDVFRlUR8-GKAw7V6yTuTyVYSspfvhu0MnCM-5YeZ4GZ1d7oncSIt1Wr7RsxcNfsI_orLzMSwrZdmPO9BISlIB9NMhlfsvLT554AqLdWkx17SP8CfX5mT82JiYtQVjtPHQ3VkLS6U1ztTqHWMJvBt5RjlMUqjAU-h10npAB0G815O8ArETVMJy3tILdes2LIN0Sg",
+        badge: "VIP Minivan • 2024",
+        badgeClass: "bg-primary-fixed text-on-primary-fixed-variant",
+        rating: "4.9",
+        guarantee: "Aynı Araç veya Üst Model Garanti",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "Otomatik" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Dizel" },
+            { icon: "group", label: "Kapasite", value: "9+1 Kişi" },
+            { icon: "luggage", label: "Bagaj", value: "6 Büyük Valiz" },
+            { icon: "speed", label: "Kilometre", value: "350 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺4.000" },
+        ],
+        oldPrice: "1 Günlük: ₺3.600 / gün",
+        price3Days: "₺8.850",
+        dailyPrice: "₺2.950",
+    },
+    {
+        id: "passat",
+        slug: "volkswagen-passat-15-tsi",
+        name: "Volkswagen Passat 1.5 TSI Elegance",
+        segment: "sedan",
+        tagline: "Uzun yol konforu, geniş bagaj hacmi ve sessiz sürüş dinamiği",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDknslYXsGehpB-D1ItG64Tv6kJJJvCsRpocNAgNUM3QprWXnK09JetPRjxTdC_2puHT9iTtDTvp1teEATCAgEgQXEnhgcRBh9-5xSNLFS2D6djCdiCbnSKEFr2ZNZ44jcUsXjO3Lj8dvKFFHN6kFVTnKJX54qtPBQXUb2N_0cfIpd0pzlDTYHf7oM2ligRu7vCQC3WvOJ-Wio9yGFoS0iufuOllAXRkAgjVlrkz8t9SDfpl6PymdQR8g",
+        badge: "Premium Konfor • 2023",
+        badgeClass: "bg-secondary-fixed text-on-secondary-fixed",
+        rating: "4.8",
+        guarantee: "Benzeri veya Aynısı Garanti",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "DSG Otomatik" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Benzin" },
+            { icon: "group", label: "Kapasite", value: "5 Yetişkin" },
+            { icon: "luggage", label: "Bagaj", value: "4 Büyük Valiz" },
+            { icon: "speed", label: "Kilometre", value: "300 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺3.000" },
+        ],
+        oldPrice: "1 Günlük: ₺1.850 / gün",
+        price3Days: "₺4.650",
+        dailyPrice: "₺1.550",
+    },
+    {
+        id: "duster",
+        slug: "dacia-duster-13-tce-4x4",
+        name: "Dacia Duster 1.3 TCe 4x4",
+        segment: "4x4",
+        tagline: "Ayder, Uzungöl ve Pokut yayla yollarına uygun yüksek alt açıklığı",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAHSzT3eqxHrNx5UX-TmwTktRgmI9LHWt0OV5G-y1GNm21xXYTEzdAEBXa0nbNXEncB2KlBPJ10BLXDnBuvpyvzUBr6NDWcbudDLum4-AKeGMYU--0wWP3CGWhY7CkZVJN7023ISAq5yxHcF2dE0wlFsaDqUOyxCELhZ0-6Bv-vDBoqyFa2OZZbC5OAhR9P_oF_4SyiolizyAInvF49BHi_VG4ap4nkDnOQ9XzWPTnoUxqc6n5ff8UKow",
+        badge: "SUV 4x4 • Yayla Paketi",
+        badgeClass: "bg-emerald-500/15 text-emerald-700",
+        rating: "4.9",
+        guarantee: "4 Çeker (4x4) Kilidi Aktif",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "Manuel 6 İleri" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Benzin" },
+            { icon: "group", label: "Kapasite", value: "5 Yetişkin" },
+            { icon: "luggage", label: "Bagaj", value: "3 Valiz" },
+            { icon: "speed", label: "Kilometre", value: "300 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺2.500" },
+        ],
+        oldPrice: "1 Günlük: ₺1.600 / gün",
+        price3Days: "₺3.900",
+        dailyPrice: "₺1.300",
+    },
+    {
+        id: "megane",
+        slug: "renault-megane-sedan-15-dci",
+        name: "Renault Megane Sedan 1.5 dCi EDC",
+        segment: "sedan",
+        tagline: "Düşük yakıt sarfiyatı ve geniş aile bagajıyla bütçe dostu konfor",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCPIfjNc3PauhkznRApElLeakhODUxkE0vAAvteylRuGeGjD-4h6fUQnQz79iwHgwrCj0xtprkgaHqauOdteGnxdKKcZlhOQPr3ILIbLc1HMKE08ozIpY0Zot9UTBPosQvxo4H17FZto69FDwS8HSMtiFQ5R1mimhJq06d56DI6-1LKcPBnKgwsipFP1g0RMGgHpIupeiew3xtc7eDKGofT_gSZqbQZvI9zoPsjbPdJYZ02-XhQbZS1cA",
+        badge: "Ekonomik Sedan • 2023",
+        badgeClass: "bg-surface-container-high text-charcoal-dark",
+        rating: "4.7",
+        guarantee: "Düşük Yakıt Tüketimi (4.2L/100km)",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "EDC Otomatik" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Dizel" },
+            { icon: "group", label: "Kapasite", value: "5 Yetişkin" },
+            { icon: "luggage", label: "Bagaj", value: "3 Valiz" },
+            { icon: "speed", label: "Kilometre", value: "300 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺2.000" },
+        ],
+        oldPrice: "1 Günlük: ₺1.400 / gün",
+        price3Days: "₺3.300",
+        dailyPrice: "₺1.100",
+    },
+    {
+        id: "3008",
+        slug: "peugeot-3008-bluehdi-allure",
+        name: "Peugeot 3008 1.5 BlueHDi Allure",
+        segment: "suv",
+        tagline: "Fütüristik i-Cockpit kabin, panoramik cam tavan ve yüksek sürüş güvenliği",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDNMo7QgwY7p6PenH_7ZiaAF8ljwR5MUr4jzOAvHzvLOlHjwnyfXViziVnucIfL0lRiq1Q5TgEzH0kSY6GUiWj5uY1qH7rpLXJWX3yrY4IPWdplW0PNykQkTWUBU3vywBAbN1g_M_Ge0AvFG7CTlsx37l8dYv9DQB13IjfHibvPmU57GrIqW76TdiSSaP-q2QqgMfQdrIAawh13KJZmFoRA-ggBOUwMlxi9_uNj_DEazMfTxuyeiHE0uA",
+        badge: "Lüks Aile SUV • 2024",
+        badgeClass: "bg-primary-fixed text-on-primary-fixed-variant",
+        rating: "4.9",
+        guarantee: "Panoramik Cam Tavan Dahil",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "EAT8 Otomatik" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Dizel" },
+            { icon: "group", label: "Kapasite", value: "5 Yetişkin" },
+            { icon: "luggage", label: "Bagaj", value: "4 Büyük Valiz" },
+            { icon: "speed", label: "Kilometre", value: "300 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺3.000" },
+        ],
+        oldPrice: "1 Günlük: ₺2.100 / gün",
+        price3Days: "₺5.250",
+        dailyPrice: "₺1.750",
+    },
+    {
+        id: "egea-cross",
+        slug: "fiat-egea-cross-multijet-lounge",
+        name: "Fiat Egea Cross 1.6 Multijet Lounge",
+        segment: "suv",
+        tagline: "Yüksek gövde yapısı, çevik sürüş ve ekonomik Karadeniz rotası için ideal",
+        image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBBpR3FDuhQR_8lRlYoKVQagAYVNSGg3hIlaZVugLpeN3AWmB6MKhBfpbv9g6XxZF7DeFCaV00Nbsgonj-R92vEGTWhSyljHRwxsi8Xm2f0pHGO4Rd0ze_7NoUvGjvRpHn6qKgoLlnrsDYmDhcSD3EVSQx3HsqitQc7qkCdWIL0EIzStUtuNt8koa9k1RIr9NcQ0DE4TgjE6Wd-uecghnS8mtUaU2SQTr6rOmI_7GntM8r0V5QX1YfnmQ",
+        badge: "Bütçe Dostu Crossover • 2023",
+        badgeClass: "bg-surface-container-high text-charcoal-dark",
+        rating: "4.6",
+        guarantee: "Bütçe Şampiyonu Seçim",
+        specs: [
+            { icon: "smart_toy", label: "Vites", value: "DCT Otomatik" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Dizel" },
+            { icon: "group", label: "Kapasite", value: "5 Yetişkin" },
+            { icon: "luggage", label: "Bagaj", value: "3 Valiz" },
+            { icon: "speed", label: "Kilometre", value: "300 KM / Gün" },
+            { icon: "credit_card", label: "Depozito", value: "₺2.000" },
+        ],
+        oldPrice: "1 Günlük: ₺1.250 / gün",
+        price3Days: "₺2.940",
+        dailyPrice: "₺980",
+    },
+];
+
+
+
+/* ─────────────────────────────────────────────
+   KURUMSAL ARAÇ TİPİ SEÇENEKLERİ
+   ───────────────────────────────────────────── */
+export const CORPORATE_VEHICLE_TYPES = [
+    { value: "sedan", label: "Sedan (Binek / Yönetici Aracı)" },
+    { value: "suv", label: "SUV (Konforlu Aile / Yönetici)" },
+    { value: "vip-minivan", label: "VIP Minivan (Vito / Sprinter)" },
+    { value: "4x4", label: "4x4 (Yayla / Arazi)" },
+    { value: "mixed", label: "Karışık Filo (Segment Bazlı)" },
+];

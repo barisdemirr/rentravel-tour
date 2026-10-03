@@ -44,7 +44,7 @@ export default function ToursGrid({ tours, variant, perPage, onPageChange }) {
                         animate="center"
                         exit="exit"
                         transition={{ duration: 0.35, ease: EASE }}
-                        className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6"
+                        className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4 lg:gap-6"
                     >
                         {visible.map((tour) => (
                             <TourCard key={tour.id} tour={tour} variant={variant} mode="grid" />

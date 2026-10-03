@@ -161,10 +161,6 @@ export default function CultureToursPage() {
                             Konaklamalı Kültür Turları
                         </h1>
 
-                        <p className="max-w-xl font-body-lg text-body-lg leading-relaxed text-surface-white/85">
-                            Otel konaklaması dahil, çok günlü özel kültür programları. Kapadokya'dan Batum'a, Karadeniz yaylalarından mağara otellere kadar her detay düşünüldü.
-                        </p>
-
                         <div className="flex flex-wrap items-center gap-4 pt-2 font-label-md text-label-md text-surface-white/90">
                             <span className="flex items-center gap-1.5">
                                 <Icon name="verified" fill className="text-[18px] text-crimson-vivid" />
