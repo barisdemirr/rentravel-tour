@@ -7,6 +7,7 @@ import Reveal from "@/components/ui/Reveal";
 import SafeImage from "@/components/ui/SafeImage";
 import RegionCarousel from "@/components/bungalows/RegionCarousel";
 import BungalowCard from "@/components/bungalows/BungalowCard";
+import TiltCard from "@/components/bungalows/TiltCard";
 import {
     bungalows,
     BUNGALOW_REGIONS,
@@ -61,7 +62,7 @@ export default function BungalovKonaklamaPage() {
 
     /* Filtre + sıralama */
     const filteredBungalows = useMemo(() => {
-        let arr = bungalows.filter((b) => b.region === region);
+        let arr = bungalows;
         if (breakfastOnly) arr = arr.filter((b) => b.breakfastIncluded);
 
         arr = [...arr];
@@ -69,7 +70,7 @@ export default function BungalovKonaklamaPage() {
         else if (sortBy === "price-desc") arr.sort((a, b) => priceOf(b) - priceOf(a));
         else if (sortBy === "rating") arr.sort((a, b) => ratingOf(b) - ratingOf(a));
         return arr;
-    }, [region, breakfastOnly, sortBy]);
+    }, [breakfastOnly, sortBy]);
 
     /* Pagination */
     const totalPages = Math.max(1, Math.ceil(filteredBungalows.length / BUNGALOWS_PER_PAGE));
@@ -79,10 +80,9 @@ export default function BungalovKonaklamaPage() {
         return filteredBungalows.slice(start, start + BUNGALOWS_PER_PAGE);
     }, [filteredBungalows, safePage]);
 
-    /* Filtre değişince sayfa 1'e dön */
     useEffect(() => {
         setPage(1);
-    }, [region, breakfastOnly, sortBy]);
+    }, [breakfastOnly, sortBy]);
 
     /* Region değişince catalog'a scroll */
     const handleRegionChange = (next) => {
@@ -237,34 +237,39 @@ export default function BungalovKonaklamaPage() {
 
                         {/* SAĞ KOLON — Görsel */}
                         <div className="relative mt-4 lg:col-span-5 lg:mt-0">
-                            <div className="group relative aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 shadow-2xl lg:aspect-square">
-                                <SafeImage
-                                    src={HERO_IMAGE}
-                                    alt="Fırtına Vadisi'nde sisler arasında lüks şömineli A-Frame dağ evi"
-                                    className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <TiltCard max={9} scale={1.02} className="group">
+                                <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 shadow-2xl lg:aspect-square">
+                                    <SafeImage
+                                        src={heroBungalow.image}
+                                        alt={heroBungalow.title}
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                                {/* Floating glass badge */}
-                                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 rounded-2xl border border-white/40 bg-surface-white/90 p-3.5 shadow-xl backdrop-blur-md lg:bottom-5 lg:left-5 lg:right-5 lg:p-4">
-                                    <div className="flex min-w-0 items-center gap-3">
-                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 font-headline-sm text-headline-sm font-bold text-emerald-700 shadow-inner">
-                                            ★ {heroBungalow.rating}
+                                    {/* Floating glass badge */}
+                                    <div
+                                        className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3 rounded-2xl border border-white/40 bg-surface-white/90 p-3.5 shadow-xl backdrop-blur-md lg:bottom-5 lg:left-5 lg:right-5 lg:p-4"
+                                        style={{ transform: "translateZ(40px)" }}
+                                    >
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 font-headline-sm text-headline-sm font-bold text-emerald-700 shadow-inner">
+                                                ★ {heroBungalow.rating}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h4 className="truncate font-headline-sm text-headline-sm font-bold leading-tight text-charcoal-dark">
+                                                    {heroBungalow.title}
+                                                </h4>
+                                                <p className="truncate font-label-sm text-label-sm font-medium text-secondary">
+                                                    {heroBungalow.location}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="min-w-0">
-                                            <h4 className="truncate font-headline-sm text-headline-sm font-bold leading-tight text-charcoal-dark">
-                                                {BUNGALOW_REGIONS.find((r) => r.value === region)?.shortLabel}
-                                            </h4>
-                                            <p className="truncate font-label-sm text-label-sm font-medium text-secondary">
-                                                {heroBungalow.title}
-                                            </p>
-                                        </div>
+                                        <span className="hidden shrink-0 rounded-full bg-emerald-100 px-3 py-1 font-label-uppercase text-label-uppercase font-bold text-emerald-800 sm:inline-flex">
+                                            Öne Çıkan
+                                        </span>
                                     </div>
-                                    <span className="hidden shrink-0 rounded-full bg-emerald-100 px-3 py-1 font-label-uppercase text-label-uppercase font-bold text-emerald-800 sm:inline-flex">
-                                        Öne Çıkan
-                                    </span>
                                 </div>
-                            </div>
+                            </TiltCard>
                         </div>
                     </div>
                 </div>
@@ -353,10 +358,7 @@ export default function BungalovKonaklamaPage() {
                         </p>
                         <button
                             type="button"
-                            onClick={() => {
-                                setRegion(BUNGALOW_REGIONS[0].value);
-                                setBreakfastOnly(false);
-                            }}
+                            onClick={() => setBreakfastOnly(false)}
                             className="mt-2 rounded-full bg-charcoal-dark px-6 py-3 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors hover:bg-primary-container"
                         >
                             Filtreleri Temizle
@@ -412,8 +414,8 @@ export default function BungalovKonaklamaPage() {
                                             }}
                                             aria-current={isActive ? "page" : undefined}
                                             className={`flex h-9 w-9 items-center justify-center rounded-full font-headline-sm text-headline-sm font-bold transition-all ${isActive
-                                                    ? "bg-primary-container text-on-primary shadow-md shadow-primary-container/25"
-                                                    : "border border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid hover:text-crimson-vivid"
+                                                ? "bg-primary-container text-on-primary shadow-md shadow-primary-container/25"
+                                                : "border border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid hover:text-crimson-vivid"
                                                 }`}
                                         >
                                             {n}

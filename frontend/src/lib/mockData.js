@@ -1021,41 +1021,11 @@ export const CORPORATE_VEHICLE_TYPES = [
 
 /* Bölge seçenekleri — hero bar ve carousel'de kullanılır */
 export const BUNGALOW_REGIONS = [
-    {
-        value: "firtina",
-        label: "Fırtına Vadisi · Nehir Kenarı",
-        shortLabel: "Fırtına Vadisi",
-        thumbnail:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuByWGMWhNq0FUlOSakD8VVXwIDOIZmwuPL9hYifkCrlIAoExkIdM3Zw3RDEFgK_1hacQpWbNGfi3utViNYmfb0ClKGFtDq1FvRjCTiiHv1xjbDyhtQ7kpDfi1QMrNbYeP3vezuM-ss_iHNo_r48Oque6jpuVrCrsz4FNEvfIiYaEWrEu0EGod-7BV90lWG62mFNFe348TsGb3Yo-di59Ee48JoDSlflLhw8C-R45WQGwaR9J3cp328ZpA",
-    },
-    {
-        value: "ayder",
-        label: "Ayder Yaylası · Bulut Denizi",
-        shortLabel: "Ayder Yaylası",
-        thumbnail:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuBfC6YE9XyaPda2Kn9-AXFvozise64MkvwWYURzS3A2XNLR3j0IXUDJgbEokS4DXXEgfRIf_MJ30HhrsnlY8ANj0jbMk0Q2fGLHNOSjQtxrdmhPh8UAvCNtCVaOkVH93pjRd1sD03BCEj6KM28_letRWBIgkxJPkCO-igUTfjpN4ZxFk_PuMJq97x5f8OobMEi9X2NgqMUQNLxRJuNqdv9kGeXRhcm9ROpVSyXSU4n34Nz9p2RWq7asag",
-    },
-    {
-        value: "camlihemsin",
-        label: "Çamlıhemşin · İzole Orman",
-        shortLabel: "Çamlıhemşin",
-        thumbnail:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuDONnKTAzABMnz_YPcSW3xa7EeZbWGHq2zTeMPxKgeMwOaOk8PFfI9JYF22bm4HZ_6O1joTwO-UC5WRwixFz-gZ-rGGu-lAVR_kMYgBKCXhXlaF-LbyO-MdSo800yw90nKCCu-d8N7WRFbMLcdzyCp7LHVsKj7TiHS4vTbEoTYM01ZcXFU2flFoY4nwK3tFpc7AWs78PzRD9NToeV6rmtpeulou-a0OOiLkOTWwtA4GFtns__V2PRPmtg",
-    },
-    {
-        value: "pokut",
-        label: "Pokut & Huser · Zirve",
-        shortLabel: "Pokut & Huser",
-        thumbnail:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuA1QBtJ3WIPgLspQD99m8qIOxFqD6w72Y_DnZI9JgUdFBMtzOGk3m1vENh5XwZkmVpuiGCA7eCRiaPV2-NtJZfT5Rj8-WcOAmOk1aepxIG_0A6_upZ9ccjacCtYKfBtIFiHkOyW8uOiiPlcTfG8OtuGLLZdg3qWGCHkEY20__2LUwD5t50wD_HQOwve6rEkTXLlcMo6el0N8P4cNWbmABASnpv_goEp7ekdz-vhLaTVkMIrrUiWgqMXvg",
-    },
-    {
-        value: "savsat",
-        label: "Şavşat & Artvin · Karagöl Kıyısı",
-        shortLabel: "Şavşat & Artvin",
-        thumbnail:
-            "https://lh3.googleusercontent.com/aida-public/AB6AXuABcG7HXSK4Wqdh6vGCN0JbqPpGnVN3-UfonwH3sVu8sILhwFzuKn1aQAPBjI4Yv_0QXi--1wnzSlC3XSpfHAJ_CRJOxgoSFX_tslUCu3kRhYSlIUTWWxyckCPRLqgWU85BScL7hiVa4FtwU-Zi66p0i7y86-XuYShBRZ7FmMbw2_w5_UB_CF1IX4CS9bKjSefRMHzCXu4Br63ETsTm7Eh6MZP-JgwEYfjg6VOcEmAPfE_pIg4k4rjORg",
-    },
+    { value: "firtina", shortLabel: "Fırtına Vadisi", label: "Fırtına Vadisi · Nehir Kenarı" },
+    { value: "ayder", shortLabel: "Ayder Yaylası", label: "Ayder Yaylası · Bulut Denizi" },
+    { value: "camlihemsin", shortLabel: "Çamlıhemşin", label: "Çamlıhemsin · İzole Orman" },
+    { value: "pokut", shortLabel: "Pokut & Huser", label: "Pokut & Huser · Zirve" },
+    { value: "savsat", shortLabel: "Şavşat & Artvin", label: "Şavşat & Artvin · Karagöl Kıyısı" },
 ];
 
 /* Bungalov listesi — 12 adet */
@@ -1345,3 +1315,81 @@ export const BUNGALOW_SORT_OPTIONS = [
     { value: "price-desc", label: "Önce En Yüksek Fiyat" },
     { value: "rating", label: "Misafir Puanı (5.0 Üzeri)" },
 ];
+
+
+/* ─────────────────────────────────────────────
+   BUNGALOV DETAY VERİLERİ
+   ───────────────────────────────────────────── */
+
+/* Slug → detay eşleşmesi.
+   Eksik bungalovlar için default değerler kullanılacak. */
+export const bungalowDetails = {
+    "river-chalet-aframe-isitmali-jakuzi": {
+        gallery: [
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBVOFseE6AkiMh-iFbJHi-atMuVWqlf2mxKB0eFurqEEDgY_fkD8lVXDlRJnGwv-yw_Vx22PlsQhospTnYA3It8bCoRdqbU9OY59KmW38JQVZMkmuNoRxwHECaPhKll1JFGaIzF2ILJXlQD8lZnUP3aLUjbeZFhu37OIp1Uh2Il1epKhz6Y0nuyt6G_8EZZk6BDGnfa29UKD2_j7LCiH8ml_yo_8CyJcOXNWszHELmBrhFA-N5Wo1aRCQ",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuANEkcnPxMxOjdmLTV9xawnRLhneIUMvnLi1usHdDUSk35T0_toFbrKmZjigYMYwxrjPSqgNY0vS-2eM6VH-HKR4P7NyJSw7r__4tE7DgbuleReWTqlz7tzSOisHDgV16y3b3fvyGb64ggQcqpJ1ZCkHdzuAHjEeYlF2UI9hJ4LOVExiD-2GdhJFFTE4ZBKcs1XqDfBEcx4sBA9FCfW4IGAxIWFhtDgygYm4KZIfV5dztlXRv2AQGVZ7A",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuCuOyKQpcxV-NBL5r8mGKz0fImnlPyw79hqrvvsA5ycdcz-nr0xW5CAPEcPNuzUgokUmzxT0QjZZcYwc4Tjl65H_mG6EWJ610JGYhcoTe-4sGoGvMZaRvuAbRghG6D6bZKO-ZNLuSJ33ZjpcPNzzO0bl2WsaCVcL400GDxz6iTM2Y__p7vkI5SpYXxU8VqWMUWA6Zx5XG88cVfvOWW7oaJ4Hrra8p9Lf9X6GkhLevwx8XHYoDtbtPlizg",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuCEeCrWzYhu76a0ntsxu6DxhDtMiOIQY4E50daiZ3L6PWipwiuiADL2nGowINXtcaIrTQZr87SbEAUWPuUOeta64cSUE98pJeumMUtj0cmu4pEZQwN4SqMQXu8f1DEQH-xS4BGWo7QrJa9C6c9Jnp4UHmwmeanBAjBKaZm6fdGyBAqpeVd5IGyzjNI57y_rLXGzQNQadnLiF3-O8BeIr9wt67gPIdu-XpqV-nQ74-PedK28nZ_-tQHtCA",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBGYaVUmWZCHKVE87O0Dwehk-OVD9XmyV5TH3Itt8pATAOunHB8EhH04forA0qeGDKdK1vePisUHX-ygBUx7q3B9lLWsDMb2hI2SEIrQ4Ic4EOiA16dpDMjUafGETE0JjsxqMcCWcEsou25-Mj8tdYj-QoAaTIdv9-zaHaQck1jJdOoJgjNGEm85VXy2yNzk7cEJgVmFbP4uQwbuGP2Db-OOsatCgGAf4EQqmZVRRqtZzn54Av_1AAy3w",
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuAsBsD6K5pCFXEzWj5bQZ0QiwIaIZ3xLckHrWnrqRyVKIQTI5eaU_1vJ9zXdCF0-b6jEhU6_gLKagVR5187dFuTsVCMkJsvITPHjr08iXAbtZhvvsJ7S2z5bb0QhDI0ZwiIXL3G3ERYUcoUqjKzCEa6Eu08CYFKf7ZpZQ7pqlozQFREZKxCUqetxuZd0RoRSKvO_E-jfJ9V0lZePHJ22CVRHAIAP86RXEt8cbNcCI-lIaQV_8kK8x3zsg",
+        ],
+        galleryLabel: "Ana Tesis & Özel Havuz",
+        totalPhotos: 28,
+        listingId: "RT-15869",
+        ratingLabel: "Mükemmel",
+        ratingScore: 4.95,
+        ratingCount: 142,
+        featureStrip: [
+            { icon: "group", label: "4 Kişi", sub: "Kapasite" },
+            { icon: "schedule", label: "Min. 2 Gece", sub: "Konaklama" },
+            { icon: "pool", label: "32°C Isıtmalı", sub: "Orman Havuzu" },
+            { icon: "hot_tub", label: "Jakuzi", sub: "Panoramik" },
+            { icon: "fireplace", label: "Döküm Şömine", sub: "Doğal Odunlu" },
+            { icon: "bakery_dining", label: "Köy Serpme", sub: "Kahvaltı Dahil" },
+        ],
+        description: [
+            "Fırtına Vadisi'nin asırlık kestane ve gürgen ormanları arasına gizlenen River Chalet, modern İskandinav mimarisi ile Karadeniz'in vahşi doğasını buluşturuyor. 95 metrekarelik iki katlı geniş A-Frame yapısı, gökyüzüne uzanan cam cephesi ve tamamen korunaklı müstakil bahçesiyle misafirlerine mutlak mahremiyet ve sessizlik vadediyor.",
+            "Dört mevsim kesintisiz hizmet veren 32°C sıcaklıktaki özel infinity havuzunda bulutların vadiye çöküşünü izleyebilir, akşam saatlerinde döküm şöminenin başında çayınızı yudumlayabilirsiniz. Üst asma katta yer alan çift kişilik master süit ve bağımsız jakuzi alanı doğrudan vadinin yemyeşil yamacına açılmaktadır.",
+        ],
+        breakfast: {
+            title: "Yöresel Organik Fırtına Kahvaltısı",
+            image:
+                "https://lh3.googleusercontent.com/aida-public/AB6AXuAsBsD6K5pCFXEzWj5bQZ0QiwIaIZ3xLckHrWnrqRyVKIQTI5eaU_1vJ9zXdCF0-b6jEhU6_gLKagVR5187dFuTsVCMkJsvITPHjr08iXAbtZhvvsJ7S2z5bb0QhDI0ZwiIXL3G3ERYUcoUqjKzCEa6Eu08CYFKf7ZpZQ7pqlozQFREZKxCUqetxuZd0RoRSKvO_E-jfJ9V0lZePHJ22CVRHAIAP86RXEt8cbNcCI-lIaQV_8kK8x3zsg",
+            description:
+                "Her sabah saat 09:00 - 11:30 arasında chaletinize özel servis edilen sıcak kuymak, organik Fırtına kestane balı, yayla tereyağı, taze mısır ekmeği ve semaverde demlenmiş Rize çayı ile güne doğanın kalbinde başlayın.",
+            tags: ["Sıcak Kuymak Dahil", "Odaya Servis", "Limitsiz Çay"],
+        },
+        amenities: [
+            { icon: "wifi", title: "Yüksek Hızlı Starlink Wi-Fi", sub: "150 Mbps kesintisiz internet" },
+            { icon: "yard", title: "450 m² Tam Korunaklı Bahçe", sub: "%100 muhafazakar mahremiyet" },
+            { icon: "outdoor_grill", title: "Veranda Barbekü & Ateş Çukuru", sub: "Kömür ve odun hazır sunulur" },
+            { icon: "thermostat", title: "Yerden Isıtma & Klima", sub: "Tüm odalarda bağımsız kontrol" },
+            { icon: "coffee_maker", title: "Nespresso Bar & Çay Makinesi", sub: "Karşılama kapsülleri dahil" },
+            { icon: "local_parking", title: "Özel Kapalı Otopark", sub: "Ücretsiz ve 22kW EV Şarj Ünitesi" },
+        ],
+        distances: [
+            { place: "Ayder Yaylası", value: "18 km (25 dk)" },
+            { place: "Zilkale", value: "12 km (18 dk)" },
+            { place: "Rize-Artvin Havalimanı", value: "34 km (35 dk)" },
+            { place: "Trabzon Havalimanı", value: "130 km (1.5 saat)" },
+        ],
+        locationNote: "Çamlıhemşin Merkez: 4.2 km",
+        rules: [
+            {
+                icon: "schedule",
+                title: "Giriş & Çıkış Saatleri",
+                text: "Giriş saati 14:30 ve sonrası, çıkış saati en geç 11:30'dur. Erken giriş imkanı doluluk durumuna bağlıdır.",
+            },
+            {
+                icon: "verified_user",
+                title: "Esnek İptal Güvencesi",
+                text: "Giriş tarihinden 7 gün öncesine kadar yapılan iptallerde %100 kesintisiz ön ödeme iadesi sağlanmaktadır.",
+            },
+        ],
+    },
+};
+
+/* Bir slug için detay varsa onu döndür, yoksa fallback */
+export function getBungalowDetail(slug) {
+    return bungalowDetails[slug] || null;
+}

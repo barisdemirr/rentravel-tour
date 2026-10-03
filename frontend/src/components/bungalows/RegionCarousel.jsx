@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
-import { BUNGALOW_REGIONS } from "@/lib/mockData";
+import { BUNGALOW_REGIONS, bungalows } from "@/lib/mockData";
 import SafeImage from "@/components/ui/SafeImage";
 
 const AUTO_INTERVAL = 4000;
@@ -22,14 +22,22 @@ export default function RegionCarousel({ value, onChange }) {
         BUNGALOW_REGIONS.findIndex((r) => r.value === value)
     );
 
-    /* Sekme gizliyken durdur */
+    /* Her bölgenin ilk bungalovunu thumbnail olarak al */
+    const regionsWithThumbs = useMemo(
+        () =>
+            BUNGALOW_REGIONS.map((r) => {
+                const first = bungalows.find((b) => b.region === r.value);
+                return { ...r, thumbnail: first?.image };
+            }),
+        []
+    );
+
     useEffect(() => {
         const on = () => setTabHidden(document.hidden);
         document.addEventListener("visibilitychange", on);
         return () => document.removeEventListener("visibilitychange", on);
     }, []);
 
-    /* Aktif pill görünüme otomatik scroll (mobil) */
     useEffect(() => {
         const list = pillsRef.current;
         if (!list) return;
@@ -41,7 +49,6 @@ export default function RegionCarousel({ value, onChange }) {
         }
     }, [value]);
 
-    /* Timebar animasyonu */
     useEffect(() => {
         const bar = barRef.current;
         if (!bar) return;
@@ -99,7 +106,7 @@ export default function RegionCarousel({ value, onChange }) {
                 ref={pillsRef}
                 className="no-scrollbar flex items-center gap-2 overflow-x-auto sm:gap-2.5"
             >
-                {BUNGALOW_REGIONS.map((region) => {
+                {regionsWithThumbs.map((region) => {
                     const isActive = region.value === value;
                     return (
                         <li key={region.value} className="shrink-0">
@@ -113,7 +120,6 @@ export default function RegionCarousel({ value, onChange }) {
                                         : "bg-canvas-offwhite text-charcoal-dark hover:bg-surface-variant"
                                     }`}
                             >
-                                {/* Timebar — sadece aktif pill'de */}
                                 {isActive && (
                                     <span
                                         ref={barRef}
@@ -123,7 +129,6 @@ export default function RegionCarousel({ value, onChange }) {
                                     />
                                 )}
 
-                                {/* Thumbnail */}
                                 <span className="relative z-10 h-7 w-7 shrink-0 overflow-hidden rounded-full border border-white/60">
                                     <SafeImage
                                         src={region.thumbnail}
@@ -133,7 +138,6 @@ export default function RegionCarousel({ value, onChange }) {
                                     />
                                 </span>
 
-                                {/* Etiket */}
                                 <span className="relative z-10 whitespace-nowrap pr-1 font-label-md text-label-md font-semibold">
                                     {region.shortLabel}
                                 </span>
