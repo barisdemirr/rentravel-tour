@@ -1495,3 +1495,196 @@ export function getVehicleDetail(slug) {
         extras: VEHICLE_EXTRAS,
     };
 }
+
+
+
+/* ─────────────────────────────────────────────
+   GÜNÜBİRLİK TUR DETAY VERİLERİ
+   ───────────────────────────────────────────── */
+
+/* Yardımcı: tarih seansları üret */
+const buildTourSessions = (basePrice, seats = 14, days = 6) => {
+    const base = new Date();
+    base.setDate(base.getDate() + 1);
+    const sessions = [];
+    for (let i = 0; i < days; i++) {
+        const d = new Date(base);
+        d.setDate(d.getDate() + i);
+        const dayNum = d.toLocaleDateString("tr-TR", { day: "2-digit" });
+        const monthName = d.toLocaleDateString("tr-TR", { month: "long" });
+        const year = d.getFullYear();
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        const price = isWeekend ? basePrice + 50 : basePrice;
+        const leftSeats = Math.max(3, seats - i * 2);
+        sessions.push({
+            id: `s-${d.toISOString().slice(0, 10)}`,
+            date: `${dayNum} ${monthName} ${year}`,
+            dateISO: d.toISOString().slice(0, 10),
+            price,
+            seats: leftSeats,
+            isLastSeats: leftSeats <= 4,
+        });
+    }
+    return sessions;
+};
+
+export const dailyTourDetails = {
+    "sumela-zigana-hamsikoy": {
+        badges: [
+            { icon: "star", label: "4.9 (420+ Katılımcı)", tone: "primary" },
+            { icon: "verified", label: "TÜRSAB A Grubu Onaylı", tone: "neutral" },
+            { icon: "workspace_premium", label: "En Çok Tercih Edilen", tone: "neutral" },
+        ],
+
+        routePills: [
+            { label: "Trabzon Merkez", highlight: false, icon: "location_on" },
+            { label: "Altındere Vadisi", highlight: false },
+            { label: "Sümela Manastırı", highlight: true },
+            { label: "Zigana Geçidi", highlight: false },
+            { label: "Hamsiköy Sütlaç Molası", highlight: false },
+            { label: "Torul Cam Teras", highlight: false },
+            { label: "Karaca Mağarası", highlight: false },
+        ],
+
+        gallery: [
+            {
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuBVLRClTfjc36nA7byjHFm-8uddCx1fEJwUhZixwQpfEMNoxjFwkXrG2yYMx1PIRMABngK_jjXkPiVU_vKD0PwFjDrIhEVhSOZKYRk3BleJcWd0qPSqIKTw3JW30chCvZMclEoPNgNkWXUZC8-Mh5IB-t_itajrxT9r0aP7lGuw6CgSe99d7jvnpmJ3lxT3vRyMDFtdbIG9M42pOIM7_TZfEbheel2Q8meSB8LIopmzrfbstolAAr6Yyg",
+                title: "Sümela Manastırı & Altındere Kanyonu",
+                subtitle: "Kayalıklara asılı 1600 yıllık dünya mirası manastır.",
+                tone: "primary",
+            },
+            {
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuCNtJ46KKeM_rVKICPOtHRJG4J9MUOLVWRdblPO_Tp1YFaa18M9f-js5KwbQXS7_XycCLa8TzFvbc6M2AgXOJuCn8mZyN3enH7vXlnT3WWCvacg4L5NrbjTRmKvGs7eKgCFUfkyBDDjtyv3m0L0BSW2JTI0-MtTeH49Tsau6ktCy-EWt2-93sFFFXIhT1Y-EPfxEJwbjkkf-eJfBZ9q9hrLaMdcyGmd1SFZNWMQZIVMlG0-o24fyGgGUQ",
+                title: "Hamsiköy Vadisi",
+                subtitle: "Geleneksel Fırın Sütlaç Durağı",
+            },
+            {
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuAXkh9WsjsMOZ2PPh_Ibv2GmQjNKmOkh42RbLrtnuFhIyuBTRBngpThJXN0vsSbwjmENOOGHe4SxtbSu28sHuJgXuLy-LNCeaOfS99Y_WT0RKMIJ3VTCB9vkek7craX5cW6JgP3fAryoJt8YI-PwOf9JADuA1XUjbBW96m7IUUzjStiVyKjbH_802tlI_GTaCHW9VVPB4e1Jh_SJX7-TTBHjJZmPveFNKHna8M7D33KIq5GnfGsix-F5g",
+                title: "Torul Cam Teras",
+                subtitle: "240m yükseklikte cam seyir terası",
+            },
+            {
+                src: "https://lh3.googleusercontent.com/aida-public/AB6AXuD60NwpE6wQ4mb-bDvwXbLnBOJfPWs7WHKYRxTBV5xe6zuW92PsYoWVIDhdeuek-iFTXfxTlscYhGQCcqWmMYbuTm7LiG53tf-FdARiLD-RKxnUtIqHhkQMsdDcyFwvMmSkeqdD0BD24guyHetuZ8tgFosJPQtkjcE0Io_GpjF-HyzVaSbflae6KYSAkNWsf6G1aQkTLVLc0gKBY3DZJIN8Qg3-Bo09elHDxKkvsMmNQUb1lFkPeLtt0w",
+                title: "Karaca Mağarası",
+                subtitle: "Yeraltı sarayı",
+                totalPhotos: 18,
+            },
+        ],
+
+        quickSpecs: [
+            { icon: "schedule", label: "Tur Süresi", value: "8 - 9 Saat" },
+            { icon: "groups", label: "Grup Kapasitesi", value: "Maks. 16 Kişi" },
+            { icon: "translate", label: "Canlı Rehberlik", value: "TR / EN / AR" },
+            { icon: "pin_drop", label: "Kalkış & Dönüş", value: "09:30 - 18:30" },
+            { icon: "published_with_changes", label: "İade Garantisi", value: "24 Saat Ücretsiz", tone: "emerald" },
+        ],
+
+        editorial: {
+            eyebrow: "Doğa & Kültür Buluşması",
+            eyebrowIcon: "history_edu",
+            title: "Sisli Çam Ormanlarından 1600 Yıllık Sırra Uzanan Yolculuk",
+            paragraphs: [
+                "Karadeniz'in heybetli Altındere Vadisi'nden göğe uzanan sarp kayalıklara oyulmuş 1600 yıllık Sümela Manastırı'na, tarihi İpek Yolu kervanlarının soluklandığı görkemli Zigana Dağı'ndan fırınlanmış meşhur tatlının anavatanı Hamsiköy'e uzanan benzersiz bir rota.",
+                "Günübirlik düzenlediğimiz bu premium turda, bölgenin kadim tarihine T.C. Kültür ve Turizm Bakanlığı kokartlı uzman rehberlerimizin sürükleyici anlatımlarıyla tanıklık ederken, Karadeniz'in el değmemiş yayla havasını içinize çekecek, Hamsiköy fırın sütlacının eşsiz lezzetini orijinal yerinde deneyimleyeceksiniz.",
+            ],
+            highlights: [
+                "Klimalı VIP Araçlar",
+                "Milli Park Girişleri Dahil",
+                "Sütlaç Molası & Tadım",
+                "Cam Teras Deneyimi",
+            ],
+        },
+
+        itinerary: [
+            {
+                icon: "departure_board",
+                time: "09:30",
+                title: "Trabzon Merkez Hareket",
+                description: "Trabzon Meydan ofisimiz önünde konuklarımızla buluşma. Profesyonel rehberimiz eşliğinde modern VIP aracımıza yerleşip Maçka istikametine hareket ediyoruz.",
+            },
+            {
+                icon: "castle",
+                time: "10:15 - 12:45",
+                title: "Altındere Milli Parkı & Sümela Manastırı",
+                description: "Milli parka varış ve milli park içi servislerle patika başına ulaşım. Yaklaşık 300 metrelik orman içi yürüyüşün ardından Sümela Manastırı'nın avlusu, freskli kaya kilisesi, çan kulesi ve koridorları rehber anlatımı eşliğinde gezilir. Seyir terasında serbest fotoğraf molası verilir.",
+            },
+            {
+                icon: "restaurant",
+                time: "13:15 - 14:30",
+                title: "Zigana Dağı Panoramik Mola & Öğle Yemeği",
+                description: "Tarihi Zigana Geçidi'ne tırmanış. Muazzam dağ havası eşliğinde yöresel yayla etleri, tereyağlı alabalık ve Karadeniz mutfağı lezzetlerinden oluşan keyifli bir öğle yemeği ve çay molası.",
+            },
+            {
+                icon: "bakery_dining",
+                time: "14:45 - 15:45",
+                title: "Hamsiköy Ziyareti & Fırın Sütlaç Molası",
+                description: "Yeşillikler arasına serpilmiş Hamsiköy vadisine iniş. Coğrafi işaretli geleneksel fırın sütlaçların tadımı, köy kahvehanesinde çay molası ve köy halkıyla sıcak sohbetler.",
+            },
+            {
+                icon: "explore",
+                time: "16:15 - 17:30",
+                title: "Torul Cam Teras & Karaca Mağarası",
+                description: "Yeni Zigana Tüneli'nden geçerek Torul Cam Seyir Terası'na geçiş. Vadi tabanını seyrettikten sonra Karaca Mağarası'nın zengin damlataş sütunları ve göletleri arasında büyüleyici yürüyüş. Dönüşte pestil-köme tadım alışverişi.",
+            },
+            {
+                icon: "flag",
+                time: "18:30",
+                title: "Trabzon'a Varış & Tur Sonu",
+                description: "Güzel anılar ve eşsiz fotoğraf kareleriyle dolu günün sonunda kalkış noktamız olan Trabzon Meydanı'na ulaşıyor ve bir sonraki Rentravel rotasında buluşmak üzere vedalaşıyoruz.",
+                final: true,
+            },
+        ],
+
+        inclusions: {
+            included: [
+                "Yeni model lüks klimalı VIP tur aracı ile gidiş-dönüş ulaşım",
+                "T.C. Kültür ve Turizm Bakanlığı kokartlı profesyonel rehberlik",
+                "Altındere Milli Parkı araç giriş ücretleri",
+                "TÜRSAB zorunlu seyahat kaza sigortası",
+                "Araç içi soğuk su ve ikram paketleri",
+            ],
+            excluded: [
+                "Öğle yemeği (yöresel serbest alakart menü seçimi)",
+                "Sümela Manastırı müze giriş bileti (Müzekart geçerlidir)",
+                "Torul Cam Teras ve Karaca Mağarası giriş ücretleri",
+                "Kişisel alışverişler, sütlaç ikramları ve hediyelik eşyalar",
+                "Milli park içi ring minibüs biniş bedeli (~₺20)",
+            ],
+        },
+
+        travelNotes: [
+            { icon: "hiking", text: "Sümela patikası ve Karaca Mağarası merdivenleri için rahat yürüyüş ayakkabısı giymeniz tavsiye edilir." },
+            { icon: "credit_card", text: "T.C. Kültür Bakanlığı Müzekart sahibi misafirlerimizin kartlarını yanlarında bulundurmaları önemle rica olunur." },
+            { icon: "umbrella", text: "Karadeniz'in değişken dağ havası sebebiyle çantanızda hafif bir yağmurluk veya rüzgarlık bulundurmanız önerilir." },
+            { icon: "battery_charging_full", text: "Fotoğraf ve video çekimi için telefon veya fotoğraf makinenizin tam şarjlı olduğundan emin olunuz." },
+        ],
+
+        booking: {
+            basePrice: 850,
+            childDiscountPercent: 30,
+            seatsTotal: 16,
+        },
+
+        agency: {
+            name: "Rentravel Seyahat Acentası",
+            tursabNo: "15869",
+            supportNote: "7/24 Kesintisiz Karadeniz Destek Hattı",
+        },
+    },
+};
+
+export function getDailyTourDetail(slug) {
+    const tour = dailyTours.find((t) => t.slug === slug);
+    const detail = dailyTourDetails[slug];
+    if (!tour || !detail) return null;
+
+    const sessions =
+        detail.booking?.sessions ||
+        buildTourSessions(
+            detail.booking?.basePrice || 850,
+            detail.booking?.seatsTotal || 16,
+            6
+        );
+
+    return { tour, ...detail, booking: { ...detail.booking, sessions } };
+}
