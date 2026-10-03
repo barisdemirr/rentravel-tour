@@ -1013,3 +1013,335 @@ export const CORPORATE_VEHICLE_TYPES = [
     { value: "4x4", label: "4x4 (Yayla / Arazi)" },
     { value: "mixed", label: "Karışık Filo (Segment Bazlı)" },
 ];
+
+
+/* ─────────────────────────────────────────────
+   BUNGALOV KONAKLAMA
+   ───────────────────────────────────────────── */
+
+/* Bölge seçenekleri — hero bar ve carousel'de kullanılır */
+export const BUNGALOW_REGIONS = [
+    {
+        value: "firtina",
+        label: "Fırtına Vadisi · Nehir Kenarı",
+        shortLabel: "Fırtına Vadisi",
+        thumbnail:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuByWGMWhNq0FUlOSakD8VVXwIDOIZmwuPL9hYifkCrlIAoExkIdM3Zw3RDEFgK_1hacQpWbNGfi3utViNYmfb0ClKGFtDq1FvRjCTiiHv1xjbDyhtQ7kpDfi1QMrNbYeP3vezuM-ss_iHNo_r48Oque6jpuVrCrsz4FNEvfIiYaEWrEu0EGod-7BV90lWG62mFNFe348TsGb3Yo-di59Ee48JoDSlflLhw8C-R45WQGwaR9J3cp328ZpA",
+    },
+    {
+        value: "ayder",
+        label: "Ayder Yaylası · Bulut Denizi",
+        shortLabel: "Ayder Yaylası",
+        thumbnail:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBfC6YE9XyaPda2Kn9-AXFvozise64MkvwWYURzS3A2XNLR3j0IXUDJgbEokS4DXXEgfRIf_MJ30HhrsnlY8ANj0jbMk0Q2fGLHNOSjQtxrdmhPh8UAvCNtCVaOkVH93pjRd1sD03BCEj6KM28_letRWBIgkxJPkCO-igUTfjpN4ZxFk_PuMJq97x5f8OobMEi9X2NgqMUQNLxRJuNqdv9kGeXRhcm9ROpVSyXSU4n34Nz9p2RWq7asag",
+    },
+    {
+        value: "camlihemsin",
+        label: "Çamlıhemşin · İzole Orman",
+        shortLabel: "Çamlıhemşin",
+        thumbnail:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuDONnKTAzABMnz_YPcSW3xa7EeZbWGHq2zTeMPxKgeMwOaOk8PFfI9JYF22bm4HZ_6O1joTwO-UC5WRwixFz-gZ-rGGu-lAVR_kMYgBKCXhXlaF-LbyO-MdSo800yw90nKCCu-d8N7WRFbMLcdzyCp7LHVsKj7TiHS4vTbEoTYM01ZcXFU2flFoY4nwK3tFpc7AWs78PzRD9NToeV6rmtpeulou-a0OOiLkOTWwtA4GFtns__V2PRPmtg",
+    },
+    {
+        value: "pokut",
+        label: "Pokut & Huser · Zirve",
+        shortLabel: "Pokut & Huser",
+        thumbnail:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuA1QBtJ3WIPgLspQD99m8qIOxFqD6w72Y_DnZI9JgUdFBMtzOGk3m1vENh5XwZkmVpuiGCA7eCRiaPV2-NtJZfT5Rj8-WcOAmOk1aepxIG_0A6_upZ9ccjacCtYKfBtIFiHkOyW8uOiiPlcTfG8OtuGLLZdg3qWGCHkEY20__2LUwD5t50wD_HQOwve6rEkTXLlcMo6el0N8P4cNWbmABASnpv_goEp7ekdz-vhLaTVkMIrrUiWgqMXvg",
+    },
+    {
+        value: "savsat",
+        label: "Şavşat & Artvin · Karagöl Kıyısı",
+        shortLabel: "Şavşat & Artvin",
+        thumbnail:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuABcG7HXSK4Wqdh6vGCN0JbqPpGnVN3-UfonwH3sVu8sILhwFzuKn1aQAPBjI4Yv_0QXi--1wnzSlC3XSpfHAJ_CRJOxgoSFX_tslUCu3kRhYSlIUTWWxyckCPRLqgWU85BScL7hiVa4FtwU-Zi66p0i7y86-XuYShBRZ7FmMbw2_w5_UB_CF1IX4CS9bKjSefRMHzCXu4Br63ETsTm7Eh6MZP-JgwEYfjg6VOcEmAPfE_pIg4k4rjORg",
+    },
+];
+
+/* Bungalov listesi — 12 adet */
+export const bungalows = [
+    // ── FİRTINA VADİSİ (3) ──
+    {
+        id: "river-chalet-aframe",
+        slug: "river-chalet-aframe-isitmali-jakuzi",
+        region: "firtina",
+        title: "River Chalet A-Frame & Isıtmalı Jakuzi Deluxe",
+        description:
+            "Fırtına Deresi'ne sıfır, özel açık hava terasında sıcak su jakuzisi, döküm şömine ve geniş cam cephe.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuAoaRM3QctDbMLTMvd85a4WGvULNJIBuhYV6AlbDU_BTZlblCgBilpSH4UmXMq9qFSRim4R2pWieSjg_hej58j_vKCPwLn_3MRN7BFdUdg1hwktaEG6cYf_2vQiKr_rL-047hTb5iZZY0iPzJm4Hl3bF5wGP7t54v-YdifjOHxvN3F53D3Bh-L_n0YILhS66dMzRId8CfKuHylA8MlYZ_JzvYAcxLcECIHX6uVRxch4OKj6WiAof6wmmw",
+        location: "Çamlıhemşin, Fırtına Vadisi",
+        breakfastIncluded: true,
+        breakfastNote: "Yöresel Muhlamalı Karadeniz Serpme Köy Kahvaltısı Dahildir",
+        rating: "4.98",
+        reviews: "112",
+        pricePerNight: "₺4.650",
+        capacity: "2-4 Kişilik",
+        amenities: [
+            { icon: "hot_tub", label: "Sıcak Jakuzi" },
+            { icon: "local_fire_department", label: "Meşe Şömine" },
+            { icon: "wifi", label: "Fiber WiFi" },
+        ],
+    },
+    {
+        id: "firtina-orman-aframe",
+        slug: "firtina-orman-aframe-konaklama",
+        region: "firtina",
+        title: "Fırtına Vadisi Orman A-Frame",
+        description:
+            "Vadi ortasında izole ahşap A-Frame, özel teras, şömine ve gökyüzü gözlem pencereleri.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuAoaRM3QctDbMLTMvd85a4WGvULNJIBuhYV6AlbDU_BTZlblCgBilpSH4UmXMq9qFSRim4R2pWieSjg_hej58j_vKCPwLn_3MRN7BFdUdg1hwktaEG6cYf_2vQiKr_rL-047hTb5iZZY0iPzJm4Hl3bF5wGP7t54v-YdifjOHxvN3F53D3Bh-L_n0YILhS66dMzRId8CfKuHylA8MlYZ_JzvYAcxLcECIHX6uVRxch4OKj6WiAof6wmmw",
+        location: "Çamlıhemşin, Fırtına Vadisi",
+        breakfastIncluded: true,
+        breakfastNote: "Serpme Karadeniz Kahvaltısı Dahil",
+        rating: "4.93",
+        reviews: "89",
+        pricePerNight: "₺3.950",
+        capacity: "2-4 Kişilik",
+        amenities: [
+            { icon: "local_fire_department", label: "Döküm Şömine" },
+            { icon: "park", label: "Orman Manzarası" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+    {
+        id: "dere-konagi-firtina",
+        slug: "dere-konagi-nehir-kenari",
+        region: "firtina",
+        title: "Dere Konağı Nehir Kenarı",
+        description:
+            "Dere kenarında taş ve ahşap karışımı otantik konak, geniş bahçe ve açık ateş alanı.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuAoaRM3QctDbMLTMvd85a4WGvULNJIBuhYV6AlbDU_BTZlblCgBilpSH4UmXMq9qFSRim4R2pWieSjg_hej58j_vKCPwLn_3MRN7BFdUdg1hwktaEG6cYf_2vQiKr_rL-047hTb5iZZY0iPzJm4Hl3bF5wGP7t54v-YdifjOHxvN3F53D3Bh-L_n0YILhS66dMzRId8CfKuHylA8MlYZ_JzvYAcxLECIHX6uVRxch4OKj6WiAof6wmmw",
+        location: "Çamlıhemşin, Dere Kenarı",
+        breakfastIncluded: false,
+        breakfastNote: "Sadece Konaklama / Kahvaltı Opsiyonel",
+        rating: "4.86",
+        reviews: "56",
+        pricePerNight: "₺3.250",
+        capacity: "4-6 Kişilik",
+        amenities: [
+            { icon: "outdoor_grill", label: "Açık Ateş" },
+            { icon: "yard", label: "Geniş Bahçe" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+
+    // ── AYDER (3) ──
+    {
+        id: "ayder-bulut-terasi",
+        slug: "ayder-bulut-terasi-aframe-havuz",
+        region: "ayder",
+        title: "Ayder Bulut Terası A-Frame & Havuz",
+        description:
+            "Kaçkarların bulut denizine bakan ısıtmalı sonsuzluk havuzu, panoramik şömineli salon ve yerden ısıtma.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBfC6YE9XyaPda2Kn9-AXFvozise64MkvwWYURzS3A2XNLR3j0IXUDJgbEokS4DXXEgfRIf_MJ30HhrsnlY8ANj0jbMk0Q2fGLHNOSjQtxrdmhPh8UAvCNtCVaOkVH93pjRd1sD03BCEj6KM28_letRWBIgkxJPkCO-igUTfjpN4ZxFk_PuMJq97x5f8OobMEi9X2NgqMUQNLxRJuNqdv9kGeXRhcm9ROpVSyXSU4n34Nz9p2RWq7asag",
+        location: "Ayder Yaylası, Rize",
+        breakfastIncluded: true,
+        breakfastNote: "Muhlama & Doğal Bal Eşliğinde Yayla Kahvaltısı Dahil",
+        rating: "4.99",
+        reviews: "98",
+        pricePerNight: "₺6.400",
+        capacity: "2-3 Kişilik",
+        amenities: [
+            { icon: "pool", label: "Isıtmalı Havuz" },
+            { icon: "hot_tub", label: "Doğa Jakuzisi" },
+            { icon: "thermostat", label: "Yerden Isıtma" },
+        ],
+    },
+    {
+        id: "ayder-kackar-konak",
+        slug: "ayder-kackar-panorama-konak",
+        region: "ayder",
+        title: "Kaçkar Panorama Konak",
+        description:
+            "Yayla ortasında geleneksel Karadeniz konağı, bulut denizi manzaralı balkon ve sıcak aile ortamı.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBfC6YE9XyaPda2Kn9-AXFvozise64MkvwWYURzS3A2XNLR3j0IXUDJgbEokS4DXXEgfRIf_MJ30HhrsnlY8ANj0jbMk0Q2fGLHNOSjQtxrdmhPh8UAvCNtCVaOkVH93pjRd1sD03BCEj6KM28_letRWBIgkxJPkCO-igUTfjpN4ZxFk_PuMJq97x5f8OobMEi9X2NgqMUQNLxRJuNqdv9kGeXRhcm9ROpVSyXSU4n34Nz9p2RWq7asag",
+        location: "Yukarı Ayder, Rize",
+        breakfastIncluded: true,
+        breakfastNote: "Yayla Kahvaltısı Dahil",
+        rating: "4.91",
+        reviews: "74",
+        pricePerNight: "₺4.200",
+        capacity: "4-5 Kişilik",
+        amenities: [
+            { icon: "local_fire_department", label: "Şömine" },
+            { icon: "landscape", label: "Panoramik Balkon" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+    {
+        id: "ayder-selale-evi",
+        slug: "ayder-selale-evi-konaklama",
+        region: "ayder",
+        title: "Gelintülü Selale Evi",
+        description:
+            "Gelintülü Şelalesi'ne yürüme mesafesinde, ahşap bungalov ve özel teras.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuBfC6YE9XyaPda2Kn9-AXFvozise64MkvwWYURzS3A2XNLR3j0IXUDJgbEokS4DXXEgfRIf_MJ30HhrsnlY8ANj0jbMk0Q2fGLHNOSjQtxrdmhPh8UAvCNtCVaOkVH93pjRd1sD03BCEj6KM28_letRWBIgkxJPkCO-igUTfjpN4ZxFk_PuMJq97x5f8OobMEi9X2NgqMUQNLxRJuNqdv9kGeXRhcm9ROpVSyXSU4n34Nz9p2RWq7asag",
+        location: "Ayder, Rize",
+        breakfastIncluded: false,
+        breakfastNote: "Sadece Konaklama",
+        rating: "4.78",
+        reviews: "52",
+        pricePerNight: "₺3.500",
+        capacity: "2-4 Kişilik",
+        amenities: [
+            { icon: "waterfall_chart", label: "Şelale Manzarası" },
+            { icon: "deck", label: "Özel Teras" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+
+    // ── ÇAMLIHEMŞİN (2) ──
+    {
+        id: "cam-tavan-villa",
+        slug: "cam-tavan-orman-ici-villa",
+        region: "camlihemsin",
+        title: "Cam Tavan Orman İçi Doğa Villası",
+        description:
+            "Yatak odasından yıldızları izleyen cam tavan, ormana açılan çift kişilik jakuzi ve Nespresso bar.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuDONnKTAzABMnz_YPcSW3xa7EeZbWGHq2zTeMPxKgeMwOaOk8PFfI9JYF22bm4HZ_6O1joTwO-UC5WRwixFz-gZ-rGGu-lAVR_kMYgBKCXhXlaF-LbyO-MdSo800yw90nKCCu-d8N7WRFbMLcdzyCp7LHVsKj7TiHS4vTbEoTYM01ZcXFU2flFoY4nwK3tFpc7AWs78PzRD9NToeV6rmtpeulou-a0OOiLkOTWwtA4GFtns__V2PRPmtg",
+        location: "Çamlıhemşin Orman Yolu",
+        breakfastIncluded: true,
+        breakfastNote: "Odaya Özel İkramlı Serpme Kahvaltı Servisi Dahil",
+        rating: "4.96",
+        reviews: "116",
+        pricePerNight: "₺5.350",
+        capacity: "2 Kişi (Romantik)",
+        amenities: [
+            { icon: "roofing", label: "Cam Tavan" },
+            { icon: "hot_tub", label: "Orman Jakuzisi" },
+            { icon: "coffee", label: "Nespresso Bar" },
+        ],
+    },
+    {
+        id: "orman-kulube-camlihemsin",
+        slug: "orman-kulube-konaklama",
+        region: "camlihemsin",
+        title: "Orman Kulübe & Özel Şömine",
+        description:
+            "İzole orman içinde ahşap kulübe, kışın şömineli akşamlar, yazın doğa yürüyüşleri.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuDONnKTAzABMnz_YPcSW3xa7EeZbWGHq2zTeMPxKgeMwOaOk8PFfI9JYF22bm4HZ_6O1joTwO-UC5WRwixFz-gZ-rGGu-lAVR_kMYgBKCXhXlaF-LbyO-MdSo800yw90nKCCu-d8N7WRFbMLcdzyCp7LHVsKj7TiHS4vTbEoTYM01ZcXFU2flFoY4nwK3tFpc7AWs78PzRD9NToeV6rmtpeulou-a0OOiLkOTWwtA4GFtns__V2PRPmtg",
+        location: "Çamlıhemşin, Orman İçi",
+        breakfastIncluded: false,
+        breakfastNote: "Sadece Konaklama",
+        rating: "4.82",
+        reviews: "63",
+        pricePerNight: "₺3.100",
+        capacity: "2-4 Kişilik",
+        amenities: [
+            { icon: "local_fire_department", label: "Şömine" },
+            { icon: "forest", label: "Orman İçi" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+
+    // ── POKUT & HUSER (2) ──
+    {
+        id: "pokut-ahşap-ev",
+        slug: "pokut-ahsap-dag-evi-somineli",
+        region: "pokut",
+        title: "Pokut Ahşap Dağ Evi & Şömineli Kuzine",
+        description:
+            "2050 metre rakımda otantik sedir ağacı mimarisi, kuzineli döküm soba ve 4x4 özel transfer imkanı.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuA1QBtJ3WIPgLspQD99m8qIOxFqD6w72Y_DnZI9JgUdFBMtzOGk3m1vENh5XwZkmVpuiGCA7eCRiaPV2-NtJZfT5Rj8-WcOAmOk1aepxIG_0A6_upZ9ccjacCtYKfBtIFiHkOyW8uOiiPlcTfG8OtuGLLZdg3qWGCHkEY20__2LUwD5t50wD_HQOwve6rEkTXLlcMo6el0N8P4cNWbmABASnpv_goEp7ekdz-vhLaTVkMIrrUiWgqMXvg",
+        location: "Pokut Yaylası, 2050m",
+        breakfastIncluded: true,
+        breakfastNote: "Doğal Yayla Sütü, Petek Balı & Köy Tereyağı Kahvaltısı",
+        rating: "4.94",
+        reviews: "84",
+        pricePerNight: "₺4.100",
+        capacity: "4-6 Kişilik",
+        amenities: [
+            { icon: "mode_heat", label: "Kuzineli Soba" },
+            { icon: "cloud", label: "Bulut Balkonu" },
+            { icon: "directions_car", label: "4x4 Ulaşım" },
+        ],
+    },
+    {
+        id: "huser-zirve-konak",
+        slug: "huser-zirve-konaklama",
+        region: "pokut",
+        title: "Huser Zirve Konak",
+        description:
+            "Huser Yaylası'nın zirvesinde ahşap konak, gün doğumu ve gün batımı manzaralı balkon.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuA1QBtJ3WIPgLspQD99m8qIOxFqD6w72Y_DnZI9JgUdFBMtzOGk3m1vENh5XwZkmVpuiGCA7eCRiaPV2-NtJZfT5Rj8-WcOAmOk1aepxIG_0A6_upZ9ccjacCtYKfBtIFiHkOyW8uOiiPlcTfG8OtuGLLZdg3qWGCHkEY20__2LUwD5t50wD_HQOwve6rEkTXLlcMo6el0N8P4cNWbmABASnpv_goEp7ekdz-vhLaTVkMIrrUiWgqMXvg",
+        location: "Huser Yaylası",
+        breakfastIncluded: true,
+        breakfastNote: "Serpme Yayla Kahvaltısı Dahil",
+        rating: "4.89",
+        reviews: "68",
+        pricePerNight: "₺3.850",
+        capacity: "4-5 Kişilik",
+        amenities: [
+            { icon: "wb_twilight", label: "Gün Doğumu Manzarası" },
+            { icon: "local_fire_department", label: "Şömine" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+
+    // ── ŞAVŞAT & ARTVİN (2) ──
+    {
+        id: "savsat-orman-kosku",
+        slug: "savsat-orman-kosku-acik-hava-jakuzi",
+        region: "savsat",
+        title: "Şavşat Orman Köşkü & Açık Hava Jakuzi",
+        description:
+            "Karagöl Milli Parkı kıyısında kütük dağ evi mimarisi, ahşap teras sıcak jakuzisi ve rehberli yürüyüş parkuru.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuABcG7HXSK4Wqdh6vGCN0JbqPpGnVN3-UfonwH3sVu8sILhwFzuKn1aQAPBjI4Yv_0QXi--1wnzSlC3XSpfHAJ_CRJOxgoSFX_tslUCu3kRhYSlIUTWWxyckCPRLqgWU85BScL7hiVa4FtwU-Zi66p0i7y86-XuYShBRZ7FmMbw2_w5_UB_CF1IX4CS9bKjSefRMHzCXu4Br63ETsTm7Eh6MZP-JgwEYfjg6VOcEmAPfE_pIg4k4rjORg",
+        location: "Şavşat Karagöl, Artvin",
+        breakfastIncluded: true,
+        breakfastNote: "Şavşat Doğal Köy Ürünleri Serpme Kahvaltısı Dahildir",
+        rating: "4.97",
+        reviews: "91",
+        pricePerNight: "₺4.950",
+        capacity: "5 Kişilik",
+        amenities: [
+            { icon: "hot_tub", label: "Dış Mekan Jakuzi" },
+            { icon: "fireplace", label: "Döküm Şömine" },
+            { icon: "forest", label: "Doğa Parkuru" },
+        ],
+    },
+    {
+        id: "karagol-gol-evi",
+        slug: "karagol-gol-kenari-konaklama",
+        region: "savsat",
+        title: "Karagöl Göl Kenarı Konak",
+        description:
+            "Karagöl kıyısında ahşap konak, göl manzaralı teras ve organik köy kahvaltısı.",
+        image:
+            "https://lh3.googleusercontent.com/aida-public/AB6AXuABcG7HXSK4Wqdh6vGCN0JbqPpGnVN3-UfonwH3sVu8sILhwFzuKn1aQAPBjI4Yv_0QXi--1wnzSlC3XSpfHAJ_CRJOxgoSFX_tslUCu3kRhYSlIUTWWxyckCPRLqgWU85BScL7hiVa4FtwU-Zi66p0i7y86-XuYShBRZ7FmMbw2_w5_UB_CF1IX4CS9bKjSefRMHzCXu4Br63ETsTm7Eh6MZP-JgwEYfjg6VOcEmAPfE_pIg4k4rjORg",
+        location: "Karagöl, Şavşat",
+        breakfastIncluded: true,
+        breakfastNote: "Organik Köy Kahvaltısı Dahil",
+        rating: "4.92",
+        reviews: "58",
+        pricePerNight: "₺4.100",
+        capacity: "2-4 Kişilik",
+        amenities: [
+            { icon: "water", label: "Göl Manzarası" },
+            { icon: "deck", label: "Teras" },
+            { icon: "wifi", label: "WiFi" },
+        ],
+    },
+];
+
+/* Bungalov sayfa boyutu */
+export const BUNGALOWS_PER_PAGE = 6;
+
+/* Sıralama seçenekleri (bungalov) */
+export const BUNGALOW_SORT_OPTIONS = [
+    { value: "recommended", label: "En Çok Tercih Edilen" },
+    { value: "price-asc", label: "Önce En Düşük Fiyat" },
+    { value: "price-desc", label: "Önce En Yüksek Fiyat" },
+    { value: "rating", label: "Misafir Puanı (5.0 Üzeri)" },
+];
