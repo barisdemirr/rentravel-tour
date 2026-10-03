@@ -1,0 +1,51 @@
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Rentravel.Domain.Entities;
+
+namespace Rentravel.Infrastructure.Database;
+
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+{
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        // Soft delete: DeletedAt dolu olan kayıtlar tüm sorgulardan otomatik elenir
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes()
+                     .Where(t => typeof(BaseEntity).IsAssignableFrom(t.ClrType)))
+        {
+            var param = Expression.Parameter(entityType.ClrType, "e");
+            var deletedAt = Expression.Property(param, nameof(BaseEntity.DeletedAt));
+            var body = Expression.Equal(deletedAt, Expression.Constant(null, typeof(DateTime?)));
+            entityType.SetQueryFilter(Expression.Lambda(body, param));
+        }
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.CreatedAt = now;
+                    break;
+
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = now;
+                    break;
+
+                case EntityState.Deleted:
+                    // Hard delete yok: silme isteğini soft delete'e çevir
+                    entry.State = EntityState.Modified;
+                    entry.Entity.DeletedAt = now;
+                    entry.Entity.IsActive = false;
+                    break;
+            }
+        }
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
+}
