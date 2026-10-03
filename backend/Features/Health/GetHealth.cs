@@ -14,6 +14,6 @@ public static class GetHealth
     public class Endpoint : IEndpoint
     {
         public void MapEndpoint(IEndpointRouteBuilder app) =>
-            app.MapGet("/health", (Handler handler) => Results.Ok(handler.Handle()));
+            app.MapGet("/health", (Handler handler) => Results.Ok(handler.Handle())).AllowAnonymous();
     }
 }

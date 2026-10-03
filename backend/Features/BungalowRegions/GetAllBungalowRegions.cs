@@ -26,6 +26,7 @@ public static class GetAllBungalowRegions
         public void MapEndpoint(IEndpointRouteBuilder app) =>
             app.MapGet("/api/bungalow-regions",
                 async (Handler handler, CancellationToken ct) =>
-                    Results.Ok(await handler.Handle(ct)));
+                    Results.Ok(await handler.Handle(ct)))
+                    .AllowAnonymous();
     }
 }

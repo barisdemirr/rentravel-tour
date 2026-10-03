@@ -26,6 +26,7 @@ public static class GetAllVehicleSegments
         public void MapEndpoint(IEndpointRouteBuilder app) =>
             app.MapGet("/api/vehicle-segments",
                 async (Handler handler, CancellationToken ct) =>
-                    Results.Ok(await handler.Handle(ct)));
+                    Results.Ok(await handler.Handle(ct)))
+                    .AllowAnonymous();
     }
 }

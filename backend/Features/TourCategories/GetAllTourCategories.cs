@@ -48,6 +48,6 @@ public static class GetAllTourCategories
                     }
 
                     return Results.Ok(await handler.Handle(parsed, ct));
-                });
+                }).AllowAnonymous();
     }
 }

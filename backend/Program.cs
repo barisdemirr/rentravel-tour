@@ -1,50 +1,71 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Rentravel.Domain.Entities;
 using Rentravel.Infrastructure.Database;
+using Rentravel.Infrastructure.Services;
 using Rentravel.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
-// CORS (BURASI)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:3000")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
-
-// Features
-builder.Services.AddFeatures(typeof(Program).Assembly);
-
-// JSON enum converter
 builder.Services.ConfigureHttpJsonOptions(options =>
-{
-    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-// OpenAPI
+// ---- Auth ----
+var jwt = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+if (jwt is null || string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
+    throw new InvalidOperationException(
+        "Jwt:Key tanımlı değil veya 32 karakterden kısa. appsettings.Development.json / appsettings.Production.json içine ekle.");
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
+builder.Services.AddSingleton<TokenService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwt.Audience,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
+            ClockSkew = TimeSpan.FromMinutes(1),
+            NameClaimType = "name"
+        };
+    });
+
+// Varsayılan: her endpoint giriş yapmış kullanıcı ister. Public olanlar .AllowAnonymous() ile açılır.
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
+builder.Services.AddFeatures(typeof(Program).Assembly);
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// await AdminSeeder.SeedAsync(app.Services, app.Configuration);
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().AllowAnonymous();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-// CORS middleware (ÖNEMLİ)
-app.UseCors("Frontend");
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapFeatures();
 
