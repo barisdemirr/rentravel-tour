@@ -18,6 +18,12 @@ public class Validator
         return this;
     }
 
+    public Validator Must(string field, bool condition, string message)
+    {
+        if (!condition) Add(field, message);
+        return this;
+    }
+
     public Result ToFailure() => Result.Fail(BuildError());
     public Result<T> ToFailure<T>() => Result<T>.Fail(BuildError());
 
