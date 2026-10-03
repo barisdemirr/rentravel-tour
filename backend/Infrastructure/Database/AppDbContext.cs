@@ -8,8 +8,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
 
     public DbSet<VehicleSegment> VehicleSegments => Set<VehicleSegment>();
+    public DbSet<BungalowRegion> BungalowRegions => Set<BungalowRegion>();
+    public DbSet<TourCategory> TourCategories => Set<TourCategory>();
+    public DbSet<VehicleExtra> VehicleExtras => Set<VehicleExtra>();
+    public DbSet<AccommodationType> AccommodationTypes => Set<AccommodationType>();
 
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
