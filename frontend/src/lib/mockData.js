@@ -1688,3 +1688,159 @@ export function getDailyTourDetail(slug) {
 
     return { tour, ...detail, booking: { ...detail.booking, sessions } };
 }
+
+
+
+/* ─────────────────────────────────────────────
+   KONAKLAMALI KÜLTÜR TUR DETAY VERİLERİ
+   ───────────────────────────────────────────── */
+
+/* Jenerik detay üretici */
+function buildGenericCultureDetail(tour) {
+    const basePrice = parseInt(String(tour.price).replace(/\D/g, ""), 10) || 5900;
+
+    return {
+        badges: [
+            { icon: "star", label: `${tour.rating} (${tour.reviews} Katılımcı)`, tone: "primary" },
+            { icon: "verified", label: "TÜRSAB A Grubu Onaylı", tone: "neutral" },
+            { icon: "hotel", label: "Konaklama Dahil", tone: "neutral" },
+        ],
+
+        routePills: [
+            { label: tour.transport || "Trabzon", highlight: true, icon: "location_on" },
+            { label: tour.accommodation || "Otel", highlight: false },
+            { label: tour.nights || "Konaklama", highlight: false },
+        ],
+
+        gallery: [
+            {
+                src: tour.image,
+                title: tour.title,
+                subtitle: tour.description?.slice(0, 80) || "",
+                tone: "primary",
+            },
+        ],
+
+        quickSpecs: [
+            { icon: "schedule", label: "Tur Süresi", value: tour.duration || "Çok Günlü" },
+            { icon: "hotel", label: "Konaklama", value: tour.accommodation || "Otel" },
+            { icon: "nights_stay", label: "Konaklama Süresi", value: tour.nights || "-" },
+            { icon: "translate", label: "Canlı Rehberlik", value: "TR / EN / AR" },
+            { icon: "published_with_changes", label: "İade Garantisi", value: "7 Gün Ücretsiz", tone: "emerald" },
+        ],
+
+        editorial: {
+            eyebrow: "Kültür & Konfor Buluşması",
+            eyebrowIcon: "castle",
+            title: tour.title,
+            paragraphs: [
+                tour.description || "Karadeniz ve Anadolu'nun kültürel mirasını konforlu bir konaklama ile keşfedin.",
+                "Uzman rehberlerimiz, özenle seçilmiş otel konaklamalarımız ve TÜRSAB güvencemizle güvenli ve konforlu bir seyahat deneyimi sizi bekliyor.",
+            ],
+            highlights: [
+                "Otel Konaklaması Dahil",
+                "Profesyonel Rehberlik",
+                "Sigorta Dahil",
+                "Butik Gruplar",
+            ],
+        },
+
+        itinerary: [
+            {
+                icon: "departure_board",
+                time: "1. Gün",
+                title: "Trabzon Merkez Hareket",
+                description: "Belirlenen kalkış noktasından hareket ve rotaya doğru yola çıkış.",
+            },
+            {
+                icon: "explore",
+                time: "Program",
+                title: tour.title,
+                description: tour.description || "Rota boyunca keşif, konaklama ve kültürel geziler.",
+            },
+            {
+                icon: "flag",
+                time: "Son Gün",
+                title: "Trabzon'a Dönüş",
+                description: "Güzel anılarla kalkış noktasına dönüş.",
+                final: true,
+            },
+        ],
+
+        inclusions: {
+            included: [
+                "Klimalı VIP tur aracı ile ulaşım",
+                "Otel konaklaması",
+                "T.C. Kültür ve Turizm Bakanlığı kokartlı profesyonel rehberlik",
+                "TÜRSAB zorunlu seyahat kaza sigortası",
+                "Araç içi soğuk su ve ikram paketleri",
+            ],
+            excluded: [
+                "Öğle ve akşam yemekleri (serbest)",
+                "Müze ve ören yeri giriş ücretleri",
+                "Kişisel alışverişler ve hediyelik eşyalar",
+                "Ekstra aktiviteler",
+            ],
+        },
+
+        travelNotes: [
+            { icon: "luggage", text: "Çok günlük bir tur olduğu için rahat kıyafetler ve bir valiz hazırlamanız önerilir." },
+            { icon: "hiking", text: "Yürüyüş planlarınız için rahat ayakkabılar yanınızda olsun." },
+            { icon: "umbrella", text: "Karadeniz'in değişken havası sebebiyle yanınızda hafif bir yağmurluk bulundurun." },
+            { icon: "credit_card", text: "Müzekart sahibi misafirlerimizin kartlarını yanlarında bulundurmaları rica olunur." },
+        ],
+
+        booking: {
+            basePrice,
+            childDiscountPercent: 25,
+            seatsTotal: 20,
+        },
+
+        agency: {
+            name: "Rentravel Seyahat Acentası",
+            tursabNo: "15869",
+            supportNote: "7/24 Kesintisiz Karadeniz Destek Hattı",
+        },
+    };
+}
+
+/* Kültür turu jenerik seans üretici — gün bazlı */
+function buildCultureSessions(basePrice, seats = 20, days = 4) {
+    const base = new Date();
+    base.setDate(base.getDate() + 7);
+    const sessions = [];
+    for (let i = 0; i < days; i++) {
+        const d = new Date(base);
+        d.setDate(d.getDate() + i * 7); // haftalık kalkışlar
+        const dayNum = d.toLocaleDateString("tr-TR", { day: "2-digit" });
+        const monthName = d.toLocaleDateString("tr-TR", { month: "long" });
+        const year = d.getFullYear();
+        const leftSeats = Math.max(4, seats - i * 3);
+        sessions.push({
+            id: `cs-${d.toISOString().slice(0, 10)}`,
+            date: `${dayNum} ${monthName} ${year}`,
+            dateISO: d.toISOString().slice(0, 10),
+            price: basePrice,
+            seats: leftSeats,
+            isLastSeats: leftSeats <= 6,
+        });
+    }
+    return sessions;
+}
+
+export function getCultureTourDetail(slug) {
+    const tour = cultureTours.find((t) => t.slug === slug);
+    if (!tour) return null;
+
+    const detail = buildGenericCultureDetail(tour);
+
+    const sessions =
+        detail.booking?.sessions ||
+        buildCultureSessions(
+            detail.booking?.basePrice || 5900,
+            detail.booking?.seatsTotal || 20,
+            4
+        );
+
+    return { tour, ...detail, booking: { ...detail.booking, sessions } };
+}
