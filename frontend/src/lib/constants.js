@@ -33,5 +33,5 @@ export const waHref = (message) => {
 
 /* Splash screen süresi (ms) */
 export const SPLASH_DURATION = 1800;
-/* Splash'in localStorage key'i — kullanıcı bir kez gördüyse aynı session'da tekrar gösterme */
+
 export const SPLASH_STORAGE_KEY = "rentravel-splash-seen";
