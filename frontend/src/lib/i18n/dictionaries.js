@@ -2,6 +2,13 @@
 
 export const dictionaries = {
     TR: {
+        meta: {
+            title: "Rentravel Turizm | Premium Rotalar ve VIP Transfer",
+            description: "TÜRSAB A Grubu {tursabNo} lisanslı Rentravel ile Karadeniz, Kapadokya, Batum turları, yayla konaklamaları ve VIP şoförlü lüks transfer hizmetleri.",
+        },
+        common: {
+            loading: "Yükleniyor",
+        },
         nav: {
             home: "Anasayfa",
             tours: "Tur Rezervasyonu",
@@ -192,6 +199,13 @@ export const dictionaries = {
     },
 
     EN: {
+        meta: {
+            title: "Rentravel Tourism | Premium Routes and VIP Transfer",
+            description: "With Rentravel, a TÜRSAB Group A licensed agency (No. {tursabNo}): Black Sea, Cappadocia and Batumi tours, plateau stays and luxury chauffeured VIP transfers.",
+        },
+        common: {
+            loading: "Loading",
+        },
         nav: {
             home: "Home",
             tours: "Tour Booking",
@@ -327,6 +341,13 @@ export const dictionaries = {
     },
 
     AR: {
+        meta: {
+            title: "Rentravel للسياحة | مسارات مميزة ونقل VIP",
+            description: "مع Rentravel، وكالة مرخصة من TÜRSAB فئة A برقم {tursabNo}: جولات البحر الأسود وكبادوكيا وباتومي، وإقامات الهضاب وخدمات النقل الفاخر VIP مع سائق.",
+        },
+        common: {
+            loading: "جارٍ التحميل",
+        },
         nav: {
             home: "الرئيسية",
             tours: "حجز الجولات",
