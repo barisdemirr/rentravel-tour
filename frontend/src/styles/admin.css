@@ -1,0 +1,22 @@
+/* Admin paneli teması: kırmızı + beyaz, site renkleriyle uyumlu */
+.admin-root {
+    --ad-bg: #f6f7f9;
+    --ad-surface: #ffffff;
+    --ad-line: #e6e8ec;
+    --ad-text: #14161a;
+    --ad-muted: #6b7280;
+    --ad-brand: #d90429;
+    --ad-brand-dark: #bb0026;
+    --ad-brand-soft: #fdecef;
+    --ad-sidebar: #14161a;
+    --ad-sidebar-muted: #9aa1ad;
+
+    background: var(--ad-bg);
+    color: var(--ad-text);
+    min-height: 100dvh;
+    letter-spacing: 0;
+}
+
+.admin-root ::selection {
+    background: var(--ad-brand-soft);
+}
