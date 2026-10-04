@@ -14,6 +14,10 @@ public static class DeleteAccommodationType
             if (type is null)
                 return Result.Fail(Error.NotFound("Konaklama tipi bulunamadı."));
 
+            if (await db.CultureTourAccommodationPrices.AnyAsync(x => x.AccommodationTypeId == id, ct))
+                return Result.Fail(Error.Conflict(
+                    "Bu konaklama tipi bir veya daha fazla kültür turunun fiyatında kullanılıyor, silinemez."));
+
             db.AccommodationTypes.Remove(type); // soft delete'e çevrilir
             await db.SaveChangesAsync(ct);
 
