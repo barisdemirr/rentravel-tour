@@ -269,7 +269,7 @@ export default function PriceRulesClient({ groups, ownerType, ownerId, ownerLabe
 
                 <Field
                     label="Öncelik"
-                    hint="Çakışmada yüksek kazanır"
+                    hint="Çakışmada yüksek kazanır, 0 => en yüksek öncelik"
                     error={fieldError("priority")}
                 >
                     <NumberInput
