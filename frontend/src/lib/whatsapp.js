@@ -19,7 +19,7 @@ function compose(intro, rows, locale) {
     return [intro, "", ...rows, row("Dil", LANG_NAMES[locale])].filter((line) => line !== null).join("\n");
 }
 
-export function carMessage({ vehicleName, pickupDate, pickupTime, returnDate, returnTime, days, total, currency, locale }) {
+export function carMessage({ vehicleName, pickupDate, pickupTime, returnDate, returnTime, days, extras, total, currency, locale }) {
     return compose(
         "Merhaba, araç kiralama talebim var.",
         [
@@ -27,7 +27,27 @@ export function carMessage({ vehicleName, pickupDate, pickupTime, returnDate, re
             row("Alış", pickupDate ? `${dmy(pickupDate)} — ${pickupTime}` : null),
             row("Teslim", returnDate ? `${dmy(returnDate)} — ${returnTime}` : null),
             row("Süre", days ? `${days} gün` : null),
+            row("Ekstralar", extras?.length ? extras.join(", ") : null),
             row("Toplam", money(total, currency)),
+        ],
+        locale
+    );
+}
+
+export function corporateMessage({ company, contactName, phone, email, startDate, endDate, months, vehicleType, quantity, notes, locale }) {
+    return compose(
+        "Merhaba, kurumsal aylık araç kiralama talebim var.",
+        [
+            row("Firma", company),
+            row("Yetkili", contactName),
+            row("Telefon", phone),
+            row("E-posta", email),
+            row("Kiralama Başlangıcı", dmy(startDate)),
+            row("Kiralama Bitişi", dmy(endDate)),
+            row("Süre", months ? `${months} ay` : null),
+            row("Araç Tipi", vehicleType),
+            row("Adet", quantity),
+            row("Not", notes),
         ],
         locale
     );
