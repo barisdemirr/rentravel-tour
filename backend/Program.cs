@@ -34,6 +34,7 @@ builder.Services.AddSingleton<HtmlCleaner>();
 
 builder.Services.AddScoped<MediaItemResolver>();
 builder.Services.AddScoped<MediaUsageChecker>();
+builder.Services.AddScoped<PriceOwnerChecker>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
