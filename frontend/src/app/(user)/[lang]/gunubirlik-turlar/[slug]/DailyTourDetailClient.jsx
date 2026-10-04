@@ -13,6 +13,15 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
 import { dailyTourMessage } from "@/lib/whatsapp";
 import { quoteDailyTour } from "@/services";
+import {
+    Card,
+    Editorial,
+    GuestCounter,
+    Inclusions,
+    Itinerary,
+    QuickSpecs,
+    TravelNotes,
+} from "@/components/sections/TourDetailBlocks";
 
 const MAX_ADULTS = 50;
 const MAX_CHILDREN = 10;
@@ -424,36 +433,7 @@ export default function DailyTourDetailClient({ tour, sessions = [] }) {
                 <ImageGallery images={images} title={title} />
 
                 {/* Hızlı bilgiler */}
-                {tour.quickSpecs?.length > 0 && (
-                    <div className="mt-4 grid grid-cols-2 gap-2 rounded-2xl bg-surface-white p-3 shadow-sm sm:gap-3 sm:p-4 md:grid-cols-5">
-                        {tour.quickSpecs.map((s, i) => {
-                            const emerald = s.tone === "emerald";
-                            return (
-                                <div key={i} className="flex min-w-0 items-center gap-2.5 rounded-xl p-1.5 sm:p-2">
-                                    <span
-                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11 ${emerald
-                                            ? "bg-emerald-500/10 text-emerald-600"
-                                            : "bg-crimson-vivid/10 text-crimson-vivid"
-                                            }`}
-                                    >
-                                        <Icon name={s.icon} className="text-[20px] sm:text-[22px]" />
-                                    </span>
-                                    <div className="min-w-0">
-                                        <span className="block truncate font-label-uppercase text-label-uppercase text-secondary">
-                                            {localized(s.label, locale)}
-                                        </span>
-                                        <span
-                                            className={`block truncate font-label-md text-label-md font-bold sm:font-headline-sm sm:text-headline-sm ${emerald ? "text-emerald-600" : "text-charcoal-dark"
-                                                }`}
-                                        >
-                                            {localized(s.sub, locale)}
-                                        </span>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                )}
+                <QuickSpecs specs={tour.quickSpecs} />
 
                 {/* İçerik + panel: mobilde panel önce, masaüstünde sağda sabit */}
                 <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-x-8">
@@ -472,6 +452,10 @@ export default function DailyTourDetailClient({ tour, sessions = [] }) {
                                     dangerouslySetInnerHTML={{ __html: longDescription }}
                                 />
                             </Card>
+                        )}
+
+                        {tour.itinerary?.length > 0 && (
+                            <Itinerary items={tour.itinerary} eyebrow={d.itineraryEyebrow} title={d.itineraryTitle} />
                         )}
 
                         {tour.editorial && <Editorial editorial={tour.editorial} />}
