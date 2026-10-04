@@ -15,6 +15,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<DailyTour> DailyTours => Set<DailyTour>();
+    public DbSet<CultureTour> CultureTours => Set<CultureTour>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
