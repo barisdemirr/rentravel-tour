@@ -1,27 +1,33 @@
-import { getBungalowRegions } from "@/services/bungalowRegions";
+import { settle } from "@/lib/api";
+import { isLocale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/getDictionary";
+import { buildAlternates } from "@/lib/seo";
+import { getBungalowRegions, getBungalows } from "@/services";
 import BungalovClient from "./BungalovClient";
 
-export const metadata = {
-    title: "Bungalov Konaklama | Rentravel Turizm",
-    description:
-        "Doğu Karadeniz'in en seçkin lüks bungalov ve dağ evleri. Fırtına Vadisi, Ayder, Pokut, Şavşat ve daha fazlası.",
-};
+export async function generateMetadata({ params }) {
+    const { lang } = await params;
+    if (!isLocale(lang)) return {};
 
-export default async function BungalovKonaklamaPage() {
-    let regions = [];
-    let errorMessage = null;
+    const l = getDictionary(lang).bungalowList;
+    return {
+        title: l.metaTitle,
+        description: l.metaDescription,
+        alternates: buildAlternates("/bungalov-konaklama", lang),
+    };
+}
 
-    try {
-        regions = await getBungalowRegions();
-    } catch (err) {
-        errorMessage = err?.title || "Bölge verisi alınamadı.";
-        console.error("[bungalov-konaklama] Bölge hatası:", err);
-    }
+export default async function BungalowListPage() {
+    const [bungalows, regions] = await Promise.all([
+        settle(getBungalows(), []),
+        settle(getBungalowRegions(), []),
+    ]);
 
     return (
         <BungalovClient
-            initialRegions={regions}
-            initialError={errorMessage}
+            bungalows={bungalows.data}
+            regions={regions.data}
+            failed={Boolean(bungalows.error)}
         />
     );
 }
