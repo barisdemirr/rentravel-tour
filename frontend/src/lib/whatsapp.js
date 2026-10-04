@@ -77,3 +77,9 @@ export function bungalowMessage({ bungalowTitle, checkIn, checkOut, nights, adul
         locale
     );
 }
+
+
+/** Kartlardaki "Bilgi Al" butonu için: infoMessage({ subject: "Mercedes Vito aracı", locale }) */
+export function infoMessage({ subject, locale }) {
+    return compose(`Merhaba, ${subject} hakkında bilgi almak istiyorum.`, [], locale);
+}

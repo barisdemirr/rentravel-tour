@@ -11,7 +11,7 @@ export default function SafeImage({
 }) {
     const [failed, setFailed] = useState(false);
 
-    if (failed) {
+    if (failed || !src) {
         return (
             <div
                 aria-hidden="true"
