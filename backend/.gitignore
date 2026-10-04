@@ -89,3 +89,8 @@ secrets.json
 Thumbs.db
 ehthumbs.db
 desktop.ini
+
+
+
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
