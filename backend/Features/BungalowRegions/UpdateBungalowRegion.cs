@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Rentravel.Domain.ValueObjects;
 using Rentravel.Infrastructure.Database;
 using Rentravel.Shared;
+using Rentravel.Infrastructure.Services;
 
 namespace Rentravel.Features.BungalowRegions;
 
@@ -11,7 +12,7 @@ public static class UpdateBungalowRegion
         string Key, LocalizedText ShortLabel, LocalizedText FullLabel,
         MediaItem? Thumbnail, int OrderIndex, bool IsActive);
 
-    public class Handler(AppDbContext db)
+    public class Handler(AppDbContext db, MediaItemResolver media)
     {
         public async Task<Result<BungalowRegionDto>> Handle(Guid id, Command cmd, CancellationToken ct)
         {
@@ -26,6 +27,9 @@ public static class UpdateBungalowRegion
                 .Required("shortLabel.tr", cmd.ShortLabel?.Tr)
                 .Required("fullLabel.tr", cmd.FullLabel?.Tr);
 
+
+            var thumbnail = await media.ResolveAsync(cmd.Thumbnail, "thumbnail", validator, ct);
+
             if (!validator.IsValid) return validator.ToFailure<BungalowRegionDto>();
 
             if (await db.BungalowRegions.AnyAsync(x => x.Key == key && x.Id != id, ct))
@@ -34,7 +38,7 @@ public static class UpdateBungalowRegion
             region.Key = key;
             region.ShortLabel = cmd.ShortLabel!;
             region.FullLabel = cmd.FullLabel!;
-            region.Thumbnail = cmd.Thumbnail;
+            region.Thumbnail = thumbnail;
             region.OrderIndex = cmd.OrderIndex;
             region.IsActive = cmd.IsActive;
 

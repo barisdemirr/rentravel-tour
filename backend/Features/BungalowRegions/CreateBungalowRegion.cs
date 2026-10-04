@@ -3,6 +3,7 @@ using Rentravel.Domain.Entities;
 using Rentravel.Domain.ValueObjects;
 using Rentravel.Infrastructure.Database;
 using Rentravel.Shared;
+using Rentravel.Infrastructure.Services;
 
 namespace Rentravel.Features.BungalowRegions;
 
@@ -10,7 +11,7 @@ public static class CreateBungalowRegion
 {
     public record Command(string Key, LocalizedText ShortLabel, LocalizedText FullLabel, MediaItem? Thumbnail, int OrderIndex);
 
-    public class Handler(AppDbContext db)
+    public class Handler(AppDbContext db, MediaItemResolver media)
     {
         public async Task<Result<BungalowRegionDto>> Handle(Command cmd, CancellationToken ct)
         {
@@ -20,6 +21,8 @@ public static class CreateBungalowRegion
                 .Required("key", key).MaxLength("key", key, 50)
                 .Required("shortLabel.tr", cmd.ShortLabel?.Tr)
                 .Required("fullLabel.tr", cmd.FullLabel?.Tr);
+
+            var thumbnail = await media.ResolveAsync(cmd.Thumbnail, "thumbnail", validator, ct);
 
             if (!validator.IsValid) return validator.ToFailure<BungalowRegionDto>();
 
@@ -31,7 +34,7 @@ public static class CreateBungalowRegion
                 Key = key,
                 ShortLabel = cmd.ShortLabel!,
                 FullLabel = cmd.FullLabel!,
-                Thumbnail = cmd.Thumbnail,
+                Thumbnail = thumbnail,
                 OrderIndex = cmd.OrderIndex
             };
 
