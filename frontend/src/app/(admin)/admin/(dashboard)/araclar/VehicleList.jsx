@@ -192,7 +192,7 @@ export default function VehicleList({ rows, failed }) {
                             </EmptyState>
                         }
                         actions={(row) => [
-                            { label: "Fiyatlar", icon: "payments", href: `/admin/fiyat-kurallari?owner=Vehicle&id=${row.id}` },
+                            { label: "Fiyatlar", icon: "payments", href: `/admin/fiyat-kurallari?ownerType=Vehicle&ownerId=${row.id}` },
                             { label: "Düzenle", icon: "edit", href: `/admin/araclar/${row.id}` },
                             { label: "Sil", icon: "delete", danger: true, onClick: () => setTarget(row) },
                         ]}

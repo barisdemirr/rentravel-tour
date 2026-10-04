@@ -211,10 +211,19 @@ export default function TourList({ variant, rows, failed }) {
                                     {
                                         label: "Fiyatlar",
                                         icon: "payments",
-                                        href: `/admin/fiyat-kurallari?owner=${owner}&id=${row.id}`,
+                                        href: `/admin/fiyat-kurallari?ownerType=DailyTour&ownerId=${row.id}`,
                                     },
                                 ]),
-                            { label: "Seferler", icon: "event", href: `/admin/tur-seferleri?owner=${owner}&id=${row.id}` },
+                            {
+                                label: "Yaş fiyatları",
+                                icon: "child_care",
+                                href: `/admin/yas-fiyatlari?ownerType=${owner}&ownerId=${row.id}`,
+                            },
+                            {
+                                label: "Seferler",
+                                icon: "event",
+                                href: `/admin/tur-seferleri?tourType=${isCulture ? "Culture" : "Daily"}&tourId=${row.id}`,
+                            },
                             { label: "Düzenle", icon: "edit", href: `${base}/${row.id}` },
                             { label: "Sil", icon: "delete", danger: true, onClick: () => setTarget(row) },
                         ]}
