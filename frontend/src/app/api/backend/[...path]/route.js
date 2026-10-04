@@ -28,17 +28,28 @@ async function forward(request, context) {
 
     const hasBody = !["GET", "HEAD"].includes(request.method);
 
+    // Gövde tamponlanır: akış olarak geçirmek bazı Node sürümlerinde isteği kesiyor.
+    // Dosya yüklemede de sorun değil, sınır 10 MB.
+    const body = hasBody ? await request.arrayBuffer() : undefined;
+
     let response;
     try {
         response = await fetch(`${API}/api/${target}${url.search}`, {
             method: request.method,
             headers,
-            body: hasBody ? request.body : undefined,
-            duplex: hasBody ? "half" : undefined, // gövdeyi akış olarak geçirmek için gerekli
+            body: body && body.byteLength > 0 ? body : undefined,
             cache: "no-store",
         });
-    } catch {
+    } catch (error) {
+        console.error("[proxy] bağlantı hatası:", target, error?.cause?.code || error?.message);
         return Response.json({ title: "Sunucuya ulaşılamadı." }, { status: 503 });
+    }
+
+    // Hata durumunda sebebi terminale yaz
+    if (!response.ok) {
+        const clone = response.clone();
+        const detail = await clone.text().catch(() => "");
+        console.error("[proxy]", response.status, request.method, target, detail.slice(0, 400));
     }
 
     const outHeaders = new Headers();
