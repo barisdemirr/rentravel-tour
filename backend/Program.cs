@@ -29,6 +29,7 @@ if (jwt is null || string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton<ImageService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,6 +88,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddFeatures(typeof(Program).Assembly);
 builder.Services.AddOpenApi();
 
+
 var app = builder.Build();
 
 // await AdminSeeder.SeedAsync(app.Services, app.Configuration);
@@ -97,7 +99,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        if (context.Context.Request.Path.StartsWithSegments("/uploads"))
+            context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
+    }
+});
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
