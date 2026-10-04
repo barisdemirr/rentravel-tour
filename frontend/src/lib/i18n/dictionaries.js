@@ -9,6 +9,28 @@ export const dictionaries = {
         common: {
             loading: "Yükleniyor",
         },
+        booking: {
+            ariaLabel: "Rezervasyon",
+            pickupDate: "Alış Tarihi",
+            pickupTime: "Alış Saati",
+            returnDate: "Teslim Tarihi",
+            returnTime: "Teslim Saati",
+            tour: "Tur",
+            date: "Tarih",
+            tourDate: "Tur Tarihi",
+            adults: "Yetişkin Sayısı",
+            accommodation: "Konaklama Tipi",
+            checkIn: "Giriş Tarihi",
+            checkOut: "Çıkış Tarihi",
+            childCount: "Çocuk Sayısı",
+            children: "Çocuklar (Yaşları)",
+            age: "Yaş",
+            addChild: "Çocuk Ekle",
+            removeChild: "Çocuğu sil",
+            loading: "Yükleniyor...",
+            noTours: "Şu an listelenecek tur yok",
+            noAccommodation: "Bu tur için konaklama seçeneği yok",
+        },
         nav: {
             home: "Anasayfa",
             tours: "Tur Rezervasyonu",
@@ -27,6 +49,8 @@ export const dictionaries = {
             cultureTours: "Konaklamalı Kültür Turları",
         },
         hero: {
+            prev: "Önceki slayt",
+            next: "Sonraki slayt",
             slides: [
                 {
                     badge: "Özel Karadeniz ve Doğa Rotaları",
@@ -162,7 +186,6 @@ export const dictionaries = {
             vipConcierge: "VIP Concierge",
             rights: "Tüm hakları saklıdır.",
             paymentMethods: "Güvenli Ödeme Yöntemleri",
-            tursabEyebrow: "Resmi Doğrulama",
             legal: {
                 privacy: "Gizlilik Politikası",
                 terms: "Kullanım Koşulları",
@@ -206,6 +229,28 @@ export const dictionaries = {
         common: {
             loading: "Loading",
         },
+        booking: {
+            ariaLabel: "Booking",
+            pickupDate: "Pick-up Date",
+            pickupTime: "Pick-up Time",
+            returnDate: "Return Date",
+            returnTime: "Return Time",
+            tour: "Tour",
+            date: "Date",
+            tourDate: "Tour Date",
+            adults: "Adults",
+            accommodation: "Accommodation Type",
+            checkIn: "Check-in Date",
+            checkOut: "Check-out Date",
+            childCount: "Children",
+            children: "Children (Ages)",
+            age: "Age",
+            addChild: "Add Child",
+            removeChild: "Remove child",
+            loading: "Loading...",
+            noTours: "No tours available right now",
+            noAccommodation: "No accommodation options for this tour",
+        },
         nav: {
             home: "Home",
             tours: "Tour Booking",
@@ -224,6 +269,8 @@ export const dictionaries = {
             cultureTours: "Cultural Stays",
         },
         hero: {
+            prev: "Previous slide",
+            next: "Next slide",
             slides: [
                 { badge: "Private Black Sea & Nature Routes", line1: "Experience the Magic", accent: "at the Peak", rest: "of the Black Sea", text: "Tailored, comfortable and unforgettable journeys with Rentravel's guarantee and TÜRSAB license No. {tursabNo}.", cta: "Explore Now", alt: "VIP Booking Line" },
                 { badge: "Kaçkar Mountains Cloud Sea Discovery", line1: "Privileged Comfort", accent: "on Plateau", rest: "Routes", text: "Discover the Kaçkars with private 4x4 vehicles, professional guides and route details reserved for our distinguished guests.", cta: "View Plateau Tours", alt: "WhatsApp VIP Advisor", altFallback: "Call Our Advisor" },
@@ -307,7 +354,6 @@ export const dictionaries = {
             vipConcierge: "VIP Concierge",
             rights: "All rights reserved.",
             paymentMethods: "Secure Payment Methods",
-            tursabEyebrow: "Official Verification",
             legal: { privacy: "Privacy Policy", terms: "Terms of Use", kvkk: "KVKK Disclosure" },
         },
         tabs: {
@@ -337,7 +383,6 @@ export const dictionaries = {
             title: "Featured Bungalows",
             subtitle: "Luxury bungalows and mountain houses in the most special spots of the Black Sea.",
         },
-
     },
 
     AR: {
@@ -347,6 +392,28 @@ export const dictionaries = {
         },
         common: {
             loading: "جارٍ التحميل",
+        },
+        booking: {
+            ariaLabel: "الحجز",
+            pickupDate: "تاريخ الاستلام",
+            pickupTime: "وقت الاستلام",
+            returnDate: "تاريخ التسليم",
+            returnTime: "وقت التسليم",
+            tour: "الجولة",
+            date: "التاريخ",
+            tourDate: "تاريخ الجولة",
+            adults: "عدد البالغين",
+            accommodation: "نوع الإقامة",
+            checkIn: "تاريخ الدخول",
+            checkOut: "تاريخ الخروج",
+            childCount: "عدد الأطفال",
+            children: "الأطفال (الأعمار)",
+            age: "العمر",
+            addChild: "إضافة طفل",
+            removeChild: "حذف الطفل",
+            loading: "جارٍ التحميل...",
+            noTours: "لا توجد جولات متاحة حاليًا",
+            noAccommodation: "لا توجد خيارات إقامة لهذه الجولة",
         },
         nav: {
             home: "الرئيسية",
@@ -366,6 +433,8 @@ export const dictionaries = {
             cultureTours: "جولات ثقافية مع إقامة",
         },
         hero: {
+            prev: "الشريحة السابقة",
+            next: "الشريحة التالية",
             slides: [
                 { badge: "مسارات خاصة للبحر الأسود والطبيعة", line1: "عش سحر", accent: "القمة", rest: "في البحر الأسود", text: "تجارب سفر مخصصة ومريحة ولا تُنسى بضمان Rentravel وترخيص TÜRSAB رقم {tursabNo}.", cta: "اكتشف الآن", alt: "خط حجز VIP" },
                 { badge: "اكتشاف بحر السحب في جبال كاتشكار", line1: "راحة", accent: "مميزة", rest: "في مسارات الهضاب", text: "اكتشف جبال كاتشكار بسيارات دفع رباعي خاصة ومرشدين محترفين وتفاصيل مسار مخصصة لضيوفنا المميزين.", cta: "استعرض جولات الهضاب", alt: "مستشار واتساب VIP", altFallback: "اتصل بمستشارنا" },
@@ -449,7 +518,6 @@ export const dictionaries = {
             vipConcierge: "كونسيرج VIP",
             rights: "جميع الحقوق محفوظة.",
             paymentMethods: "طرق دفع آمنة",
-            tursabEyebrow: "تحقق رسمي",
             legal: { privacy: "سياسة الخصوصية", terms: "شروط الاستخدام", kvkk: "إفصاح KVKK" },
         },
         tabs: {
