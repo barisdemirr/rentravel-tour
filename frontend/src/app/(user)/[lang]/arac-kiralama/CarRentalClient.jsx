@@ -689,7 +689,7 @@ function VehicleRow({ vehicle, quote, query }) {
                             <span className="h-8 w-28 animate-pulse rounded-lg bg-surface-variant" />
                         </div>
                     ) : (
-                        <div className="font-price-lg text-price-lg font-extrabold text-crimson-vivid">
+                        <div className="font-price-lg text-price-2xl text-2xl md:text-3xl font-extrabold text-crimson-vivid">
                             {ok ? money(ok.rentalTotal) : money(vehicle.defaultDailyPrice)}
                             {!ok && <span className="ms-1 font-label-md text-label-md font-normal text-secondary">/ {c.row.perDay}</span>}
                         </div>
