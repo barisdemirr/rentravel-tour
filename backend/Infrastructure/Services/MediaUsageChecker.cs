@@ -44,8 +44,13 @@ public class MediaUsageChecker(AppDbContext db)
             .Where(x => Uses(mediaId, x.Image, x.Gallery, x.OgImage))
             .Select(x => $"Kültür turu: {x.Slug}"));
 
-        // Sonraki: Bungalows (aşağıda eklenecek), StaticPages.
-        // Zengin metin içine gömülü görseller (LongDescription, StaticPages) URL'den taranacak.
+        var bungalows = await db.Bungalows.AsNoTracking()
+    .Select(x => new { x.Slug, x.Image, x.Gallery, x.OgImage, x.BreakfastCard })
+    .ToListAsync(ct);
+
+        usages.AddRange(bungalows
+            .Where(x => Uses(mediaId, x.Image, x.Gallery, x.OgImage) || x.BreakfastCard?.Image?.Id == mediaId)
+            .Select(x => $"Bungalov: {x.Slug}"));
 
         return usages;
     }

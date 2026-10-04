@@ -17,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<DailyTour> DailyTours => Set<DailyTour>();
     public DbSet<CultureTour> CultureTours => Set<CultureTour>();
+    public DbSet<Bungalow> Bungalows => Set<Bungalow>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
