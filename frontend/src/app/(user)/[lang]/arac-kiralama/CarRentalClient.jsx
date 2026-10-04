@@ -15,6 +15,8 @@ import { mediaAlt, mediaUrl } from "@/lib/media";
 import { TONES } from "@/lib/tones";
 import { corporateMessage } from "@/lib/whatsapp";
 import { quoteVehicle } from "@/services";
+import DateField from "@/components/ui/DateField";
+import TimeField from "@/components/ui/TimeField";
 
 /* Hero arka plan görseli */
 const HERO_BG =
@@ -122,7 +124,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
     return (
         <>
             {/* ─────────── HERO ─────────── */}
-            <section className="relative flex h-[340px] w-full items-center justify-center overflow-hidden bg-charcoal-dark md:h-[400px]">
+            <section className="relative flex min-h-[340px] w-full items-center justify-center overflow-hidden bg-charcoal-dark py-12 md:min-h-[400px]">
                 <div
                     className="absolute inset-0 scale-105 bg-cover bg-center opacity-45 transition-transform duration-1000 ease-out"
                     style={{ backgroundImage: `url('${HERO_BG}')` }}
@@ -161,8 +163,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
                             <FieldWrapper className="lg:col-span-3">
                                 <FieldLabel icon="calendar_today" text={c.bar.pickupDate} />
-                                <input
-                                    type="date"
+                                <DateField
                                     required
                                     value={pickupDate}
                                     min={todayISO()}
@@ -176,8 +177,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
 
                             <FieldWrapper className="lg:col-span-2">
                                 <FieldLabel icon="schedule" text={c.bar.pickupTime} />
-                                <input
-                                    type="time"
+                                <TimeField
                                     required
                                     value={pickupTime}
                                     onChange={(e) => setPickupTime(e.target.value)}
@@ -187,8 +187,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
 
                             <FieldWrapper className="lg:col-span-3">
                                 <FieldLabel icon="event_repeat" text={c.bar.returnDate} />
-                                <input
-                                    type="date"
+                                <DateField
                                     required
                                     value={returnDate}
                                     min={pickupDate || todayISO()}
@@ -199,8 +198,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
 
                             <FieldWrapper className="lg:col-span-2">
                                 <FieldLabel icon="schedule" text={c.bar.returnTime} />
-                                <input
-                                    type="time"
+                                <TimeField
                                     required
                                     value={returnTime}
                                     onChange={(e) => setReturnTime(e.target.value)}
@@ -496,7 +494,7 @@ function CorporateForm() {
                         <Icon name="calendar_today" className="text-[14px] text-crimson-vivid" />
                         {f.startDate}
                     </label>
-                    <input id="corp-start" required type="date" min={todayISO()} value={form.startDate} onChange={update("startDate")} className={fieldCls} />
+                    <DateField id="corp-start" required min={todayISO()} value={form.startDate} onChange={update("startDate")} className={fieldCls} />
                 </div>
 
                 <div>
@@ -504,7 +502,7 @@ function CorporateForm() {
                         <Icon name="event_repeat" className="text-[14px] text-crimson-vivid" />
                         {f.endDate} <span className="text-secondary/60">{f.optional}</span>
                     </label>
-                    <input id="corp-end" type="date" min={form.startDate || todayISO()} value={form.endDate} onChange={update("endDate")} className={fieldCls} />
+                    <DateField id="corp-end" min={form.startDate || todayISO()} value={form.endDate} onChange={update("endDate")} className={fieldCls} />
                 </div>
 
                 <div>
@@ -605,8 +603,8 @@ function SegmentPill({ active, onClick, icon, children }) {
             type="button"
             onClick={onClick}
             className={`shrink-0 rounded-full px-4 py-2.5 font-label-md text-label-md font-semibold transition-all ${active
-                    ? "bg-primary-container text-on-primary shadow-sm"
-                    : "bg-surface-white text-charcoal-dark shadow-sm hover:bg-canvas-offwhite"
+                ? "bg-primary-container text-on-primary shadow-sm"
+                : "bg-surface-white text-charcoal-dark shadow-sm hover:bg-canvas-offwhite"
                 }`}
         >
             {icon && <Icon name={icon} className="me-1.5 inline-block align-text-bottom text-[16px]" />}

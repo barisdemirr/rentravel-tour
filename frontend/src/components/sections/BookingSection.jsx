@@ -10,6 +10,8 @@ import { getCultureTourAccommodationOptions } from "@/services";
 import { bungalowMessage, carMessage, cultureTourMessage, dailyTourMessage } from "@/lib/whatsapp";
 import Icon from "../ui/Icon";
 import Reveal from "../ui/Reveal";
+import DateField from "@/components/ui/DateField";
+import TimeField from "@/components/ui/TimeField";
 
 const TABS = [
     { key: "car", icon: "directions_car" },
@@ -274,9 +276,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="event" className="text-[14px] text-crimson-vivid" />
                                                 {b.pickupDate}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="car-pickup-date"
-                                                type="date"
                                                 required
                                                 min={today}
                                                 value={carForm.pickupDate}
@@ -296,9 +297,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="schedule" className="text-[14px] text-crimson-vivid" />
                                                 {b.pickupTime}
                                             </label>
-                                            <input
+                                            <TimeField
                                                 id="car-pickup-time"
-                                                type="time"
                                                 required
                                                 value={carForm.pickupTime}
                                                 onChange={(e) => setCarForm({ ...carForm, pickupTime: e.target.value })}
@@ -310,9 +310,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="event" className="text-[14px] text-crimson-vivid" />
                                                 {b.returnDate}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="car-return-date"
-                                                type="date"
                                                 required
                                                 min={carForm.pickupDate || today}
                                                 value={carForm.returnDate}
@@ -325,9 +324,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="schedule" className="text-[14px] text-crimson-vivid" />
                                                 {b.returnTime}
                                             </label>
-                                            <input
+                                            <TimeField
                                                 id="car-return-time"
-                                                type="time"
                                                 required
                                                 value={carForm.returnTime}
                                                 onChange={(e) => setCarForm({ ...carForm, returnTime: e.target.value })}
@@ -348,9 +346,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="event" className="text-[14px] text-crimson-vivid" />
                                                 {b.date}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="daily-date"
-                                                type="date"
                                                 required
                                                 min={today}
                                                 value={dailyForm.date}
@@ -395,9 +392,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="event" className="text-[14px] text-crimson-vivid" />
                                                 {b.tourDate}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="culture-date"
-                                                type="date"
                                                 required
                                                 min={today}
                                                 value={cultureForm.date}
@@ -471,9 +467,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="login" className="text-[14px] text-crimson-vivid" />
                                                 {b.checkIn}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="bng-checkin"
-                                                type="date"
                                                 required
                                                 min={today}
                                                 value={bungalowForm.checkIn}
@@ -493,9 +488,8 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 <Icon name="logout" className="text-[14px] text-crimson-vivid" />
                                                 {b.checkOut}
                                             </label>
-                                            <input
+                                            <DateField
                                                 id="bng-checkout"
-                                                type="date"
                                                 required
                                                 min={bungalowForm.checkIn ? dateISOFrom(bungalowForm.checkIn, 1) : today}
                                                 value={bungalowForm.checkOut}
