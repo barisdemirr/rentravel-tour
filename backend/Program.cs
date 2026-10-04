@@ -9,6 +9,8 @@ using Rentravel.Domain.Entities;
 using Rentravel.Infrastructure.Database;
 using Rentravel.Infrastructure.Services;
 using Rentravel.Shared;
+using System.Security.Claims;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,11 +46,43 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.FromMinutes(1),
             NameClaimType = "name"
         };
+        options.Events = new JwtBearerEvents
+        {
+            // Token geçerli olsa bile kullanıcı pasife alınmış veya silinmişse reddet
+            OnTokenValidated = async context =>
+            {
+                var db = context.HttpContext.RequestServices.GetRequiredService<AppDbContext>();
+                var isActive = Guid.TryParse(context.Principal?.FindFirstValue("sub"), out var userId)
+                    && await db.AdminUsers.AnyAsync(x => x.Id == userId && x.IsActive,
+                           context.HttpContext.RequestAborted);
+
+                if (!isActive) context.Fail("Kullanıcı pasif veya silinmiş.");
+            }
+        };
     });
 
 // Varsayılan: her endpoint giriş yapmış kullanıcı ister. Public olanlar .AllowAnonymous() ile açılır.
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+
+
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Giriş: IP başına dakikada en fazla 5 deneme
+    options.AddPolicy("login", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
+
 
 builder.Services.AddFeatures(typeof(Program).Assembly);
 builder.Services.AddOpenApi();
@@ -64,6 +98,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 

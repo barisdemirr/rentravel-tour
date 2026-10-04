@@ -55,6 +55,7 @@ public static class Login
             app.MapPost("/api/auth/login",
                 async (Command cmd, Handler handler, CancellationToken ct) =>
                     (await handler.Handle(cmd, ct)).ToHttp(response => Results.Ok(response)))
-                .AllowAnonymous();
+                .AllowAnonymous()
+                .RequireRateLimiting("login");
     }
 }
