@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Icon from "@/components/ui/Icon";
+import ToastProvider from "@/components/admin/Toast";
 import { logout } from "@/lib/admin/client";
 import { NAV_GROUPS, groupOf } from "@/lib/admin/nav";
 
@@ -85,7 +86,9 @@ export default function AdminShell({ user, children }) {
                     </div>
                 </header>
 
-                <main className="min-w-0 flex-1 px-3 py-5 sm:px-6 sm:py-7 lg:px-8">{children}</main>
+                <main className="min-w-0 flex-1 px-3 py-5 sm:px-6 sm:py-7 lg:px-8">
+                    <ToastProvider>{children}</ToastProvider>
+                </main>
             </div>
         </div>
     );
@@ -279,8 +282,8 @@ function NavLink({ item, pathname, nested = false }) {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={`relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[13px] transition-colors ${active
-                    ? "ad-nav-active font-semibold text-white"
-                    : "text-ad-nav-text hover:bg-white/5 hover:text-white"
+                ? "ad-nav-active font-semibold text-white"
+                : "text-ad-nav-text hover:bg-white/5 hover:text-white"
                 }`}
         >
             <Icon
