@@ -5,7 +5,7 @@ import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import { useToast } from "@/components/admin/Toast";
 import { Field, FormSection, TextInput } from "@/components/admin/fields";
-import { adminPut, logout } from "@/lib/admin/client";
+import { adminPost, logout } from "@/lib/admin/client";
 
 export default function ProfileClient({ me }) {
     const toast = useToast();
@@ -33,7 +33,7 @@ export default function ProfileClient({ me }) {
         setErrors({});
 
         try {
-            await adminPut("/admin/me/password", {
+            await adminPost("/admin/me/password", {
                 currentPassword: form.currentPassword,
                 newPassword: form.newPassword,
             });
