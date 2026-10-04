@@ -592,6 +592,15 @@ export const dictionaries = {
             trust1: "TÜRSAB Onaylı Rezervasyon",
             trust2: "7/24 VIP Karşılama ve Destek",
         },
+        staticPage: {
+            home: "Anasayfa",
+            breadcrumbLabel: "Ekmek kırıntısı",
+            updatedAt: "Son güncelleme: {date}",
+            contactTitle: "Sorunuz mu var?",
+            contactText: "Bu sayfadaki konularla ilgili aklınıza takılan her şey için bize ulaşabilirsiniz.",
+            contactWhatsapp: "WhatsApp ile yazın",
+            otherPages: "Diğer Sayfalar",
+        },
     },
 
     EN: {
@@ -1128,6 +1137,15 @@ export const dictionaries = {
             reserve: "Book",
             trust1: "TÜRSAB Approved Booking",
             trust2: "24/7 VIP Welcome and Support",
+        },
+        staticPage: {
+            home: "Home",
+            breadcrumbLabel: "Breadcrumb",
+            updatedAt: "Last updated: {date}",
+            contactTitle: "Have a question?",
+            contactText: "Reach out to us about anything related to the topics on this page.",
+            contactWhatsapp: "Message us on WhatsApp",
+            otherPages: "Other Pages",
         },
     },
 
@@ -1666,6 +1684,15 @@ export const dictionaries = {
             trust1: "حجز معتمد من TÜRSAB",
             trust2: "استقبال VIP ودعم على مدار الساعة",
         },
+    },
+    staticPage: {
+        home: "الرئيسية",
+        breadcrumbLabel: "مسار التنقل",
+        updatedAt: "آخر تحديث: {date}",
+        contactTitle: "لديك سؤال؟",
+        contactText: "تواصل معنا بشأن أي أمر يتعلق بمواضيع هذه الصفحة.",
+        contactWhatsapp: "راسلنا على واتساب",
+        otherPages: "صفحات أخرى",
     },
 };
 
