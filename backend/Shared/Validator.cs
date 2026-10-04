@@ -38,6 +38,12 @@ public class Validator
         return this;
     }
 
+    public Validator AddError(string field, string message)
+    {
+        Add(field, message);
+        return this;
+    }
+
     public Result ToFailure() => Result.Fail(BuildError());
     public Result<T> ToFailure<T>() => Result<T>.Fail(BuildError());
 
