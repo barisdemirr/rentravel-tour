@@ -7,6 +7,7 @@
     .material-symbols-outlined { font-size: 24px } kuralı Tailwind'in
     text-[28px] gibi utility'lerini ezmez. */
   @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
   @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block") layer(gfonts);
   @import "tailwindcss";
 
@@ -167,6 +168,41 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 
-  /* Arapça (RTL) düzeltmeleri */
-  html[dir="rtl"] body { font-family: "Inter", system-ui, sans-serif; }
-  html[dir="rtl"] .material-symbols-outlined { direction: ltr; }
+  /* ── Arapça (RTL) ── */
+
+/* Montserrat ve Inter Arapça harfleri desteklemez: tüm yazı tipi token'ları Cairo'ya geçer */
+html[lang="ar"] {
+  --font-display-hero: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-display-hero-mobile: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-lg-mobile: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-md: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-headline-sm: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-label-uppercase: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-body-lg: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-body-md: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-body-sm: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-label-md: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-label-sm: "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+html[dir="rtl"] body {
+  font-family: var(--font-body-md);
+}
+
+/* Harf aralığı Arapçada harflerin birleşmesini bozar */
+html[dir="rtl"] *,
+html[dir="rtl"] *::before,
+html[dir="rtl"] *::after {
+  letter-spacing: 0 !important;
+}
+
+/* İkon fontu her zaman soldan sağa */
+html[dir="rtl"] .material-symbols-outlined {
+  direction: ltr;
+}
+
+/* Splash daha önce görüldüyse ilk boyamadan önce gizlenir (layout.jsx'teki script) */
+html[data-splash-seen="1"] .splash-root {
+  display: none;
+}
