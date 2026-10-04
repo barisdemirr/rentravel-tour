@@ -34,4 +34,7 @@ export const waHref = (message) => {
 /* Splash screen süresi (ms) */
 export const SPLASH_DURATION = 1800;
 
+/* Hero slayt süresi (ms) */
+export const SLIDE_DURATION = 4500;
+
 export const SPLASH_STORAGE_KEY = "rentravel-splash-seen";
