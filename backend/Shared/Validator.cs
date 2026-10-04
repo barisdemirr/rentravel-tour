@@ -1,3 +1,5 @@
+using Rentravel.Domain.ValueObjects;
+
 namespace Rentravel.Shared;
 
 public class Validator
@@ -44,6 +46,32 @@ public class Validator
         return this;
     }
 
+
+    public Validator LocalizedRequired(string field, LocalizedText? value, int max)
+    {
+        if (value is null || string.IsNullOrWhiteSpace(value.Tr))
+            Add($"{field}.tr", $"{field}.tr zorunludur.");
+        return LocalizedMax(field, value, max);
+    }
+
+    public Validator LocalizedOptional(string field, LocalizedText? value, int max)
+    {
+        if (value.IsBlank()) return this; // tamamen boş gelirse "verilmedi" sayılır
+        if (string.IsNullOrWhiteSpace(value!.Tr))
+            Add($"{field}.tr", $"{field} verildiyse {field}.tr zorunludur.");
+        return LocalizedMax(field, value, max);
+    }
+
+    private Validator LocalizedMax(string field, LocalizedText? value, int max)
+    {
+        if (value is null) return this;
+        if (value.Tr?.Length > max) Add($"{field}.tr", $"{field}.tr en fazla {max} karakter olabilir.");
+        if (value.En?.Length > max) Add($"{field}.en", $"{field}.en en fazla {max} karakter olabilir.");
+        if (value.Ar?.Length > max) Add($"{field}.ar", $"{field}.ar en fazla {max} karakter olabilir.");
+        return this;
+    }
+
+    
     public Result ToFailure() => Result.Fail(BuildError());
     public Result<T> ToFailure<T>() => Result<T>.Fail(BuildError());
 

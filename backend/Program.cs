@@ -30,6 +30,7 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<ImageService>();
+builder.Services.AddSingleton<HtmlCleaner>();
 
 builder.Services.AddScoped<MediaItemResolver>();
 builder.Services.AddScoped<MediaUsageChecker>();
