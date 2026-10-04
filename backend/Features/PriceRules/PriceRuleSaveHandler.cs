@@ -38,6 +38,9 @@ public class PriceRuleSaveHandler(AppDbContext db, PriceOwnerChecker owners)
             validator.Must("ownerType", ownerType is { } t && Enum.IsDefined(t),
                 "ownerType zorunlu ve geçerli olmalı (Vehicle, DailyTour, CultureTour, Bungalow).");
 
+            validator.Must("ownerType", ownerType != PriceOwnerType.CultureTour,
+                "Kültür turlarında fiyat konaklama tipine göre belirlenir, tarihe göre fiyat kuralı tanımlanamaz.");
+
             if (ownerType is { } ot && Enum.IsDefined(ot) && !await owners.ExistsAsync(ot, ownerId, ct))
                 validator.AddError("ownerId", "Sahip bulunamadı.");
         }

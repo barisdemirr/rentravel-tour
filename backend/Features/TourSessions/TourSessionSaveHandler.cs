@@ -48,6 +48,12 @@ public class TourSessionSaveHandler(AppDbContext db, PriceOwnerChecker owners)
         var selfId = existing?.Id ?? Guid.Empty;
         var date = input.Date!.Value;
 
+        if (effectiveType == TourType.Culture && input.PriceOverride is not null)
+            return Result<TourSessionDto>.Fail(Error.Validation(new()
+            {
+                ["priceOverride"] = ["Kültür turlarında fiyat konaklama tipine göre belirlenir, seans için özel fiyat girilemez."]
+            }));
+
         // Bir turun aynı tarihe tek seansı olur
         if (await db.TourSessions.AnyAsync(x =>
                 x.TourType == effectiveType && x.TourId == effectiveTourId && x.Date == date && x.Id != selfId, ct))
