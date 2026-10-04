@@ -1,27 +1,35 @@
-import { getVehicleSegments } from "@/services/vehicleSegments";
+import { settle } from "@/lib/api";
+import { isLocale } from "@/lib/i18n/config";
+import { getDictionary } from "@/lib/i18n/getDictionary";
+import { buildAlternates } from "@/lib/seo";
+import { getVehicleSegments, getVehicles } from "@/services";
 import CarRentalClient from "./CarRentalClient";
 
-export const metadata = {
-    title: "Araç Kiralama | Rentravel Turizm",
-    description:
-        "Trabzon Havalimanı ve Doğu Karadeniz bölgesinde lüks araç kiralama. Mercedes Vito, SUV ve sedan seçenekleri. 7/24 havalimanı teslimat, tam kasko.",
-};
+export async function generateMetadata({ params }) {
+    const { lang } = await params;
+    if (!isLocale(lang)) return {};
+
+    const { meta } = getDictionary(lang).carRental;
+
+    return {
+        title: meta.title,
+        description: meta.description,
+        alternates: buildAlternates("/arac-kiralama", lang),
+        openGraph: { title: meta.title, description: meta.description },
+    };
+}
 
 export default async function CarRentalPage() {
-    let segments = [];
-    let errorMessage = null;
-
-    try {
-        segments = await getVehicleSegments();
-    } catch (err) {
-        errorMessage = err?.title || "Segment verisi alınamadı.";
-        console.error("[arac-kiralama] Segment hatası:", err);
-    }
+    const [segments, vehicles] = await Promise.all([
+        settle(getVehicleSegments()),
+        settle(getVehicles()),
+    ]);
 
     return (
         <CarRentalClient
-            initialSegments={segments}
-            initialError={errorMessage}
+            segments={segments.data}
+            vehicles={vehicles.data}
+            hasError={segments.error || vehicles.error}
         />
     );
 }

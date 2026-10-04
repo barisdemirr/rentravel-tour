@@ -1,123 +1,122 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Icon from "@/components/ui/Icon";
-import { vehicles, CORPORATE_VEHICLE_TYPES } from "@/lib/mockData";
+import SafeImage from "@/components/ui/SafeImage";
+import Link from "@/components/ui/LocalizedLink";
+import { SITE, waHref } from "@/lib/constants";
+import { plusDays, rentalDays as calcDays, todayISO } from "@/lib/dates";
+import { formatPrice } from "@/lib/format";
+import { getDictionary } from "@/lib/i18n/getDictionary";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { localized } from "@/lib/i18n/localized";
+import { mediaAlt, mediaUrl } from "@/lib/media";
+import { TONES } from "@/lib/tones";
+import { corporateMessage } from "@/lib/whatsapp";
+import { quoteVehicle } from "@/services";
 
 /* Hero arka plan görseli */
 const HERO_BG =
     "https://lh3.googleusercontent.com/aida-public/AB6AXuAvRzs4pa1PMvu4VPDkfTXMn2SoMJD5lKt5fMgEzl8rMR0stFMqHauYXq6_hqzDfznn66WVYhIdpPWaXvdfGCMnm-bAU65jfkwIV7FgR_NP6ne6NbGX6RgDy-5RnXrBkC2r5QUg5xJReeMKTgWggTXgIaJ0Kf18iAImrvC_-x-In7hnk8wwYX2WXWip5fH1kJ3zYEXa4MUarWXiV4hFhvK9pUlRIcUbsQ-yIo-px39t_xVVeDX3bT6KzA";
 
-const SORT_OPTIONS = [
-    { value: "recommended", label: "Önerilen" },
-    { value: "price-asc", label: "Fiyata Göre (Artan)" },
-    { value: "price-desc", label: "Fiyata Göre (Azalan)" },
-    { value: "rating", label: "Müşteri Puanına Göre" },
+const HERO_BADGE_ICONS = ["flight_takeoff", "verified_user", "key"];
+const ADVANTAGE_STYLES = [
+    { icon: "shield", tone: "primary" },
+    { icon: "flight_land", tone: "dark" },
+    { icon: "support_agent", tone: "emerald" },
+    { icon: "sanitizer", tone: "neutral" },
 ];
 
-/* ───────── Yardımcılar ───────── */
-const todayISO = () =>
-    new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 10);
+export default function CarRentalClient({ segments = [], vehicles = [], hasError = false }) {
+    const { t, tpl, locale } = useLanguage();
+    const c = t.carRental;
 
-const plusDays = (iso, days) => {
-    const d = new Date(`${iso}T00:00:00`);
-    d.setDate(d.getDate() + days);
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 10);
-};
-
-const priceOf = (v) => parseInt(String(v.price3Days).replace(/\D/g, ""), 10) || 0;
-
-const dayDiff = (from, to) => {
-    if (!from || !to) return 0;
-    const a = new Date(`${from}T00:00:00`).getTime();
-    const b = new Date(`${to}T00:00:00`).getTime();
-    return Math.max(1, Math.round((b - a) / 86400000));
-};
-
-/* Dil fallback: field[lang] ?? field.tr */
-const localized = (field, lang = "tr") => {
-    if (!field) return "";
-    if (typeof field === "string") return field;
-    return field[lang] || field.tr || "";
-};
-
-/* "all" segmenti frontend'de ekleniyor (backend'de yok) */
-const ALL_SEGMENT = {
-    id: "all",
-    key: "all",
-    label: { tr: "Tüm Araçlar", en: "All Vehicles", ar: null },
-    icon: "apps",
-    orderIndex: -1,
-};
-
-export default function CarRentalClient({ initialSegments = [], initialError = null }) {
     const [pickupDate, setPickupDate] = useState("");
     const [pickupTime, setPickupTime] = useState("10:00");
     const [returnDate, setReturnDate] = useState("");
     const [returnTime, setReturnTime] = useState("10:00");
     const [segment, setSegment] = useState("all");
     const [sortBy, setSortBy] = useState("recommended");
+    const [quotes, setQuotes] = useState({}); // slug -> { status: "loading" | "ok" | "error", data }
     const catalogRef = useRef(null);
     const corporateRef = useRef(null);
 
     /* Tarihleri client'ta kur (hydration güvenliği) */
     useEffect(() => {
-        const t = todayISO();
-        setPickupDate(t);
-        setReturnDate(plusDays(t, 3));
+        const today = todayISO();
+        setPickupDate(today);
+        setReturnDate(plusDays(today, 3));
     }, []);
 
-    const rentalDays = useMemo(
-        () => dayDiff(pickupDate, returnDate),
-        [pickupDate, returnDate]
+    const days = useMemo(
+        () => calcDays(pickupDate, pickupTime, returnDate, returnTime),
+        [pickupDate, pickupTime, returnDate, returnTime]
     );
+    const periodValid = days > 0;
 
-    /* Segment listesi: backend'den gelen + "all" + sayılar */
-    const segments = useMemo(() => {
+    /* Seçilen dönem için her aracın fiyatı backend'den (0,4 sn bekleyip) */
+    useEffect(() => {
+        if (!periodValid || vehicles.length === 0) {
+            setQuotes({});
+            return;
+        }
+
+        let cancelled = false;
+        setQuotes(Object.fromEntries(vehicles.map((v) => [v.slug, { status: "loading" }])));
+
+        const timer = setTimeout(async () => {
+            const body = { pickupDate, pickupTime, returnDate, returnTime };
+            const entries = await Promise.all(
+                vehicles.map(async (v) => {
+                    try {
+                        return [v.slug, { status: "ok", data: await quoteVehicle(v.slug, body) }];
+                    } catch {
+                        return [v.slug, { status: "error" }];
+                    }
+                })
+            );
+            if (!cancelled) setQuotes(Object.fromEntries(entries));
+        }, 400);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [periodValid, pickupDate, pickupTime, returnDate, returnTime, vehicles]);
+
+    /* Segmentler: "tümü" + araç sayısı olanlar */
+    const segmentList = useMemo(() => {
         const counts = {};
         vehicles.forEach((v) => {
-            counts[v.segment] = (counts[v.segment] || 0) + 1;
+            const key = v.segment?.key;
+            if (key) counts[key] = (counts[key] || 0) + 1;
         });
 
-        const allWithCount = {
-            ...ALL_SEGMENT,
-            count: vehicles.length,
-        };
+        return [
+            { key: "all", icon: "apps", label: c.allVehicles, count: vehicles.length },
+            ...segments
+                .filter((s) => counts[s.key])
+                .map((s) => ({ key: s.key, icon: s.icon, label: localized(s.label, locale), count: counts[s.key] })),
+        ];
+    }, [segments, vehicles, locale, c.allVehicles]);
 
-        const backendWithCount = initialSegments.map((s) => ({
-            ...s,
-            count: counts[s.key] || 0,
-        }));
-
-        return [allWithCount, ...backendWithCount];
-    }, [initialSegments]);
-
-    /* Filtre + sıralama */
+    /* Filtre + sıralama (backend sırası "önerilen") */
     const visibleVehicles = useMemo(() => {
-        let arr = vehicles;
-        if (segment !== "all") arr = arr.filter((v) => v.segment === segment);
-        arr = [...arr];
-        if (sortBy === "price-asc") arr.sort((a, b) => priceOf(a) - priceOf(b));
-        else if (sortBy === "price-desc") arr.sort((a, b) => priceOf(b) - priceOf(a));
-        else if (sortBy === "rating")
-            arr.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
-        return arr;
-    }, [segment, sortBy]);
+        let list = segment === "all" ? vehicles : vehicles.filter((v) => v.segment?.key === segment);
+        list = [...list];
+        if (sortBy === "price-asc") list.sort((a, b) => a.defaultDailyPrice - b.defaultDailyPrice);
+        else if (sortBy === "price-desc") list.sort((a, b) => b.defaultDailyPrice - a.defaultDailyPrice);
+        return list;
+    }, [vehicles, segment, sortBy]);
 
-    const scrollToCatalog = () =>
-        catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const query = new URLSearchParams({ pickupDate, pickupTime, returnDate, returnTime }).toString();
 
-    const scrollToCorporate = () =>
-        corporateRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
     const onSearch = (e) => {
         e.preventDefault();
-        scrollToCatalog();
+        scrollTo(catalogRef);
     };
 
     return (
@@ -134,23 +133,23 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                 <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-10">
                     <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-white shadow-sm backdrop-blur-md sm:px-4">
                         <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-crimson-vivid" />
-                        <span className="font-label-uppercase text-label-uppercase font-semibold tracking-wider text-[10px] sm:text-[11px]">
-                            Trabzon Havalimanı (TZX) & Doğu Karadeniz
+                        <span className="font-label-uppercase text-label-uppercase text-[10px] font-semibold tracking-wider sm:text-[11px]">
+                            {c.heroBadge}
                         </span>
                     </div>
 
                     <h1 className="max-w-3xl font-headline-lg-mobile text-headline-lg-mobile font-extrabold uppercase leading-tight tracking-tight text-white drop-shadow-sm md:font-headline-lg md:text-headline-lg">
-                        Trabzon Havalimanı & Bölge Araç Kiralama Filosu
+                        {c.heroTitle}
                     </h1>
 
-                    <p className="mt-3 max-w-2xl font-body-md text-body-md text-white/90 md:text-body-lg md:font-body-lg">
-                        Rentravel güvencesiyle 7/24 Havalimanı teslimatlı, tam kaskolu, son model binek ve VIP araçlar.
+                    <p className="mt-3 max-w-2xl font-body-md text-body-md text-white/90 md:font-body-lg md:text-body-lg">
+                        {c.heroText}
                     </p>
 
                     <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                        <HeroBadge icon="flight_takeoff" text="7/24 Havalimanı Karşılama" />
-                        <HeroBadge icon="verified_user" text="Tam Kapsamlı Kasko" />
-                        <HeroBadge icon="key" text="Hızlı Anahtar Teslimi" />
+                        {c.heroBadges.map((text, i) => (
+                            <HeroBadge key={text} icon={HERO_BADGE_ICONS[i]} text={text} />
+                        ))}
                     </div>
                 </div>
             </section>
@@ -160,38 +159,37 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                 <div className="rounded-3xl bg-surface-white p-4 shadow-[0_20px_40px_-15px_rgba(15,17,21,0.09)] sm:p-5 md:p-6">
                     <form onSubmit={onSearch}>
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end">
-                            {/* Alış tarihi */}
                             <FieldWrapper className="lg:col-span-3">
-                                <FieldLabel icon="calendar_today" text="Alış Tarihi" />
+                                <FieldLabel icon="calendar_today" text={c.bar.pickupDate} />
                                 <input
                                     type="date"
+                                    required
                                     value={pickupDate}
                                     min={todayISO()}
                                     onChange={(e) => {
                                         setPickupDate(e.target.value);
-                                        if (e.target.value > returnDate)
-                                            setReturnDate(plusDays(e.target.value, 3));
+                                        if (e.target.value > returnDate) setReturnDate(plusDays(e.target.value, 3));
                                     }}
                                     className="w-full bg-transparent font-headline-sm text-headline-sm font-semibold text-charcoal-dark focus:outline-none"
                                 />
                             </FieldWrapper>
 
-                            {/* Alış saati */}
                             <FieldWrapper className="lg:col-span-2">
-                                <FieldLabel icon="schedule" text="Alış Saati" />
+                                <FieldLabel icon="schedule" text={c.bar.pickupTime} />
                                 <input
                                     type="time"
+                                    required
                                     value={pickupTime}
                                     onChange={(e) => setPickupTime(e.target.value)}
                                     className="w-full bg-transparent font-headline-sm text-headline-sm font-semibold text-charcoal-dark focus:outline-none"
                                 />
                             </FieldWrapper>
 
-                            {/* Teslim tarihi */}
                             <FieldWrapper className="lg:col-span-3">
-                                <FieldLabel icon="event_repeat" text="Teslim Tarihi" />
+                                <FieldLabel icon="event_repeat" text={c.bar.returnDate} />
                                 <input
                                     type="date"
+                                    required
                                     value={returnDate}
                                     min={pickupDate || todayISO()}
                                     onChange={(e) => setReturnDate(e.target.value)}
@@ -199,25 +197,24 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                                 />
                             </FieldWrapper>
 
-                            {/* Teslim saati */}
                             <FieldWrapper className="lg:col-span-2">
-                                <FieldLabel icon="schedule" text="Teslim Saati" />
+                                <FieldLabel icon="schedule" text={c.bar.returnTime} />
                                 <input
                                     type="time"
+                                    required
                                     value={returnTime}
                                     onChange={(e) => setReturnTime(e.target.value)}
                                     className="w-full bg-transparent font-headline-sm text-headline-sm font-semibold text-charcoal-dark focus:outline-none"
                                 />
                             </FieldWrapper>
 
-                            {/* CTA */}
                             <div className="w-full sm:col-span-2 lg:col-span-2">
                                 <button
                                     type="submit"
                                     className="group flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary-container font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_10px_25px_-5px_rgba(187,0,38,0.35)] transition-all hover:bg-crimson-vivid active:scale-95"
                                 >
                                     <Icon name="directions_car" className="text-[22px] transition-transform group-hover:scale-110" />
-                                    <span>Listele</span>
+                                    <span>{c.bar.submit}</span>
                                 </button>
                             </div>
                         </div>
@@ -225,15 +222,21 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                         {/* Alt bilgi satırı */}
                         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-surface-variant pt-4">
                             <div className="flex flex-wrap items-center gap-2">
-                                <InfoPill icon="badge" text="21+ Yaş & 2 Yıl Ehliyet" />
-                                <InfoPill icon="credit_card" text="Kredi Kartı Provizyon" />
+                                <InfoPill icon="badge" text={c.bar.ageLicense} />
+                                <InfoPill icon="credit_card" text={c.bar.cardDeposit} />
                             </div>
                             <div className="flex items-center gap-1.5 font-label-md text-label-md text-secondary">
                                 <Icon name="bolt" className="text-[16px] text-crimson-vivid" />
-                                <span>
-                                    Toplam{" "}
-                                    <strong className="text-charcoal-dark">{rentalDays} gün</strong>
-                                </span>
+                                {periodValid ? (
+                                    <span>
+                                        {c.bar.total}{" "}
+                                        <strong className="text-charcoal-dark">
+                                            {days} {c.bar.days}
+                                        </strong>
+                                    </span>
+                                ) : (
+                                    <span className="text-crimson-vivid">{c.bar.periodError}</span>
+                                )}
                             </div>
                         </div>
                     </form>
@@ -242,8 +245,8 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                 {/* Kurumsal banner */}
                 <button
                     type="button"
-                    onClick={scrollToCorporate}
-                    className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border border-primary-container/20 bg-primary-container/5 px-4 py-3 text-left transition-colors hover:bg-primary-container/10 sm:px-5"
+                    onClick={() => scrollTo(corporateRef)}
+                    className="mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border border-primary-container/20 bg-primary-container/5 px-4 py-3 text-start transition-colors hover:bg-primary-container/10 sm:px-5"
                 >
                     <div className="flex items-center gap-3">
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-container text-on-primary">
@@ -251,11 +254,9 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                         </span>
                         <div className="min-w-0">
                             <div className="truncate font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                                Kurumsal Aylık Kiralama
+                                {c.corporateBanner.title}
                             </div>
-                            <div className="truncate font-body-sm text-body-sm text-secondary">
-                                Uzun dönem filo talepleri için hızlı başvuru
-                            </div>
+                            <div className="truncate font-body-sm text-body-sm text-secondary">{c.corporateBanner.text}</div>
                         </div>
                     </div>
                     <Icon name="arrow_downward" className="shrink-0 text-[20px] text-crimson-vivid" />
@@ -263,27 +264,18 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
             </section>
 
             {/* ─────────── SEGMENT FİLTRELERİ ─────────── */}
-            <section
-                ref={catalogRef}
-                className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pt-10 sm:px-6 lg:px-10"
-            >
-                {/* Hata banner */}
-                {initialError && (
+            <section ref={catalogRef} className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 pt-10 sm:px-6 lg:px-10">
+                {hasError && (
                     <div className="mb-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 font-body-sm text-body-sm text-amber-900">
                         <Icon name="warning" className="shrink-0 text-[20px] text-amber-600" />
-                        <span>{initialError}</span>
+                        <span>{c.loadError}</span>
                     </div>
                 )}
 
                 <div className="no-scrollbar -mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
-                    {segments.map((s) => (
-                        <SegmentPill
-                            key={s.id}
-                            active={segment === s.key}
-                            onClick={() => setSegment(s.key)}
-                            icon={s.icon}
-                        >
-                            {localized(s.label)} ({s.count})
+                    {segmentList.map((s) => (
+                        <SegmentPill key={s.key} active={segment === s.key} onClick={() => setSegment(s.key)} icon={s.icon}>
+                            {s.label} ({s.count})
                         </SegmentPill>
                     ))}
                 </div>
@@ -293,32 +285,28 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                     <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex h-2.5 w-2.5 animate-ping rounded-full bg-emerald-500 opacity-75" />
                         <span className="font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                            {visibleVehicles.length} Müsait Araç Bulundu
+                            {tpl(c.found, { count: visibleVehicles.length })}
                         </span>
                         <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 font-label-uppercase text-label-uppercase font-semibold text-emerald-700">
-                            Anında Onaylı
+                            {c.instant}
                         </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="hidden font-label-md text-label-md text-secondary md:inline">
-                            Sıralama:
-                        </span>
+                        <span className="hidden font-label-md text-label-md text-secondary md:inline">{c.sortLabel}</span>
                         <div className="relative flex-1 sm:w-56">
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full cursor-pointer appearance-none rounded-xl border border-surface-variant bg-surface-white px-4 py-2 pr-9 font-label-md text-label-md text-charcoal-dark shadow-sm focus:outline-none focus:ring-2 focus:ring-crimson-vivid/20"
+                                className="w-full cursor-pointer appearance-none rounded-xl border border-surface-variant bg-surface-white px-4 py-2 pe-9 font-label-md text-label-md text-charcoal-dark shadow-sm focus:outline-none focus:ring-2 focus:ring-crimson-vivid/20"
                             >
-                                {SORT_OPTIONS.map((o) => (
-                                    <option key={o.value} value={o.value}>
-                                        {o.label}
-                                    </option>
-                                ))}
+                                <option value="recommended">{c.sort.recommended}</option>
+                                <option value="price-asc">{c.sort.priceAsc}</option>
+                                <option value="price-desc">{c.sort.priceDesc}</option>
                             </select>
                             <Icon
                                 name="unfold_more"
-                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-secondary"
+                                className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-[18px] text-secondary"
                             />
                         </div>
                     </div>
@@ -332,30 +320,25 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-canvas-offwhite">
                             <Icon name="no_crash" className="text-[28px] text-crimson-vivid" />
                         </div>
-                        <h3 className="font-headline-sm text-headline-sm text-charcoal-dark">
-                            Bu segmentte araç bulunamadı
-                        </h3>
-                        <p className="max-w-md font-body-sm text-body-sm text-secondary">
-                            Farklı bir segment seçmeyi deneyin.
-                        </p>
+                        <h3 className="font-headline-sm text-headline-sm text-charcoal-dark">{c.empty.title}</h3>
+                        <p className="max-w-md font-body-sm text-body-sm text-secondary">{c.empty.text}</p>
                         <button
                             type="button"
                             onClick={() => setSegment("all")}
                             className="mt-2 rounded-xl bg-charcoal-dark px-6 py-3 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors hover:bg-primary-container"
                         >
-                            Tüm Araçları Göster
+                            {c.empty.showAll}
                         </button>
                     </div>
                 ) : (
-                    visibleVehicles.map((v) => <VehicleRow key={v.id} vehicle={v} days={rentalDays} />)
+                    visibleVehicles.map((v) => (
+                        <VehicleRow key={v.id} vehicle={v} quote={quotes[v.slug]} query={query} />
+                    ))
                 )}
             </section>
 
             {/* ─────────── KURUMSAL AYLIK KİRALAMA FORMU ─────────── */}
-            <section
-                ref={corporateRef}
-                className="mx-auto w-full max-w-5xl scroll-mt-24 px-4 pb-16 pt-8 sm:px-6 lg:px-10"
-            >
+            <section ref={corporateRef} className="mx-auto w-full max-w-5xl scroll-mt-24 px-4 pb-16 pt-8 sm:px-6 lg:px-10">
                 <CorporateForm />
             </section>
 
@@ -363,41 +346,18 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
             <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 md:py-16 lg:px-10">
                 <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
                     <span className="mb-2 inline-block rounded-full bg-primary-fixed px-4 py-1 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary-fixed-variant">
-                        Rentravel Ayrıcalıkları
+                        {c.advantages.eyebrow}
                     </span>
                     <h2 className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold text-charcoal-dark md:font-headline-lg md:text-headline-lg">
-                        Karadeniz'de Güvenli ve Konforlu Sürüş Garantisi
+                        {c.advantages.title}
                     </h2>
-                    <p className="mt-2 font-body-md text-body-md text-secondary">
-                        Sürpriz faturalar yok. TÜRSAB A Grubu lisansı ve şeffaf sözleşme ile seyahatinizi güvenceye alıyoruz.
-                    </p>
+                    <p className="mt-2 font-body-md text-body-md text-secondary">{c.advantages.subtitle}</p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <AdvantageCard
-                        icon="shield"
-                        tone="primary"
-                        title="Tam Kapsamlı Güvence"
-                        text="Sıfır sürpriz maliyet, şeffaf sözleşme ve kaza muafiyetsiz kasko koruması ile güvendesiniz."
-                    />
-                    <AdvantageCard
-                        icon="flight_land"
-                        tone="dark"
-                        title="Terminal Önü Teslimat"
-                        text="Trabzon Havalimanı iç ve dış hatlar çıkış kapısında personelimiz adınıza hazırlanmış anahtarla karşılar."
-                    />
-                    <AdvantageCard
-                        icon="support_agent"
-                        tone="emerald"
-                        title="7/24 Bölge Yol Yardımı"
-                        text="Trabzon, Rize, Artvin ve Giresun yaylalarında kesintisiz mobil teknik servis ve ikame araç desteği."
-                    />
-                    <AdvantageCard
-                        icon="sanitizer"
-                        tone="neutral"
-                        title="Ozon Sterilizasyon & Bakım"
-                        text="Her yolculuk öncesi detaylı ozonla dezenfekte edilen ve periyodik muayenesi yapılmış araçlar."
-                    />
+                    {c.advantages.items.map((item, i) => (
+                        <AdvantageCard key={item.title} {...ADVANTAGE_STYLES[i]} title={item.title} text={item.text} />
+                    ))}
                 </div>
             </section>
 
@@ -405,34 +365,17 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
             <section className="mx-auto w-full max-w-4xl px-4 pb-16 sm:px-6 lg:px-10">
                 <div className="mb-8 text-center">
                     <span className="mb-1 block font-label-md text-label-md font-bold uppercase tracking-wider text-crimson-vivid">
-                        Merak Edilenler
+                        {c.faq.eyebrow}
                     </span>
                     <h2 className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold text-charcoal-dark md:font-headline-lg md:text-headline-lg">
-                        Sıkça Sorulan Sorular ve Şartlar
+                        {c.faq.title}
                     </h2>
                 </div>
 
                 <div className="space-y-3">
-                    <FaqItem
-                        question="Araç kiralama için ehliyet ve yaş sınırı nedir?"
-                        answer="Ekonomik ve sedan araçlarımız için sürücünün en az 21 yaşında olması ve 2 yıllık geçerli bir B sınıfı sürücü belgesine sahip olması gerekmektedir. VIP Minivan (Mercedes Vito vb.) ve Lüks SUV kategorilerinde ise yaş sınırı 25 ve en az 3 yıllık ehliyet aranmaktadır."
-                    />
-                    <FaqItem
-                        question="Depozito (Provizyon) nasıl tahsil edilir ve ne zaman iade edilir?"
-                        answer="Depozito tutarı kiralama anında ana sürücünün adına kayıtlı kredi kartından ön provizyon olarak bloke edilir (nakit çekim yapılmaz). Araç eksiksiz ve hasarsız teslim edildikten sonra olası HGS/OGS geçişleri hesaplanarak bakiye kalan miktar 7-14 iş günü içinde bankanız tarafından otomatik olarak blokesi kaldırılır."
-                    />
-                    <FaqItem
-                        question="Trabzon Havalimanı'nda (TZX) aracı nasıl teslim alırım?"
-                        answer="Uçuş kodunuzu rezervasyon esnasında belirttiğiniz için uçağınız indiği anda operasyon yetkilimiz bagaj alım çıkış kapısında isminizin yazılı olduğu Rentravel levhasıyla sizi bekler. Terminal çıkış otoparkındaki aracınıza 2 dakika içinde geçerek dijital sözleşmenizi onaylayıp anahtarınızı teslim alabilirsiniz."
-                    />
-                    <FaqItem
-                        question="Karadeniz yaylalarına (Pokut, Huser, Gito) kiralık araçla çıkabilir miyim?"
-                        answer="Ayder ve Uzungöl gibi asfalt yola sahip merkezlere binek ve sedan araçlarımızla güvenle ulaşabilirsiniz. Ancak Pokut, Samistal ve Gito gibi taşlık ve yüksek rakımlı yayla etapları için filomuzda yer alan 4x4 Dacia Duster veya özel yerden yüksek SUV segmenti araçlarımızı tercih etmeniz gerekmektedir."
-                    />
-                    <FaqItem
-                        question="Kurumsal aylık kiralama hizmetiniz var mı?"
-                        answer="Evet. Rentravel olarak kurumsal firmalara uzun dönem (1 ay ve üzeri) araç kiralama hizmeti sunuyoruz. Filo yönetimi, ikame araç, kurumsal faturalama ve özel fiyatlandırma gibi avantajlardan yararlanabilirsiniz. Sayfadaki 'Kurumsal Aylık Kiralama' formundan başvuru yapabilirsiniz."
-                    />
+                    {c.faq.items.map((item) => (
+                        <FaqItem key={item.q} question={item.q} answer={item.a} />
+                    ))}
                 </div>
 
                 {/* Hızlı iletişim bannerı */}
@@ -442,20 +385,16 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
                             <Icon name="headset_mic" className="text-[24px] text-on-primary" />
                         </div>
                         <div>
-                            <h4 className="font-headline-sm text-headline-sm font-bold text-white">
-                                Özel Bir Araç veya Şoförlü VIP mi Lazım?
-                            </h4>
-                            <p className="font-body-sm text-body-sm text-white/80">
-                                Filo uzmanlarımız Karadeniz rotanıza en uygun aracı 5 dakikada önersin.
-                            </p>
+                            <h4 className="font-headline-sm text-headline-sm font-bold text-white">{c.help.title}</h4>
+                            <p className="font-body-sm text-body-sm text-white/80">{c.help.text}</p>
                         </div>
                     </div>
                     <a
-                        href="tel:08503096100"
+                        href={SITE.phoneHref}
                         className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary-container px-6 py-3 font-headline-sm text-headline-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-crimson-vivid"
                     >
                         <Icon name="call" className="text-[20px]" />
-                        <span>0850 309 61 00</span>
+                        <span dir="ltr">{SITE.phone}</span>
                     </a>
                 </div>
             </section>
@@ -467,6 +406,10 @@ export default function CarRentalClient({ initialSegments = [], initialError = n
    KURUMSAL AYLIK KİRALAMA FORMU
    ───────────────────────────────────────────── */
 function CorporateForm() {
+    const { t, locale } = useLanguage();
+    const f = t.carRental.corporate;
+    const typeKeys = Object.keys(f.types);
+
     const [form, setForm] = useState({
         company: "",
         contactName: "",
@@ -475,43 +418,30 @@ function CorporateForm() {
         startDate: "",
         endDate: "",
         months: "",
-        vehicleType: CORPORATE_VEHICLE_TYPES[0].value,
+        vehicleType: typeKeys[0],
         quantity: "1",
         notes: "",
     });
 
-    const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+    const update = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
     const onSubmit = (e) => {
         e.preventDefault();
 
-        const vehicleTypeLabel =
-            CORPORATE_VEHICLE_TYPES.find((v) => v.value === form.vehicleType)?.label || "-";
+        // Mesaj her zaman Türkçe
+        const message = corporateMessage({
+            ...form,
+            vehicleType: getDictionary("tr").carRental.corporate.types[form.vehicleType],
+            locale,
+        });
 
-        const lines = [
-            "Merhaba, kurumsal aylık araç kiralama talebim var.",
-            "",
-            `• Firma: ${form.company || "-"}`,
-            `• Yetkili: ${form.contactName || "-"}`,
-            `• Telefon: ${form.phone || "-"}`,
-            form.email ? `• E-posta: ${form.email}` : null,
-            `• Kiralama Başlangıcı: ${form.startDate || "-"}`,
-            `• Kiralama Bitişi: ${form.endDate || "-"}`,
-            form.months ? `• Süre: ${form.months} ay` : null,
-            `• Araç Tipi: ${vehicleTypeLabel}`,
-            `• Adet: ${form.quantity}`,
-            form.notes ? `• Not: ${form.notes}` : null,
-        ].filter(Boolean);
-
-        const text = lines.join("\n");
-        const url = `https://wa.me/908503096100?text=${encodeURIComponent(text)}`;
-        window.open(url, "_blank", "noopener,noreferrer");
+        const url = waHref(message);
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
     };
 
     const fieldCls =
         "w-full rounded-xl border border-surface-variant bg-canvas-offwhite px-4 py-3 font-label-md text-label-md text-charcoal-dark outline-none transition-all placeholder:text-secondary/50 focus:border-crimson-vivid focus:bg-white focus:ring-2 focus:ring-crimson-vivid/15";
-    const labelCls =
-        "mb-1.5 flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary";
+    const labelCls = "mb-1.5 flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary";
 
     return (
         <div className="overflow-hidden rounded-3xl bg-surface-white shadow-[0_20px_40px_-15px_rgba(15,17,21,0.09)]">
@@ -521,171 +451,98 @@ function CorporateForm() {
                         <Icon name="corporate_fare" className="text-[24px]" />
                     </span>
                     <div>
-                        <span className="mb-1 block font-label-uppercase text-label-uppercase text-crimson-vivid">
-                            Kurumsal Çözümler
-                        </span>
-                        <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-white">
-                            Aylık / Uzun Dönem Araç Kiralama
-                        </h2>
-                        <p className="mt-1 max-w-xl font-body-sm text-body-sm text-white/75">
-                            Firmanız için 1 ay ve üzeri filo kiralamalarında özel fiyatlandırma,
-                            ikame araç ve kurumsal faturalama avantajları.
-                        </p>
+                        <span className="mb-1 block font-label-uppercase text-label-uppercase text-crimson-vivid">{f.eyebrow}</span>
+                        <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-white">{f.title}</h2>
+                        <p className="mt-1 max-w-xl font-body-sm text-body-sm text-white/75">{f.text}</p>
                     </div>
                 </div>
             </div>
 
             <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 sm:p-8">
                 <div className="sm:col-span-2">
-                    <label className={labelCls}>
+                    <label htmlFor="corp-company" className={labelCls}>
                         <Icon name="business" className="text-[14px] text-crimson-vivid" />
-                        Firma Adı
+                        {f.company}
                     </label>
-                    <input
-                        required
-                        type="text"
-                        placeholder="Örn: ABC Turizm Ltd. Şti."
-                        value={form.company}
-                        onChange={update("company")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-company" required type="text" placeholder={f.companyPh} value={form.company} onChange={update("company")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-name" className={labelCls}>
                         <Icon name="person" className="text-[14px] text-crimson-vivid" />
-                        Yetkili Ad Soyad
+                        {f.contactName}
                     </label>
-                    <input
-                        required
-                        type="text"
-                        placeholder="Adınız Soyadınız"
-                        value={form.contactName}
-                        onChange={update("contactName")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-name" required type="text" placeholder={f.contactNamePh} value={form.contactName} onChange={update("contactName")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-phone" className={labelCls}>
                         <Icon name="call" className="text-[14px] text-crimson-vivid" />
-                        Telefon
+                        {f.phone}
                     </label>
-                    <input
-                        required
-                        type="tel"
-                        placeholder="05XX XXX XX XX"
-                        value={form.phone}
-                        onChange={update("phone")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-phone" required type="tel" dir="ltr" placeholder={f.phonePh} value={form.phone} onChange={update("phone")} className={fieldCls} />
                 </div>
 
                 <div className="sm:col-span-2">
-                    <label className={labelCls}>
+                    <label htmlFor="corp-email" className={labelCls}>
                         <Icon name="mail" className="text-[14px] text-crimson-vivid" />
-                        E-posta <span className="text-secondary/60">(opsiyonel)</span>
+                        {f.email} <span className="text-secondary/60">{f.optional}</span>
                     </label>
-                    <input
-                        type="email"
-                        placeholder="ornek@firma.com"
-                        value={form.email}
-                        onChange={update("email")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-email" type="email" dir="ltr" placeholder={f.emailPh} value={form.email} onChange={update("email")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-start" className={labelCls}>
                         <Icon name="calendar_today" className="text-[14px] text-crimson-vivid" />
-                        Kiralama Başlangıcı
+                        {f.startDate}
                     </label>
-                    <input
-                        required
-                        type="date"
-                        min={todayISO()}
-                        value={form.startDate}
-                        onChange={update("startDate")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-start" required type="date" min={todayISO()} value={form.startDate} onChange={update("startDate")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-end" className={labelCls}>
                         <Icon name="event_repeat" className="text-[14px] text-crimson-vivid" />
-                        Kiralama Bitişi
+                        {f.endDate} <span className="text-secondary/60">{f.optional}</span>
                     </label>
-                    <input
-                        type="date"
-                        min={form.startDate || todayISO()}
-                        value={form.endDate}
-                        onChange={update("endDate")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-end" type="date" min={form.startDate || todayISO()} value={form.endDate} onChange={update("endDate")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-months" className={labelCls}>
                         <Icon name="timelapse" className="text-[14px] text-crimson-vivid" />
-                        Kiralama Süresi (ay)
+                        {f.months}
                     </label>
-                    <input
-                        required
-                        type="number"
-                        min="1"
-                        max="24"
-                        placeholder="Örn: 6"
-                        value={form.months}
-                        onChange={update("months")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-months" required type="number" min="1" max="24" placeholder={f.monthsPh} value={form.months} onChange={update("months")} className={fieldCls} />
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-type" className={labelCls}>
                         <Icon name="directions_car" className="text-[14px] text-crimson-vivid" />
-                        Tercih Edilen Araç Tipi
+                        {f.vehicleType}
                     </label>
-                    <select
-                        value={form.vehicleType}
-                        onChange={update("vehicleType")}
-                        className={`${fieldCls} cursor-pointer`}
-                    >
-                        {CORPORATE_VEHICLE_TYPES.map((v) => (
-                            <option key={v.value} value={v.value}>
-                                {v.label}
+                    <select id="corp-type" value={form.vehicleType} onChange={update("vehicleType")} className={`${fieldCls} cursor-pointer`}>
+                        {typeKeys.map((key) => (
+                            <option key={key} value={key}>
+                                {f.types[key]}
                             </option>
                         ))}
                     </select>
                 </div>
 
                 <div>
-                    <label className={labelCls}>
+                    <label htmlFor="corp-qty" className={labelCls}>
                         <Icon name="inventory_2" className="text-[14px] text-crimson-vivid" />
-                        Araç Adedi
+                        {f.quantity}
                     </label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="50"
-                        value={form.quantity}
-                        onChange={update("quantity")}
-                        className={fieldCls}
-                    />
+                    <input id="corp-qty" type="number" min="1" max="50" value={form.quantity} onChange={update("quantity")} className={fieldCls} />
                 </div>
 
                 <div className="sm:col-span-2">
-                    <label className={labelCls}>
+                    <label htmlFor="corp-notes" className={labelCls}>
                         <Icon name="notes" className="text-[14px] text-crimson-vivid" />
-                        Ek Notlar <span className="text-secondary/60">(opsiyonel)</span>
+                        {f.notes} <span className="text-secondary/60">{f.optional}</span>
                     </label>
-                    <textarea
-                        rows={3}
-                        placeholder="Özel talepleriniz, şoför ihtiyacı, rota bilgisi vb."
-                        value={form.notes}
-                        onChange={update("notes")}
-                        className={`${fieldCls} resize-none`}
-                    />
+                    <textarea id="corp-notes" rows={3} placeholder={f.notesPh} value={form.notes} onChange={update("notes")} className={`${fieldCls} resize-none`} />
                 </div>
 
                 <div className="sm:col-span-2">
@@ -693,13 +550,10 @@ function CorporateForm() {
                         type="submit"
                         className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container px-6 py-4 font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_10px_25px_-5px_rgba(187,0,38,0.35)] transition-all hover:bg-crimson-vivid active:scale-[0.98]"
                     >
-                        <Icon name="send" className="text-[20px] transition-transform group-hover:translate-x-0.5" />
-                        <span>WhatsApp ile Başvuru Gönder</span>
+                        <Icon name="send" className="text-[20px] transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100" />
+                        <span>{f.submit}</span>
                     </button>
-                    <p className="mt-3 text-center font-body-sm text-body-sm text-secondary">
-                        Formu gönderdiğinizde WhatsApp üzerinden filo uzmanımıza ulaşır.
-                        En kısa sürede size özel fiyat teklifi iletilir.
-                    </p>
+                    <p className="mt-3 text-center font-body-sm text-body-sm text-secondary">{f.hint}</p>
                 </div>
             </form>
         </div>
@@ -721,9 +575,7 @@ function HeroBadge({ icon, text }) {
 
 function FieldWrapper({ children, className = "" }) {
     return (
-        <div
-            className={`group cursor-pointer rounded-2xl bg-canvas-offwhite/70 p-3 transition-colors hover:bg-canvas-offwhite ${className}`}
-        >
+        <div className={`group cursor-pointer rounded-2xl bg-canvas-offwhite/70 p-3 transition-colors hover:bg-canvas-offwhite ${className}`}>
             {children}
         </div>
     );
@@ -753,73 +605,71 @@ function SegmentPill({ active, onClick, icon, children }) {
             type="button"
             onClick={onClick}
             className={`shrink-0 rounded-full px-4 py-2.5 font-label-md text-label-md font-semibold transition-all ${active
-                ? "bg-primary-container text-on-primary shadow-sm"
-                : "bg-surface-white text-charcoal-dark shadow-sm hover:bg-canvas-offwhite"
+                    ? "bg-primary-container text-on-primary shadow-sm"
+                    : "bg-surface-white text-charcoal-dark shadow-sm hover:bg-canvas-offwhite"
                 }`}
         >
-            {icon && <Icon name={icon} className="mr-1.5 inline-block text-[16px] align-text-bottom" />}
+            {icon && <Icon name={icon} className="me-1.5 inline-block align-text-bottom text-[16px]" />}
             {children}
         </button>
     );
 }
 
-function VehicleRow({ vehicle, days = 3 }) {
-    const priceNum = priceOf(vehicle);
-    const totalPrice =
-        days && days !== 3
-            ? `₺${(priceNum * (days / 3)).toLocaleString("tr-TR")}`
-            : vehicle.price3Days;
+function VehicleRow({ vehicle, quote, query }) {
+    const { t, tpl, locale } = useLanguage();
+    const c = t.carRental;
+
+    const name = localized(vehicle.name, locale);
+    const badge = localized(vehicle.badge, locale);
+    const ok = quote?.status === "ok" ? quote.data : null;
+    const loading = quote?.status === "loading";
+    const avgDaily = ok ? ok.rentalTotal / ok.days : vehicle.defaultDailyPrice;
+    const money = (amount) => formatPrice(amount, vehicle.currency, locale);
 
     return (
         <article className="group flex flex-col gap-5 rounded-2xl bg-surface-white p-4 shadow-sm transition-all duration-300 hover:shadow-[0_20px_35px_-10px_rgba(187,0,38,0.12)] sm:p-6 lg:flex-row lg:items-stretch lg:gap-6 lg:p-7">
             <div className="flex w-full flex-col lg:w-[32%]">
                 <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full px-3 py-1 font-label-uppercase text-label-uppercase font-bold ${vehicle.badgeClass}`}>
-                        {vehicle.badge}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-canvas-offwhite px-2.5 py-0.5 font-label-md text-label-md text-secondary">
-                        <Icon name="star" fill className="text-[14px] text-amber-400" />
-                        <span>{vehicle.rating}</span>
-                    </span>
+                    {badge && (
+                        <span className={`rounded-full px-3 py-1 font-label-uppercase text-label-uppercase font-bold ${TONES[vehicle.badgeTone] ?? TONES.surface}`}>
+                            {badge}
+                        </span>
+                    )}
                 </div>
 
                 <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-charcoal-dark transition-colors group-hover:text-crimson-vivid">
-                    {vehicle.name}
+                    {name}
                 </h2>
-                <p className="mb-3 font-body-sm text-body-sm text-secondary">
-                    {vehicle.tagline}
-                </p>
+                <p className="mb-3 font-body-sm text-body-sm text-secondary">{localized(vehicle.tagline, locale)}</p>
 
                 <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/50 p-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        src={vehicle.image}
-                        alt={vehicle.name}
+                    <SafeImage
+                        src={mediaUrl(vehicle.image, "md")}
+                        alt={mediaAlt(vehicle.image, locale, name)}
                         loading="lazy"
                         className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                 </div>
 
-                <div className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full bg-canvas-offwhite px-3 py-1 font-label-uppercase text-label-uppercase text-secondary">
-                    <Icon name="check_circle" className="text-[14px] text-emerald-600" />
-                    <span className="text-[10px] sm:text-[11px]">{vehicle.guarantee}</span>
-                </div>
+                {vehicle.guarantee && (
+                    <div className="mt-3 inline-flex items-center gap-1.5 self-start rounded-full bg-canvas-offwhite px-3 py-1 font-label-uppercase text-label-uppercase text-secondary">
+                        <Icon name="check_circle" className="text-[14px] text-emerald-600" />
+                        <span className="text-[10px] sm:text-[11px]">{localized(vehicle.guarantee, locale)}</span>
+                    </div>
+                )}
             </div>
 
             <div className="flex w-full flex-col justify-center lg:w-[40%]">
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {vehicle.specs.map((s) => (
-                        <div
-                            key={s.label}
-                            className="flex items-center gap-2 rounded-xl bg-canvas-offwhite/70 p-2.5"
-                        >
+                    {vehicle.specs.map((s, i) => (
+                        <div key={i} className="flex items-center gap-2 rounded-xl bg-canvas-offwhite/70 p-2.5">
                             <Icon name={s.icon} className="shrink-0 text-[18px] text-crimson-vivid sm:text-[20px]" />
                             <div className="min-w-0">
-                                <div className="truncate font-label-uppercase text-label-uppercase text-secondary text-[9px] sm:text-[10px]">
-                                    {s.label}
+                                <div className="truncate font-label-uppercase text-label-uppercase text-[9px] text-secondary sm:text-[10px]">
+                                    {localized(s.label, locale)}
                                 </div>
-                                <div className="truncate font-label-md text-label-md font-semibold text-charcoal-dark text-[12px] sm:text-[13px]">
-                                    {s.value}
+                                <div className="truncate font-label-md text-label-md text-[12px] font-semibold text-charcoal-dark sm:text-[13px]">
+                                    {localized(s.value, locale)}
                                 </div>
                             </div>
                         </div>
@@ -828,41 +678,45 @@ function VehicleRow({ vehicle, days = 3 }) {
 
                 <div className="mt-3 flex items-start gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 font-label-md text-label-md text-emerald-700">
                     <Icon name="verified" className="mt-0.5 shrink-0 text-[16px]" />
-                    <span className="text-[11px] leading-snug sm:text-[12px]">
-                        Son 24 Saate Kadar Ücretsiz İptal & Kesintisiz İade
-                    </span>
+                    <span className="text-[11px] leading-snug sm:text-[12px]">{c.row.freeCancel}</span>
                 </div>
             </div>
 
             <div className="flex w-full flex-col justify-between gap-4 rounded-2xl bg-canvas-offwhite/40 p-4 sm:p-5 lg:w-[28%] lg:bg-transparent lg:p-0">
                 <div>
-                    {vehicle.oldPrice && (
-                        <div className="font-body-sm text-body-sm text-secondary line-through">
-                            {vehicle.oldPrice}
+                    {/* Toplam: backend'den gelen dönem fiyatı. Hesaplanırken küçük animasyon, alamazsak günlük fiyat. */}
+                    {loading ? (
+                        <div className="flex items-center gap-2" aria-busy="true">
+                            <Icon name="progress_activity" className="animate-spin text-[22px] text-crimson-vivid" />
+                            <span className="h-8 w-28 animate-pulse rounded-lg bg-surface-variant" />
+                        </div>
+                    ) : (
+                        <div className="font-price-lg text-price-lg font-extrabold text-crimson-vivid">
+                            {ok ? money(ok.rentalTotal) : money(vehicle.defaultDailyPrice)}
+                            {!ok && <span className="ms-1 font-label-md text-label-md font-normal text-secondary">/ {c.row.perDay}</span>}
                         </div>
                     )}
-                    <div className="mt-0.5 font-price-lg text-price-lg font-extrabold text-crimson-vivid">
-                        {totalPrice}
-                    </div>
-                    <div className="font-label-md text-label-md text-secondary">
-                        {days} Günlük Toplam •{" "}
-                        <span className="font-semibold text-emerald-700">
-                            Günlük {vehicle.dailyPrice}
-                        </span>
-                    </div>
+
+                    {ok && (
+                        <div className="font-label-md text-label-md text-secondary">
+                            {tpl(c.row.daysTotal, { days: ok.days })} •{" "}
+                            <span className="font-semibold text-emerald-700">{tpl(c.row.daily, { price: money(avgDaily) })}</span>
+                        </div>
+                    )}
+
                     <div className="mt-1 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
                         <Icon name="shield" className="text-[14px] text-crimson-vivid" />
-                        <span>KDV, Tam Kasko Dahil</span>
+                        <span>{c.row.taxIncluded}</span>
                     </div>
                 </div>
 
-                <a
-                    href={`/arac-kiralama/${vehicle.slug}`}
+                <Link
+                    href={`/arac-kiralama/${vehicle.slug}?${query}`}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary-container px-4 py-3 font-headline-sm text-headline-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-crimson-vivid"
                 >
-                    <span>Hemen Kirala</span>
-                    <Icon name="arrow_forward" className="text-[18px]" />
-                </a>
+                    <span>{c.row.rentNow}</span>
+                    <Icon name="arrow_forward" className="text-[18px] rtl:-scale-x-100" />
+                </Link>
             </div>
         </article>
     );
@@ -876,18 +730,14 @@ const ADVANTAGE_TONES = {
 };
 
 function AdvantageCard({ icon, tone, title, text }) {
-    const t = ADVANTAGE_TONES[tone] || ADVANTAGE_TONES.primary;
+    const style = ADVANTAGE_TONES[tone] || ADVANTAGE_TONES.primary;
     return (
         <div className="flex flex-col items-start rounded-2xl bg-surface-white p-5 shadow-sm transition-shadow hover:shadow-md">
-            <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-2xl ${t.wrapper}`}>
-                <Icon name={icon} className={`text-[26px] ${t.icon}`} />
+            <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-2xl ${style.wrapper}`}>
+                <Icon name={icon} className={`text-[26px] ${style.icon}`} />
             </div>
-            <h4 className="mb-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                {title}
-            </h4>
-            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">
-                {text}
-            </p>
+            <h4 className="mb-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">{title}</h4>
+            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{text}</p>
         </div>
     );
 }
@@ -900,15 +750,12 @@ function FaqItem({ question, answer }) {
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
-                className="flex w-full items-center justify-between gap-4 p-5 text-left focus:outline-none"
+                className="flex w-full items-center justify-between gap-4 p-5 text-start focus:outline-none"
             >
-                <span className="font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                    {question}
-                </span>
+                <span className="font-headline-sm text-headline-sm font-bold text-charcoal-dark">{question}</span>
                 <Icon
                     name="expand_more"
-                    className={`shrink-0 text-[22px] text-secondary transition-transform duration-300 ${open ? "rotate-180" : ""
-                        }`}
+                    className={`shrink-0 text-[22px] text-secondary transition-transform duration-300 ${open ? "rotate-180" : ""}`}
                 />
             </button>
             <AnimatePresence initial={false}>
@@ -920,9 +767,7 @@ function FaqItem({ question, answer }) {
                         transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                         className="overflow-hidden"
                     >
-                        <p className="px-5 pb-5 font-body-sm text-body-sm leading-relaxed text-secondary">
-                            {answer}
-                        </p>
+                        <p className="px-5 pb-5 font-body-sm text-body-sm leading-relaxed text-secondary">{answer}</p>
                     </motion.div>
                 )}
             </AnimatePresence>
