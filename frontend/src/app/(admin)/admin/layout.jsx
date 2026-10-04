@@ -8,13 +8,15 @@ export const metadata = {
 };
 
 export default async function AdminRootLayout({ children }) {
-    // Login sayfası da bu layout'u kullanır, bu yüzden burada yönlendirme yok;
-    // koruma middleware'de ve her sayfanın requireSession çağrısında.
     const payload = readToken((await cookies()).get(ADMIN_COOKIE)?.value);
 
     return (
-        <div className="admin-root" data-signed-in={payload ? "1" : "0"}>
-            {children}
-        </div>
+        <html lang="tr">
+            <body>
+                <div className="admin-root" data-signed-in={payload ? "1" : "0"}>
+                    {children}
+                </div>
+            </body>
+        </html>
     );
 }

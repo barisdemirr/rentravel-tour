@@ -1,3 +1,9 @@
+ @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block") layer(gfonts);
+  @import "tailwindcss";
+
+
 /* Admin paneli teması: kırmızı + beyaz, site renkleriyle uyumlu */
 .admin-root {
     --ad-bg: #f6f7f9;
@@ -19,4 +25,121 @@
 
 .admin-root ::selection {
     background: var(--ad-brand-soft);
+}
+
+
+/* ════════════════════════════════════════════
+   YÖNETİM PANELİ TASARIM SİSTEMİ
+   Site temasından ayrı, "ad-" önekiyle çakışmaz
+   ════════════════════════════════════════════ */
+@theme {
+    /* Zemin ve yüzeyler */
+    --color-ad-canvas: #f4f5f7;
+    --color-ad-surface: #ffffff;
+    --color-ad-sunken: #f8f9fb;
+    --color-ad-line: #e8eaee;
+    --color-ad-line-strong: #d6d9e0;
+
+    /* Metin */
+    --color-ad-ink: #11131a;
+    --color-ad-body: #3d424e;
+    --color-ad-muted: #767d8c;
+    --color-ad-faint: #a4aab6;
+
+    /* Marka (site kırmızısı) */
+    --color-ad-brand: #d90429;
+    --color-ad-brand-dark: #a80320;
+    --color-ad-brand-soft: #fdeaee;
+    --color-ad-brand-line: #f6c6cf;
+
+    /* Sidebar */
+    --color-ad-nav: #0e1016;
+    --color-ad-nav-soft: #171a23;
+    --color-ad-nav-text: #8b93a3;
+
+    /* Durum */
+    --color-ad-ok: #0f9960;
+    --color-ad-ok-soft: #e7f6ef;
+    --color-ad-warn: #b4690e;
+    --color-ad-warn-soft: #fdf2e3;
+
+    /* Gölgeler: katmanlı, yumuşak */
+    --shadow-ad-sm: 0 1px 2px rgb(17 19 26 / 0.04), 0 1px 3px rgb(17 19 26 / 0.06);
+    --shadow-ad: 0 2px 4px rgb(17 19 26 / 0.03), 0 8px 20px -6px rgb(17 19 26 / 0.1);
+    --shadow-ad-lg: 0 4px 8px rgb(17 19 26 / 0.04), 0 20px 48px -12px rgb(17 19 26 / 0.18);
+    --shadow-ad-brand: 0 6px 20px -6px rgb(217 4 41 / 0.45);
+}
+
+/* Panel kökü: site stillerinden yalıtım */
+.admin-root {
+    min-height: 100dvh;
+    background-color: var(--color-ad-canvas);
+    color: var(--color-ad-ink);
+    letter-spacing: 0;
+    /* Çok ince kağıt dokusu, düz zemini kırar */
+    background-image: radial-gradient(circle at 1px 1px, rgb(17 19 26 / 0.025) 1px, transparent 0);
+    background-size: 22px 22px;
+}
+
+.admin-root ::selection {
+    background: var(--color-ad-brand-soft);
+    color: var(--color-ad-brand-dark);
+}
+
+/* Sidebar: derinlik için üstten alta hafif gradyan + sağda ışık çizgisi */
+.ad-nav {
+    background: linear-gradient(180deg, #171a23 0%, #0e1016 55%, #0b0d12 100%);
+    box-shadow: inset -1px 0 0 rgb(255 255 255 / 0.06);
+}
+
+/* Aktif menü öğesi: dolgu yerine yanan kenar + yumuşak ışık */
+.ad-nav-active {
+    background: linear-gradient(90deg, rgb(217 4 41 / 0.22) 0%, rgb(217 4 41 / 0.04) 100%);
+    box-shadow: inset 2px 0 0 var(--color-ad-brand);
+}
+
+/* Form alanları: tek yerde tanımlı, her sayfada tekrar yazılmaz */
+.ad-field {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid var(--color-ad-line-strong);
+    background: var(--color-ad-surface);
+    padding: 0.7rem 0.9rem;
+    font-size: 0.875rem;
+    color: var(--color-ad-ink);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ad-field::placeholder {
+    color: var(--color-ad-faint);
+}
+
+.ad-field:focus {
+    border-color: var(--color-ad-brand);
+    box-shadow: 0 0 0 3px rgb(217 4 41 / 0.12);
+}
+
+.ad-field:disabled {
+    background: var(--color-ad-sunken);
+    color: var(--color-ad-muted);
+}
+
+.ad-field[aria-invalid="true"] {
+    border-color: var(--color-ad-brand);
+    background: var(--color-ad-brand-soft);
+}
+
+/* Kart yüzeyi */
+.ad-card {
+    border-radius: 1rem;
+    border: 1px solid var(--color-ad-line);
+    background: var(--color-ad-surface);
+    box-shadow: var(--shadow-ad-sm);
+}
+
+/* Panel içinde odak halkası tutarlı olsun */
+.admin-root :focus-visible {
+    outline: 2px solid var(--color-ad-brand);
+    outline-offset: 2px;
 }
