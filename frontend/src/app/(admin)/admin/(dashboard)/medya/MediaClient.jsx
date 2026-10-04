@@ -10,6 +10,7 @@ import { useToast } from "@/components/admin/Toast";
 import LocalizedField, { cleanLocalized, toLocalized } from "@/components/admin/LocalizedField";
 import { Field, SelectInput, Switch } from "@/components/admin/fields";
 import { adminDelete, adminPut, adminUpload } from "@/lib/admin/client";
+import { assetUrl } from "@/lib/admin/media";
 
 const CATEGORIES = [
     { value: "General", label: "Genel" },
@@ -91,9 +92,8 @@ export default function MediaClient({ assets, failed }) {
         setBusy(true);
         try {
             await adminPut(`/admin/media/${editing.id}`, {
-                alt: cleanLocalized(form.alt),
                 category: form.category,
-                isActive: form.isActive,
+                altText: cleanLocalized(form.alt),
             });
             toast.success("Dosya bilgileri güncellendi.");
             setEditing(null);
@@ -200,7 +200,7 @@ export default function MediaClient({ assets, failed }) {
                             <div className="relative aspect-square bg-ad-sunken">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
-                                    src={asset.urls.thumb}
+                                    src={assetUrl(asset, "thumb")}
                                     alt={asset.altText?.tr ?? ""}
                                     loading="lazy"
                                     className="h-full w-full object-cover"
@@ -214,7 +214,7 @@ export default function MediaClient({ assets, failed }) {
 
                                 <div className="absolute inset-0 flex items-center justify-center gap-1.5 bg-ad-ink/60 opacity-0 transition-opacity group-hover:opacity-100">
                                     <a
-                                        href={asset.urls.original}
+                                        href={assetUrl(asset, "original")}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         title="Büyük boyutta aç"
@@ -280,26 +280,19 @@ export default function MediaClient({ assets, failed }) {
                     />
                 </div>
 
-                <Field label="Kategori">
-                    <SelectInput
-                        value={form.category}
-                        onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    >
-                        {CATEGORIES.map((c) => (
-                            <option key={c.value} value={c.value}>
-                                {c.label}
-                            </option>
-                        ))}
-                    </SelectInput>
-                </Field>
-
-                <div className="flex items-end">
-                    <Switch
-                        label="Kullanımda"
-                        hint="Kapalıyken seçicide görünmez"
-                        checked={form.isActive}
-                        onChange={(v) => setForm((f) => ({ ...f, isActive: v }))}
-                    />
+                <div className="sm:col-span-2">
+                    <Field label="Kategori">
+                        <SelectInput
+                            value={form.category}
+                            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                        >
+                            {CATEGORIES.map((c) => (
+                                <option key={c.value} value={c.value}>
+                                    {c.label}
+                                </option>
+                            ))}
+                        </SelectInput>
+                    </Field>
                 </div>
             </FormDialog>
 

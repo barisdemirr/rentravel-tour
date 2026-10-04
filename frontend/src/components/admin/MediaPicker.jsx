@@ -6,6 +6,7 @@ import { useToast } from "@/components/admin/Toast";
 import { adminGet, adminUpload } from "@/lib/admin/client";
 import { mediaUrl } from "@/lib/media";
 import { Field } from "./fields";
+import { absoluteUrl, assetUrl } from "@/lib/admin/media";
 
 /**
  * Tek görsel (multiple=false) veya galeri (multiple=true) seçer.
@@ -51,7 +52,7 @@ export default function MediaPicker({ label, value, onChange, multiple = false, 
                         className="group relative h-24 w-32 overflow-hidden rounded-xl border border-ad-line bg-ad-sunken"
                     >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={mediaUrl(item, "thumb")} alt="" className="h-full w-full object-cover" />
+                        <img src={absoluteUrl(item.url)} alt="" className="h-full w-full object-cover" />
 
                         <div className="absolute inset-0 flex items-center justify-center gap-1 bg-ad-ink/60 opacity-0 transition-opacity group-hover:opacity-100">
                             {multiple && (
@@ -239,7 +240,7 @@ function MediaBrowser({ category, selectedIds, onPick, onClose }) {
                                     >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
-                                            src={asset.urls.thumb}
+                                            src={assetUrl(asset, "thumb")}
                                             alt=""
                                             loading="lazy"
                                             className="h-full w-full object-cover"

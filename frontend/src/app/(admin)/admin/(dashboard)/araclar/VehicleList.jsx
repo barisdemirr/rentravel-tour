@@ -10,6 +10,7 @@ import { useToast } from "@/components/admin/Toast";
 import { adminDelete, adminGet, adminPut } from "@/lib/admin/client";
 import { sortByOrder } from "@/lib/admin/reorder";
 import { mediaUrl } from "@/lib/media";
+import { absoluteUrl } from "@/lib/admin/media";
 
 const money = (amount, currency) =>
     new Intl.NumberFormat("tr-TR", { style: "currency", currency: currency || "TRY", maximumFractionDigits: 0 }).format(
@@ -69,7 +70,7 @@ export default function VehicleList({ rows, failed }) {
                     <span className="h-12 w-16 shrink-0 overflow-hidden rounded-lg bg-ad-sunken">
                         {row.image ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={mediaUrl(row.image, "thumb")} alt="" className="h-full w-full object-cover" />
+                            <img src={absoluteUrl(row.image?.url)} alt="" className="h-full w-full object-cover" />
                         ) : (
                             <span className="flex h-full w-full items-center justify-center text-ad-faint">
                                 <Icon name="directions_car" className="text-[20px]" />
@@ -148,7 +149,7 @@ export default function VehicleList({ rows, failed }) {
                             <span className="h-9 w-12 shrink-0 overflow-hidden rounded-md bg-ad-sunken">
                                 {row.image && (
                                     // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={mediaUrl(row.image, "thumb")} alt="" className="h-full w-full object-cover" />
+                                    <img src={absoluteUrl(row.image?.url)} alt="" className="h-full w-full object-cover" />
                                 )}
                             </span>
                             <span className="truncate text-sm font-semibold">{row.name?.tr}</span>
