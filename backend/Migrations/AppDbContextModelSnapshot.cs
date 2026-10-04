@@ -277,6 +277,136 @@ namespace rentravel.Migrations
                     b.ToTable("TourCategories", (string)null);
                 });
 
+            modelBuilder.Entity("Rentravel.Domain.Entities.Vehicle", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Badge")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BadgeTone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<decimal>("DefaultDailyPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Delivery")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Deposit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DetailedSpecs")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DriverRequirements")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ExtraKmPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Extras")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gallery")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Guarantee")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("KmLimit")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Office")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OgImage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Rating")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid?>("SegmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SeoDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SeoKeywords")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SeoTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Specs")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tagline")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SegmentId");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasFilter("[DeletedAt] IS NULL");
+
+                    b.HasIndex("IsActive", "IsFeatured");
+
+                    b.ToTable("Vehicles", (string)null);
+                });
+
             modelBuilder.Entity("Rentravel.Domain.Entities.VehicleExtra", b =>
                 {
                     b.Property<Guid>("Id")
@@ -388,6 +518,16 @@ namespace rentravel.Migrations
                         .WithMany()
                         .HasForeignKey("UploadedBy")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Rentravel.Domain.Entities.Vehicle", b =>
+                {
+                    b.HasOne("Rentravel.Domain.Entities.VehicleSegment", "Segment")
+                        .WithMany()
+                        .HasForeignKey("SegmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Segment");
                 });
 #pragma warning restore 612, 618
         }
