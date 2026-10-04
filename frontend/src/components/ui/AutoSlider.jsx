@@ -2,16 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import Icon from "./Icon";
 
 const AUTO_INTERVAL = 3000;
 
-export default function AutoSlider({
-    children,
-    ariaLabel = "İçerik kaydırıcı",
-    className = "",
-    showControls = true,
-}) {
+export default function AutoSlider({ children, ariaLabel, className = "", showControls = true }) {
+    const { t, isRtl } = useLanguage();
     const trackRef = useRef(null);
     const sectionRef = useRef(null);
     const reduce = useReducedMotion();
@@ -19,6 +16,9 @@ export default function AutoSlider({
     const [tabHidden, setTabHidden] = useState(false);
     const [paused, setPaused] = useState(false);
     const [canScroll, setCanScroll] = useState(false);
+
+    // RTL'de scrollLeft negatiftir: ileri = sola, geri = sağa
+    const sign = isRtl ? -1 : 1;
 
     // Tab gizliyken durdur
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function AutoSlider({
         return () => ro.disconnect();
     }, [children]);
 
-    // Tek kart genişliği + gap hesapla
+    // Tek kart genişliği + gap
     const getStep = useCallback(() => {
         const el = trackRef.current;
         if (!el || !el.firstElementChild) return 0;
@@ -51,26 +51,26 @@ export default function AutoSlider({
         if (!el) return;
         const step = getStep();
         if (!step) return;
-        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+        const atEnd = Math.abs(el.scrollLeft) + el.clientWidth >= el.scrollWidth - 8;
         if (atEnd) {
             el.scrollTo({ left: 0, behavior: "smooth" });
         } else {
-            el.scrollBy({ left: step, behavior: "smooth" });
+            el.scrollBy({ left: sign * step, behavior: "smooth" });
         }
-    }, [getStep]);
+    }, [getStep, sign]);
 
     const scrollPrev = useCallback(() => {
         const el = trackRef.current;
         if (!el) return;
         const step = getStep();
         if (!step) return;
-        const atStart = el.scrollLeft <= 8;
+        const atStart = Math.abs(el.scrollLeft) <= 8;
         if (atStart) {
-            el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+            el.scrollTo({ left: sign * el.scrollWidth, behavior: "smooth" });
         } else {
-            el.scrollBy({ left: -step, behavior: "smooth" });
+            el.scrollBy({ left: -sign * step, behavior: "smooth" });
         }
-    }, [getStep]);
+    }, [getStep, sign]);
 
     // Auto-scroll döngüsü
     useEffect(() => {
@@ -97,22 +97,22 @@ export default function AutoSlider({
         >
             {/* Oklar */}
             {showControls && canScroll && (
-                <div className="pointer-events-none absolute -top-14 right-0 hidden items-center gap-2 md:flex">
+                <div className="pointer-events-none absolute -top-14 end-0 hidden items-center gap-2 md:flex">
                     <button
                         type="button"
-                        aria-label="Önceki"
+                        aria-label={t.common.prev}
                         onClick={scrollPrev}
                         className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-xl bg-surface-white text-charcoal-dark shadow-sm transition-colors hover:bg-primary-container hover:text-on-primary"
                     >
-                        <Icon name="chevron_left" className="text-[20px]" />
+                        <Icon name={isRtl ? "chevron_right" : "chevron_left"} className="text-[20px]" />
                     </button>
                     <button
                         type="button"
-                        aria-label="Sonraki"
+                        aria-label={t.common.next}
                         onClick={scrollNext}
                         className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-xl bg-surface-white text-charcoal-dark shadow-sm transition-colors hover:bg-primary-container hover:text-on-primary"
                     >
-                        <Icon name="chevron_right" className="text-[20px]" />
+                        <Icon name={isRtl ? "chevron_left" : "chevron_right"} className="text-[20px]" />
                     </button>
                 </div>
             )}
