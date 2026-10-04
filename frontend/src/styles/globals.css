@@ -206,3 +206,11 @@ html[dir="rtl"] .material-symbols-outlined {
 html[data-splash-seen="1"] .splash-root {
   display: none;
 }
+
+
+/* Sabit alt çubuk (araç detay) varken yüzen WhatsApp düğmesi çubuğun üstünde kalsın */
+@media (max-width: 1023px) {
+  body:has([data-sticky-cta]) a[href^="https://wa.me"].fixed {
+    bottom: 5.5rem;
+  }
+}

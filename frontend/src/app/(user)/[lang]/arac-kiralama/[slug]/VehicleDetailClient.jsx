@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import DateField from "@/components/ui/DateField";
 import Icon from "@/components/ui/Icon";
-import SafeImage from "@/components/ui/SafeImage";
 import Link from "@/components/ui/LocalizedLink";
+import SafeImage from "@/components/ui/SafeImage";
+import TimeField from "@/components/ui/TimeField";
 import { SITE, waHref } from "@/lib/constants";
 import { plusDays, rentalDays as calcDays, todayISO } from "@/lib/dates";
 import { formatPrice } from "@/lib/format";
@@ -63,7 +65,8 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                     extraIds: selected,
                 });
                 if (!cancelled) setQuote({ status: "ok", data });
-            } catch {
+            } catch (error) {
+                console.error("[quote]", error);
                 if (!cancelled) setQuote({ status: "error" });
             }
         }, 400);
@@ -104,6 +107,140 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
     const images = [vehicle.image, ...(vehicle.gallery ?? [])].filter(Boolean);
     const specs = vehicle.detailedSpecs ?? [];
 
+    /* Rezervasyon paneli: mobilde hero kartının hemen altında, masaüstünde sağda sabit */
+    const bookingPanel = (
+        <div className="flex flex-col gap-5 rounded-3xl bg-surface-white p-4 shadow-[0_16px_36px_-6px_rgba(15,17,21,0.08)] sm:gap-6 sm:p-7">
+            {/* FİYAT BAŞLIĞI */}
+            <div className="flex flex-col gap-1.5 rounded-2xl bg-charcoal-dark p-4 text-white shadow-md sm:p-5">
+                <span className="font-label-uppercase text-label-uppercase text-white/70">{p.dailyRate}</span>
+                <div className="flex items-baseline gap-2">
+                    <span className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-white md:font-headline-lg md:text-headline-lg">
+                        {money(avgDaily)}
+                    </span>
+                    <span className="font-body-sm text-body-sm text-white/60">{p.perDay}</span>
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/75">
+                    <Icon name="verified" className="text-[14px] text-crimson-vivid" />
+                    <span>{p.included}</span>
+                </div>
+            </div>
+
+            {/* TAKVİM */}
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                    <span className="font-label-md text-label-md font-bold text-charcoal-dark">{p.calendar}</span>
+                    {periodValid && (
+                        <span className="rounded-full bg-primary-fixed/40 px-2.5 py-0.5 font-label-md text-label-md font-bold text-crimson-vivid">
+                            {tpl(p.daysBadge, { days: shownDays })}
+                        </span>
+                    )}
+                </div>
+
+                <DateBlock
+                    icon="calendar_today"
+                    label={p.pickup}
+                    date={pickupDate}
+                    time={pickupTime}
+                    onDateChange={(v) => {
+                        setPickupDate(v);
+                        if (v > returnDate) setReturnDate(plusDays(v, 3));
+                    }}
+                    onTimeChange={setPickupTime}
+                    dateMin={ready ? todayISO() : undefined}
+                />
+                <DateBlock
+                    icon="event_available"
+                    label={p.return}
+                    date={returnDate}
+                    time={returnTime}
+                    onDateChange={setReturnDate}
+                    onTimeChange={setReturnTime}
+                    dateMin={pickupDate || undefined}
+                />
+
+                {ready && !periodValid && (
+                    <p className="rounded-xl bg-crimson-vivid/10 px-3 py-2 font-label-md text-label-md text-crimson-vivid">
+                        {p.periodError}
+                    </p>
+                )}
+            </div>
+
+            {/* FİYAT DÖKÜMÜ (backend hesabı) */}
+            <div className="flex flex-col gap-2.5 rounded-2xl bg-canvas-offwhite p-4" aria-busy={loading}>
+                {quote.status === "error" && (
+                    <p className="font-body-sm text-body-sm text-crimson-vivid">{p.quoteError}</p>
+                )}
+
+                {q &&
+                    q.rentalLines.map((line, i) => (
+                        <div key={i} className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
+                            <span className="text-secondary">
+                                {tpl(p.lineFormat, { days: line.periods, price: money(line.unitPrice) })}
+                                {line.label && (
+                                    <span className="block text-[11px] text-secondary/70">{localized(line.label, locale)}</span>
+                                )}
+                            </span>
+                            <span className="shrink-0 font-semibold text-charcoal-dark">{money(line.subtotal)}</span>
+                        </div>
+                    ))}
+
+                <div className="flex items-center justify-between font-body-sm text-body-sm">
+                    <span className="text-secondary">{p.airport}</span>
+                    <span className="font-semibold text-emerald-600">{p.free}</span>
+                </div>
+                <div className="flex items-center justify-between font-body-sm text-body-sm">
+                    <span className="text-secondary">{p.extras}</span>
+                    <span className="font-semibold text-charcoal-dark">{money(q?.extrasTotal ?? 0)}</span>
+                </div>
+
+                <div className="mt-1 flex items-center justify-between gap-3 border-t border-surface-variant pt-2.5">
+                    <span className="font-headline-sm text-headline-sm font-bold text-charcoal-dark">{p.total}</span>
+                    <span className="flex items-center gap-2 font-headline-md text-headline-md font-extrabold text-crimson-vivid">
+                        {loading && <Icon name="progress_activity" className="animate-spin text-[18px]" />}
+                        {q ? money(q.total) : "—"}
+                    </span>
+                </div>
+            </div>
+
+            {/* CTA'LAR */}
+            <div className="flex flex-col gap-3">
+                <a
+                    href={whatsappHref ?? "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-4 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-all hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
+                >
+                    <Icon name="chat" className="text-[22px]" />
+                    <span>{p.whatsapp}</span>
+                </a>
+                <a
+                    href={SITE.phoneHref}
+                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-charcoal-dark py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-sm transition-colors hover:bg-charcoal-surface"
+                >
+                    <Icon name="call" className="text-[18px]" />
+                    <span>{p.phone}</span>
+                </a>
+            </div>
+
+            {/* GÜVENLİK / DESTEK */}
+            <div className="flex flex-col gap-2 pt-1 font-body-sm text-body-sm text-secondary">
+                <div className="flex items-center gap-2">
+                    <Icon name="support_agent" className="text-[18px] text-crimson-vivid" />
+                    <span>
+                        {p.support}{" "}
+                        <a href={SITE.phoneHref} dir="ltr" className="font-bold text-charcoal-dark hover:underline">
+                            {SITE.phone}
+                        </a>
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Icon name="verified" className="text-[18px] text-crimson-vivid" />
+                    <span>{p.digital}</span>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <>
             {/* Mobil alt CTA bar için boşluk */}
@@ -111,7 +248,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                 {/* Breadcrumb */}
                 <nav
                     aria-label={d.breadcrumbLabel}
-                    className="mb-5 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap font-label-md text-label-md text-secondary"
+                    className="no-scrollbar mb-4 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap font-label-md text-label-md text-secondary"
                 >
                     <Link href="/" className="transition-colors hover:text-crimson-vivid">
                         {d.home}
@@ -124,14 +261,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                     <span className="font-semibold text-charcoal-dark">{name}</span>
                 </nav>
 
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-                    {/* ═══ SOL KOLON ═══ */}
-                    <div className="flex flex-col gap-5 lg:col-span-8">
-                        {/* ARAÇ HERO KARTI */}
-                        <div className="relative overflow-hidden rounded-3xl bg-surface-white p-5 shadow-sm sm:p-7">
+                {/* Mobilde sıra: hero, rezervasyon paneli, diğer bölümler. Masaüstünde: sol hero + diğerleri, sağda sabit panel */}
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-x-8">
+                    {/* ═══ ARAÇ HERO KARTI ═══ */}
+                    <div className="min-w-0 lg:col-span-8 lg:col-start-1 lg:row-start-1">
+                        <div className="relative overflow-hidden rounded-3xl bg-surface-white p-4 shadow-sm sm:p-7">
                             <div className="pointer-events-none absolute -end-20 -top-20 h-80 w-80 rounded-full bg-crimson-vivid/5 blur-3xl" />
 
-                            <div className="relative z-10 mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <div className="relative z-10 mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <span className="inline-flex items-center gap-1.5 rounded-full bg-canvas-offwhite px-3 py-1.5 font-label-md text-label-md font-medium text-charcoal-dark">
                                     <Icon name="check_circle" fill className="text-[16px] text-emerald-600" />
                                     {d.freeCancel}
@@ -142,7 +279,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
 
                             <div className="relative z-10 mb-4 flex flex-col gap-1">
-                                <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-charcoal-dark md:font-headline-lg md:text-headline-lg">
+                                <h1 className="break-words font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-charcoal-dark md:font-headline-lg md:text-headline-lg">
                                     {name}
                                 </h1>
                                 {vehicle.guarantee && (
@@ -154,12 +291,12 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
 
                             {/* Araç görseli (+ galeri küçük resimleri) */}
-                            <div className="relative mb-5 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/60 px-4 py-6">
+                            <div className="relative mb-4 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/60 px-3 py-4 sm:mb-5 sm:px-4 sm:py-6">
                                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-surface-white/40 to-surface-white/80" />
                                 <SafeImage
                                     src={mediaUrl(images[activeImage])}
                                     alt={mediaAlt(images[activeImage], locale, name)}
-                                    className="relative z-10 max-h-56 w-auto object-contain transition-transform duration-500 hover:scale-105 sm:max-h-72"
+                                    className="relative z-10 max-h-48 w-auto max-w-full object-contain transition-transform duration-500 hover:scale-105 sm:max-h-72"
                                 />
                                 {images.length > 1 && (
                                     <div className="relative z-10 mt-4 flex flex-wrap justify-center gap-2">
@@ -169,7 +306,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                                                 type="button"
                                                 onClick={() => setActiveImage(i)}
                                                 aria-label={`${name} ${i + 1}`}
-                                                className={`h-14 w-20 overflow-hidden rounded-xl bg-surface-white ring-2 transition-all ${i === activeImage ? "ring-crimson-vivid" : "ring-transparent opacity-70 hover:opacity-100"
+                                                className={`h-14 w-20 overflow-hidden rounded-xl bg-surface-white ring-2 transition-all ${i === activeImage ? "ring-crimson-vivid" : "opacity-70 ring-transparent hover:opacity-100"
                                                     }`}
                                             >
                                                 <SafeImage src={mediaUrl(img, "thumb")} alt="" className="h-full w-full object-cover" />
@@ -181,17 +318,17 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
 
                             {/* Teknik özellikler */}
                             {specs.length > 0 && (
-                                <div className="relative z-10 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                                <div className="relative z-10 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
                                     {specs.map((s, i) => (
-                                        <div key={i} className="flex items-center gap-2.5 rounded-2xl bg-canvas-offwhite p-3">
-                                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-white text-crimson-vivid shadow-sm">
-                                                <Icon name={s.icon} className="text-[20px]" />
+                                        <div key={i} className="flex min-w-0 items-center gap-2 rounded-2xl bg-canvas-offwhite p-2.5 sm:gap-2.5 sm:p-3">
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-white text-crimson-vivid shadow-sm sm:h-10 sm:w-10">
+                                                <Icon name={s.icon} className="text-[18px] sm:text-[20px]" />
                                             </span>
                                             <div className="flex min-w-0 flex-col">
-                                                <span className="truncate font-label-uppercase text-label-uppercase text-secondary">
+                                                <span className="truncate font-label-uppercase text-label-uppercase text-[10px] text-secondary">
                                                     {localized(s.label, locale)}
                                                 </span>
-                                                <span className="truncate font-headline-sm text-headline-sm font-bold text-charcoal-dark">
+                                                <span className="truncate font-label-md text-label-md font-bold text-charcoal-dark sm:font-headline-sm sm:text-headline-sm">
                                                     {localized(s.value, locale)}
                                                 </span>
                                             </div>
@@ -200,10 +337,18 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                                 </div>
                             )}
                         </div>
+                    </div>
 
+                    {/* ═══ REZERVASYON PANELİ ═══ */}
+                    <div className="min-w-0 lg:col-span-4 lg:col-start-9 lg:row-span-2 lg:row-start-1">
+                        <div className="lg:sticky lg:top-28">{bookingPanel}</div>
+                    </div>
+
+                    {/* ═══ DİĞER BÖLÜMLER ═══ */}
+                    <div className="flex min-w-0 flex-col gap-5 lg:col-span-8 lg:col-start-1 lg:row-start-2">
                         {/* Açıklama (backend'de girildiyse, HTML sunucuda temizlenmiş) */}
                         {vehicle.description && localized(vehicle.description, locale) && (
-                            <div className="rounded-3xl bg-surface-white p-5 shadow-sm sm:p-7">
+                            <div className="rounded-3xl bg-surface-white p-4 shadow-sm sm:p-7">
                                 <h2 className="mb-3 font-headline-sm text-headline-sm font-bold text-charcoal-dark md:font-headline-md md:text-headline-md">
                                     {d.about}
                                 </h2>
@@ -216,14 +361,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
 
                         {/* TESLİMAT & OFİS */}
                         {(vehicle.delivery || vehicle.office) && (
-                            <div className="grid grid-cols-1 gap-4 rounded-3xl bg-surface-white p-5 shadow-sm sm:grid-cols-2 sm:p-6">
+                            <div className="grid grid-cols-1 gap-3 rounded-3xl bg-surface-white p-4 shadow-sm sm:grid-cols-2 sm:gap-4 sm:p-6">
                                 {vehicle.delivery && <DeliveryCard block={vehicle.delivery} tone="primary" />}
                                 {vehicle.office && <DeliveryCard block={vehicle.office} tone="neutral" />}
                             </div>
                         )}
 
                         {/* KİRALAMA KOŞULLARI */}
-                        <div className="flex flex-col gap-5 rounded-3xl bg-surface-white p-5 shadow-sm sm:p-7">
+                        <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
                             <SectionHeader icon="policy" title={d.conditionsTitle} sub={d.conditionsSub} />
                             <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.conditionsText}</p>
 
@@ -247,14 +392,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
 
                         {/* SÜRÜCÜ GEREKSİNİMLERİ */}
                         {vehicle.driverRequirements.length > 0 && (
-                            <div className="flex flex-col gap-5 rounded-3xl bg-surface-white p-5 shadow-sm sm:p-7">
+                            <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
                                 <SectionHeader icon="badge" title={d.driverTitle} sub={d.driverSub} />
                                 <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.driverText}</p>
 
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
                                     {vehicle.driverRequirements.map((r, i) => (
-                                        <div key={i} className="flex flex-col rounded-2xl bg-canvas-offwhite p-4">
-                                            <span className="font-label-uppercase text-label-uppercase text-secondary">
+                                        <div key={i} className="flex min-w-0 flex-col rounded-2xl bg-canvas-offwhite p-3 sm:p-4">
+                                            <span className="font-label-uppercase text-label-uppercase text-[10px] text-secondary">
                                                 {localized(r.label, locale)}
                                             </span>
                                             <span className="mt-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
@@ -271,7 +416,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
 
                         {/* EKSTRA HİZMETLER */}
                         {vehicle.extras.length > 0 && (
-                            <div className="flex flex-col gap-5 rounded-3xl bg-surface-white p-5 shadow-sm sm:p-7">
+                            <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                     <div>
                                         <h2 className="font-headline-sm text-headline-sm font-bold text-charcoal-dark md:font-headline-md md:text-headline-md">
@@ -299,154 +444,17 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
                         )}
                     </div>
-
-                    {/* ═══ SAĞ KOLON (masaüstü sticky) ═══ */}
-                    <div className="lg:col-span-4">
-                        <div className="lg:sticky lg:top-28">
-                            <div className="flex flex-col gap-6 rounded-3xl bg-surface-white p-5 shadow-[0_16px_36px_-6px_rgba(15,17,21,0.08)] sm:p-7">
-                                {/* FİYAT BAŞLIĞI */}
-                                <div className="flex flex-col gap-1.5 rounded-2xl bg-charcoal-dark p-5 text-white shadow-md">
-                                    <span className="font-label-uppercase text-label-uppercase text-white/70">{p.dailyRate}</span>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="font-headline-lg-mobile text-headline-lg-mobile font-extrabold tracking-tight text-white md:font-headline-lg md:text-headline-lg">
-                                            {money(avgDaily)}
-                                        </span>
-                                        <span className="font-body-sm text-body-sm text-white/60">{p.perDay}</span>
-                                    </div>
-                                    <div className="mt-1 flex items-center gap-1.5 text-[12px] text-white/75">
-                                        <Icon name="verified" className="text-[14px] text-crimson-vivid" />
-                                        <span>{p.included}</span>
-                                    </div>
-                                </div>
-
-                                {/* TAKVİM */}
-                                <div className="flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <span className="font-label-md text-label-md font-bold text-charcoal-dark">{p.calendar}</span>
-                                        {periodValid && (
-                                            <span className="rounded-full bg-primary-fixed/40 px-2.5 py-0.5 font-label-md text-label-md font-bold text-crimson-vivid">
-                                                {tpl(p.daysBadge, { days: shownDays })}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <DateBlock
-                                        icon="calendar_today"
-                                        label={p.pickup}
-                                        date={pickupDate}
-                                        time={pickupTime}
-                                        onDateChange={(v) => {
-                                            setPickupDate(v);
-                                            if (v > returnDate) setReturnDate(plusDays(v, 3));
-                                        }}
-                                        onTimeChange={setPickupTime}
-                                        dateMin={ready ? todayISO() : undefined}
-                                    />
-                                    <DateBlock
-                                        icon="event_available"
-                                        label={p.return}
-                                        date={returnDate}
-                                        time={returnTime}
-                                        onDateChange={setReturnDate}
-                                        onTimeChange={setReturnTime}
-                                        dateMin={pickupDate || undefined}
-                                    />
-
-                                    {ready && !periodValid && (
-                                        <p className="rounded-xl bg-crimson-vivid/10 px-3 py-2 font-label-md text-label-md text-crimson-vivid">
-                                            {p.periodError}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* FİYAT DÖKÜMÜ (backend hesabı) */}
-                                <div className="flex flex-col gap-2.5 rounded-2xl bg-canvas-offwhite p-4" aria-busy={loading}>
-                                    {quote.status === "error" && (
-                                        <p className="font-body-sm text-body-sm text-crimson-vivid">{p.quoteError}</p>
-                                    )}
-
-                                    {q &&
-                                        q.rentalLines.map((line, i) => (
-                                            <div key={i} className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
-                                                <span className="text-secondary">
-                                                    {tpl(p.lineFormat, { days: line.periods, price: money(line.unitPrice) })}
-                                                    {line.label && (
-                                                        <span className="block text-[11px] text-secondary/70">
-                                                            {localized(line.label, locale)}
-                                                        </span>
-                                                    )}
-                                                </span>
-                                                <span className="font-semibold text-charcoal-dark">{money(line.subtotal)}</span>
-                                            </div>
-                                        ))}
-
-                                    <div className="flex items-center justify-between font-body-sm text-body-sm">
-                                        <span className="text-secondary">{p.airport}</span>
-                                        <span className="font-semibold text-emerald-600">{p.free}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between font-body-sm text-body-sm">
-                                        <span className="text-secondary">{p.extras}</span>
-                                        <span className="font-semibold text-charcoal-dark">{money(q?.extrasTotal ?? 0)}</span>
-                                    </div>
-
-                                    <div className="mt-1 flex items-center justify-between border-t border-surface-variant pt-2.5">
-                                        <span className="font-headline-sm text-headline-sm font-bold text-charcoal-dark">{p.total}</span>
-                                        <span className="flex items-center gap-2 font-headline-md text-headline-md font-extrabold text-crimson-vivid">
-                                            {loading && (
-                                                <Icon name="progress_activity" className="animate-spin text-[18px]" />
-                                            )}
-                                            {q ? money(q.total) : "—"}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* CTA'LAR */}
-                                <div className="flex flex-col gap-3">
-                                    <a
-                                        href={whatsappHref ?? "#"}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-4 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-all hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
-                                    >
-                                        <Icon name="chat" className="text-[22px]" />
-                                        <span>{p.whatsapp}</span>
-                                    </a>
-                                    <a
-                                        href={SITE.phoneHref}
-                                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-charcoal-dark py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-sm transition-colors hover:bg-charcoal-surface"
-                                    >
-                                        <Icon name="call" className="text-[18px]" />
-                                        <span>{p.phone}</span>
-                                    </a>
-                                </div>
-
-                                {/* GÜVENLİK / DESTEK */}
-                                <div className="flex flex-col gap-2 pt-2 font-body-sm text-body-sm text-secondary">
-                                    <div className="flex items-center gap-2">
-                                        <Icon name="support_agent" className="text-[18px] text-crimson-vivid" />
-                                        <span>
-                                            {p.support}{" "}
-                                            <a href={SITE.phoneHref} dir="ltr" className="font-bold text-charcoal-dark hover:underline">
-                                                {SITE.phone}
-                                            </a>
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Icon name="verified" className="text-[18px] text-crimson-vivid" />
-                                        <span>{p.digital}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             {/* ═══ MOBİL SABİT ALT CTA ═══ */}
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-surface-variant bg-surface-white/95 px-4 py-3 shadow-[0_-8px_24px_-8px_rgba(15,17,21,0.12)] backdrop-blur-lg lg:hidden">
+            <div
+                data-sticky-cta
+                className="fixed inset-x-0 bottom-0 z-40 border-t border-surface-variant bg-surface-white/95 px-4 py-3 shadow-[0_-8px_24px_-8px_rgba(15,17,21,0.12)] backdrop-blur-lg lg:hidden"
+            >
                 <div className="flex items-center justify-between gap-3">
-                    <div className="flex flex-col">
-                        <span className="font-label-uppercase text-label-uppercase text-secondary">
+                    <div className="flex min-w-0 flex-col">
+                        <span className="truncate font-label-uppercase text-label-uppercase text-secondary">
                             {tpl(p.totalDays, { days: shownDays || 0 })}
                         </span>
                         <span className="flex items-center gap-2 font-headline-sm text-headline-sm font-extrabold text-charcoal-dark">
@@ -458,7 +466,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                         href={whatsappHref ?? "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-2xl bg-primary-container px-6 py-3 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-colors active:scale-[0.98]"
+                        className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-primary-container px-6 py-3 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-colors active:scale-[0.98]"
                     >
                         <Icon name="chat" className="text-[18px]" />
                         <span>{p.rent}</span>
@@ -479,7 +487,7 @@ function SectionHeader({ icon, title, sub }) {
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-canvas-offwhite text-crimson-vivid">
                 <Icon name={icon} className="text-[22px]" />
             </span>
-            <div>
+            <div className="min-w-0">
                 <h2 className="font-headline-sm text-headline-sm font-bold text-charcoal-dark md:font-headline-md md:text-headline-md">
                     {title}
                 </h2>
@@ -498,9 +506,9 @@ function DeliveryCard({ block, tone = "primary" }) {
     const style = tones[tone] || tones.primary;
 
     return (
-        <div className="flex items-start gap-3 rounded-2xl bg-canvas-offwhite p-4">
-            <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${style.wrapper}`}>
-                <Icon name={block.icon} className={`text-[24px] ${style.icon}`} />
+        <div className="flex items-start gap-3 rounded-2xl bg-canvas-offwhite p-3.5 sm:p-4">
+            <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full sm:h-12 sm:w-12 ${style.wrapper}`}>
+                <Icon name={block.icon} className={`text-[22px] sm:text-[24px] ${style.icon}`} />
             </span>
             <div className="flex min-w-0 flex-col">
                 <span className="font-label-uppercase text-label-uppercase text-secondary">{localized(block.label, locale)}</span>
@@ -515,7 +523,7 @@ function DeliveryCard({ block, tone = "primary" }) {
 
 function ConditionCard({ icon, label, value, badge }) {
     return (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-canvas-offwhite p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-canvas-offwhite p-3.5 sm:gap-3 sm:p-4">
             <div className="flex items-center gap-3">
                 <Icon name={icon} className="text-[22px] text-crimson-vivid" />
                 <div className="flex flex-col">
@@ -539,10 +547,10 @@ function ExtraRow({ item, active, days, onToggle }) {
     const money = (amount) => formatPrice(amount, item.currency, locale);
 
     return (
-        <div className="flex flex-col gap-4 rounded-2xl bg-canvas-offwhite p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3.5">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-surface-white text-crimson-vivid shadow-sm">
-                    <Icon name={item.icon} className="text-[24px]" />
+        <div className="flex flex-col gap-3 rounded-2xl bg-canvas-offwhite p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
+            <div className="flex min-w-0 items-start gap-3">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-surface-white text-crimson-vivid shadow-sm sm:h-12 sm:w-12">
+                    <Icon name={item.icon} className="text-[22px] sm:text-[24px]" />
                 </span>
                 <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -572,7 +580,7 @@ function ExtraRow({ item, active, days, onToggle }) {
                 type="button"
                 onClick={onToggle}
                 aria-pressed={active}
-                className={`flex shrink-0 items-center justify-center gap-1.5 self-end rounded-full px-5 py-2.5 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-sm transition-colors sm:self-center ${active
+                className={`flex w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-5 py-2.5 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-sm transition-colors sm:w-auto ${active
                         ? "bg-primary-container text-on-primary hover:bg-crimson-vivid"
                         : "bg-surface-white text-charcoal-dark hover:bg-surface-variant"
                     }`}
@@ -585,27 +593,28 @@ function ExtraRow({ item, active, days, onToggle }) {
 }
 
 function DateBlock({ icon, label, date, time, onDateChange, onTimeChange, dateMin }) {
+    const fieldCls =
+        "w-full cursor-pointer rounded-xl bg-surface-white px-3 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark";
+
     return (
-        <div className="flex flex-col gap-2 rounded-2xl bg-canvas-offwhite p-3.5">
+        <div className="flex flex-col gap-2 rounded-2xl bg-canvas-offwhite p-3">
             <div className="flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary">
                 <Icon name={icon} className="text-[14px] text-crimson-vivid" />
                 <span>{label}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-                <input
-                    type="date"
+            <div className="grid grid-cols-[3fr_2fr] gap-2">
+                <DateField
                     required
                     value={date}
                     min={dateMin}
                     onChange={(e) => onDateChange(e.target.value)}
-                    className="w-full cursor-pointer rounded-xl bg-surface-white px-3 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark focus:outline-none focus:ring-2 focus:ring-crimson-vivid/20"
+                    className={fieldCls}
                 />
-                <input
-                    type="time"
+                <TimeField
                     required
                     value={time}
                     onChange={(e) => onTimeChange(e.target.value)}
-                    className="w-full cursor-pointer rounded-xl bg-surface-white px-3 py-2.5 font-label-md text-label-md font-semibold text-charcoal-dark focus:outline-none focus:ring-2 focus:ring-crimson-vivid/20"
+                    className={fieldCls}
                 />
             </div>
         </div>
