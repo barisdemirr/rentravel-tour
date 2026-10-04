@@ -27,7 +27,7 @@ export async function apiFetch(path, options = {}) {
         const response = await fetch(url, {
             ...fetchOptions,
             headers: {
-                "Content-Type": "application/json",
+                ...(fetchOptions.body ? { "Content-Type": "application/json" } : {}),
                 Accept: "application/json",
                 ...fetchOptions.headers,
             },
