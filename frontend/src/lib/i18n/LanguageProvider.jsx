@@ -1,27 +1,41 @@
 "use client";
 
 import { createContext, useContext, useMemo } from "react";
-import { dictionaries, interpolate } from "./dictionaries";
+import { usePathname, useRouter } from "next/navigation";
+import { interpolate } from "./dictionaries";
+import { getDictionary } from "./getDictionary";
+import { DIRECTIONS, LOCALES, isLocale, localizedPath, stripLocale } from "./config";
 
 const LanguageContext = createContext(null);
 
-const SUPPORTED = ["TR", "AR", "EN"];
-const LOCKED_LANG = "TR"; // Backend hazır olana kadar TR'de kilitli
+export function LanguageProvider({ locale, children }) {
+    const pathname = usePathname();
+    const router = useRouter();
 
-export function LanguageProvider({ children }) {
-    const value = useMemo(() => ({
-        lang: LOCKED_LANG,
-        setLang: () => { }, // no-op
-        supported: SUPPORTED,
-        t: dictionaries[LOCKED_LANG],
-        tpl: interpolate,
-    }), []);
+    const value = useMemo(
+        () => ({
+            locale, // "tr" | "en" | "ar" (adresler, backend alanları)
+            lang: locale.toUpperCase(), // "TR" | "EN" | "AR" (menü ve sözlük anahtarları)
+            dir: DIRECTIONS[locale],
+            isRtl: DIRECTIONS[locale] === "rtl",
+            supported: LOCALES.map((l) => l.toUpperCase()),
+            t: getDictionary(locale),
+            tpl: interpolate,
+            // Dile uygun iç bağlantı: href("/arac-kiralama") -> "/en/arac-kiralama"
+            href: (path) => localizedPath(locale, path),
+            // Aynı sayfayı seçilen dilde açar (arama ve # korunur)
+            setLang: (next) => {
+                const target = String(next).toLowerCase();
+                if (!isLocale(target) || target === locale) return;
 
-    return (
-        <LanguageContext.Provider value={value}>
-            {children}
-        </LanguageContext.Provider>
+                const path = localizedPath(target, stripLocale(pathname));
+                router.push(`${path}${window.location.search}${window.location.hash}`);
+            },
+        }),
+        [locale, pathname, router]
     );
+
+    return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 
 export function useLanguage() {

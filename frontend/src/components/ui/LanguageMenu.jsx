@@ -93,7 +93,7 @@ export default function LanguageMenu({ variant = "light" }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full z-50 mt-2 min-w-[130px] overflow-hidden rounded-xl bg-surface-white p-1 shadow-[0_8px_24px_rgba(15,17,21,0.14)]"
+                        className="absolute end-0 top-full z-50 mt-2 min-w-[130px] overflow-hidden rounded-xl bg-surface-white p-1 shadow-[0_8px_24px_rgba(15,17,21,0.14)]"
                     >
                         {supported.map((l) => (
                             <li key={l}>
@@ -103,7 +103,7 @@ export default function LanguageMenu({ variant = "light" }) {
                                         setLang(l);
                                         setOpen(false);
                                     }}
-                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left font-label-uppercase text-label-uppercase transition-colors ${itemCls(l === lang)}`}
+                                    className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start font-label-uppercase text-label-uppercase transition-colors ${itemCls(l === lang)}`}
                                 >
                                     <span className="flex h-4 w-5 items-center justify-center">{FLAGS[l]}</span>
                                     <span>{l}</span>
