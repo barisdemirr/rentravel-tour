@@ -28,7 +28,9 @@ export function parseDateOnly(value) {
 /** formatDate("2027-07-15", "tr") -> "15 Temmuz 2027" */
 export function formatDate(value, locale = "tr", options = { day: "numeric", month: "long", year: "numeric" }) {
     if (!value) return "";
-    return new Intl.DateTimeFormat(INTL_LOCALES[locale] ?? INTL_LOCALES.tr, options).format(parseDateOnly(value));
+    const date = parseDateOnly(value);
+    if (Number.isNaN(date?.getTime?.())) return "";
+    return new Intl.DateTimeFormat(INTL_LOCALES[locale] ?? INTL_LOCALES.tr, options).format(date);
 }
 
 
@@ -37,4 +39,12 @@ export function formatDateInput(value) {
     if (!value) return "";
     const [y, m, d] = String(value).split("-");
     return `${d}/${m}/${y}`;
+}
+
+/** Zaman damgası biçimlendirir (updatedAt gibi ISO tarihler için, saat gösterilmez) */
+export function formatDateTime(value, locale = "tr", options = { day: "numeric", month: "long", year: "numeric" }) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return new Intl.DateTimeFormat(INTL_LOCALES[locale] ?? INTL_LOCALES.tr, options).format(date);
 }

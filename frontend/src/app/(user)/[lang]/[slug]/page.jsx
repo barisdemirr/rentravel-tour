@@ -3,13 +3,13 @@ import Icon from "@/components/ui/Icon";
 import Link from "@/components/ui/LocalizedLink";
 import { ApiError, settle } from "@/lib/api";
 import { SITE, waHref } from "@/lib/constants";
-import { formatDate } from "@/lib/format";
 import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { localized } from "@/lib/i18n/localized";
 import { buildAlternates } from "@/lib/seo";
 import { infoMessage } from "@/lib/whatsapp";
-import { getStaticPageBySlug, getStaticPages } from "@/services";
+import { getStaticPageBySlug, getStaticPages } from "@/services/staticPages";
+import { formatDateTime } from "@/lib/format";
 
 export const revalidate = 300;
 
@@ -79,7 +79,7 @@ export default async function StaticPage({ params }) {
                 {updated && (
                     <p className="mt-3 flex items-center gap-1.5 font-label-md text-label-md text-secondary">
                         <Icon name="update" className="shrink-0 text-[16px] text-crimson-vivid" />
-                        {t.updatedAt.replace("{date}", formatDate(updated, locale))}
+                        {t.updatedAt.replace("{date}", formatDateTime(updated, locale))}
                     </p>
                 )}
             </header>

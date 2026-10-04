@@ -99,12 +99,11 @@ export function bungalowMessage({ bungalowTitle, checkIn, checkOut, nights, adul
 }
 
 
-/** Genel bilgi talebi: hangi sayfadan geldiği belirtilir */
+/** Genel bilgi talebi: hangi sayfadan gelindiği belirtilir */
 export function infoMessage({ topic, locale }) {
-    return lines([
+    return compose(
         "Merhaba, bilgi almak istiyorum.",
-        "",
-        topic ? `• Konu: ${topic}` : null,
-        langLine(locale),
-    ]);
+        [row("Konu", topic)],
+        locale
+    );
 }

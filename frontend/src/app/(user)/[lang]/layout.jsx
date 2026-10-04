@@ -9,9 +9,9 @@ import { DIRECTIONS, LOCALES, OG_LOCALES, isLocale } from "@/lib/i18n/config";
 import Analytics from "@/components/seo/Analytics";
 import { SITE_URL } from "@/lib/siteUrl";
 import { safe } from "@/lib/api";
-import { getSiteSettings } from "@/services";
+import { getSiteSettings } from "@/services/siteSettings";
+import { buildAlternates } from "@/lib/seo";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://rentravel.com.tr";
 
 export const viewport = {
     width: "device-width",
