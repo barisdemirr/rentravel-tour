@@ -9,16 +9,32 @@ import Link from "@/components/ui/LocalizedLink";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
 
-export default function BungalowCard({ bungalow }) {
-    const { t, locale } = useLanguage();
+/**
+ * mode: "slider" (ana sayfa) | "grid" (liste sayfası)
+ * stay: { status, data } seçili tarihler için backend hesabı (opsiyonel)
+ * query: detay linkine eklenecek "?checkIn=...&checkOut=..." (opsiyonel)
+ */
+export default function BungalowCard({ bungalow, mode = "slider", stay = null, query = "" }) {
+    const { t, tpl, locale } = useLanguage();
 
     const title = localized(bungalow.title, locale);
     const region = localized(bungalow.region?.shortLabel, locale);
     const location = localized(bungalow.location, locale);
     const capacity = localized(bungalow.capacity, locale);
 
+    const quote = stay?.data;
+    const loading = stay?.status === "loading";
+    const money = (amount) => formatPrice(amount, bungalow.currency, locale);
+
+    const wrapperCls =
+        mode === "grid"
+            ? "w-full"
+            : "w-[300px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]";
+
     return (
-        <article className="group flex h-full w-[300px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl sm:w-[340px] lg:w-[360px]">
+        <article
+            className={`group flex h-full ${wrapperCls} flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl`}
+        >
             {/* Görsel */}
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal-dark">
                 <SafeImage
@@ -38,15 +54,13 @@ export default function BungalowCard({ bungalow }) {
 
             {/* İçerik */}
             <div className="flex flex-1 flex-col gap-4 p-5">
-                {/* Konum */}
                 {location && (
                     <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-secondary">
-                        <Icon name="location_on" className="text-[16px] text-crimson-vivid" />
-                        {location}
+                        <Icon name="location_on" className="shrink-0 text-[16px] text-crimson-vivid" />
+                        <span className="min-w-0 truncate">{location}</span>
                     </div>
                 )}
 
-                {/* Başlık + açıklama */}
                 <div className="flex flex-col gap-2">
                     <h3 className="font-headline-sm text-headline-sm uppercase leading-tight text-charcoal-dark transition-colors group-hover:text-crimson-vivid">
                         {title}
@@ -56,7 +70,6 @@ export default function BungalowCard({ bungalow }) {
                     </p>
                 </div>
 
-                {/* Özellikler: kapasite ve kahvaltı */}
                 <div className="grid grid-cols-2 gap-2 font-label-sm text-label-sm text-secondary">
                     {capacity && (
                         <span className="flex items-center gap-1.5">
@@ -72,7 +85,6 @@ export default function BungalowCard({ bungalow }) {
                     )}
                 </div>
 
-                {/* Etiketler */}
                 <div className="flex flex-wrap gap-1.5">
                     {bungalow.amenities.slice(0, 3).map((a, i) => (
                         <span
@@ -86,17 +98,25 @@ export default function BungalowCard({ bungalow }) {
 
                 {/* Fiyat + CTA */}
                 <div className="mt-auto flex items-center justify-between gap-3 pt-2">
-                    <div>
-                        <div className="font-label-uppercase text-label-uppercase text-secondary">
-                            {t.cards.perNight}
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary">
+                            {quote ? tpl(t.cards.stayTotal, { nights: quote.nights }) : t.cards.perNight}
+                            {loading && (
+                                <Icon name="progress_activity" className="animate-spin text-[12px] text-crimson-vivid" />
+                            )}
                         </div>
                         <div className="font-headline-md text-headline-md font-bold text-crimson-vivid">
-                            {formatPrice(bungalow.defaultPricePerNight, bungalow.currency, locale)}
+                            {quote ? money(quote.total) : money(bungalow.defaultPricePerNight)}
                         </div>
+                        {quote && (
+                            <div className="font-label-sm text-label-sm text-secondary">
+                                {tpl(t.cards.nightlyShort, { price: money(quote.accommodationTotal / quote.nights) })}
+                            </div>
+                        )}
                     </div>
                     <Link
-                        href={`/bungalov-konaklama/${bungalow.slug}`}
-                        className="inline-flex items-center justify-center rounded-xl bg-charcoal-dark px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
+                        href={`/bungalov-konaklama/${bungalow.slug}${query}`}
+                        className="inline-flex shrink-0 items-center justify-center rounded-xl bg-charcoal-dark px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
                     >
                         {t.cards.details}
                     </Link>
