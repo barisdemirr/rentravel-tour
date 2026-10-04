@@ -18,6 +18,20 @@ public class Validator
         return this;
     }
 
+    public Validator MinLength(string field, string? value, int min)
+    {
+        if (value is not null && value.Length < min) Add(field, $"{field} en az {min} karakter olmalı.");
+        return this;
+    }
+
+    public Validator Email(string field, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value) &&
+            !(System.Net.Mail.MailAddress.TryCreate(value, out var address) && address.Address == value))
+            Add(field, $"{field} geçerli bir e-posta adresi olmalı.");
+        return this;
+    }
+
     public Validator Must(string field, bool condition, string message)
     {
         if (!condition) Add(field, message);
