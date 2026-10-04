@@ -8,6 +8,19 @@ export const dictionaries = {
         },
         common: {
             loading: "Yükleniyor",
+            prev: "Önceki",
+            next: "Sonraki",
+        },
+        cards: {
+            perPerson: "Kişi Başı",
+            startingFrom: "Kişi başı başlangıç",
+            perDay: "gün",
+            perNight: "Gecelik",
+            view: "İncele",
+            details: "Detaylar",
+            requestInfo: "Bilgi Al",
+            nights: "Gece",
+            breakfastIncluded: "Kahvaltı Dahil",
         },
         booking: {
             ariaLabel: "Rezervasyon",
@@ -200,21 +213,25 @@ export const dictionaries = {
         },
         submit: "WhatsApp ile Rezervasyon",
         vehicles: {
+            ariaLabel: "Öne çıkan araçlar",
             eyebrow: "PREMİUM FİLO",
             title: "Öne Çıkan Araçlarımız",
             subtitle: "Şoförlü VIP transfer, havalimanı karşılama ve özel tur programları için son model araç filomuz.",
         },
         dailyTours: {
+            ariaLabel: "Günübirlik turlar",
             eyebrow: "GÜNÜBİRLİK ROTALAR",
             title: "Popüler Günübirlik Turlar",
             subtitle: "Uzman rehberler eşliğinde, tek günde Karadeniz'in en özel noktalarını keşfedin.",
         },
         cultureTours: {
+            ariaLabel: "Konaklamalı kültür turları",
             eyebrow: "KONAKLAMALI KÜLTÜR",
             title: "Konaklamalı Kültür Turları",
             subtitle: "Otel konaklaması dahil, tarih ve kültür dolu çok günlü özel programlar.",
         },
         bungalows: {
+            ariaLabel: "Öne çıkan bungalovlar",
             eyebrow: "ÖZEL KONAKLAMA",
             title: "Öne Çıkan Bungalovlar",
             subtitle: "Karadeniz'in en özel noktalarında, doğayla iç içe lüks bungalov ve dağ evleri.",
@@ -228,6 +245,19 @@ export const dictionaries = {
         },
         common: {
             loading: "Loading",
+            prev: "Previous",
+            next: "Next",
+        },
+        cards: {
+            perPerson: "Per Person",
+            startingFrom: "Starting per person",
+            perDay: "day",
+            perNight: "Per Night",
+            view: "View",
+            details: "Details",
+            requestInfo: "Get Info",
+            nights: "Nights",
+            breakfastIncluded: "Breakfast Included",
         },
         booking: {
             ariaLabel: "Booking",
@@ -364,21 +394,25 @@ export const dictionaries = {
         },
         submit: "Book via WhatsApp",
         vehicles: {
+            ariaLabel: "Featured vehicles",
             eyebrow: "PREMIUM FLEET",
             title: "Featured Vehicles",
             subtitle: "Latest model fleet for chauffeured VIP transfer, airport pickup and private tour programs.",
         },
         dailyTours: {
+            ariaLabel: "Daily tours",
             eyebrow: "DAILY ROUTES",
             title: "Popular Daily Tours",
             subtitle: "Discover the most special spots of the Black Sea in a single day with expert guides.",
         },
         cultureTours: {
+            ariaLabel: "Cultural tours with accommodation",
             eyebrow: "CULTURE WITH STAY",
             title: "Cultural Tours with Accommodation",
             subtitle: "Multi-day cultural programs including hotel accommodation and expert guides.",
         },
         bungalows: {
+            ariaLabel: "Featured bungalows",
             eyebrow: "PRIVATE STAYS",
             title: "Featured Bungalows",
             subtitle: "Luxury bungalows and mountain houses in the most special spots of the Black Sea.",
@@ -392,6 +426,19 @@ export const dictionaries = {
         },
         common: {
             loading: "جارٍ التحميل",
+            prev: "السابق",
+            next: "التالي",
+        },
+        cards: {
+            perPerson: "للفرد",
+            startingFrom: "ابتداءً من للفرد",
+            perDay: "يوم",
+            perNight: "لليلة",
+            view: "عرض",
+            details: "التفاصيل",
+            requestInfo: "اطلب معلومات",
+            nights: "ليالٍ",
+            breakfastIncluded: "الإفطار مشمول",
         },
         booking: {
             ariaLabel: "الحجز",
@@ -528,21 +575,25 @@ export const dictionaries = {
         },
         submit: "احجز عبر واتساب",
         vehicles: {
+            ariaLabel: "السيارات المميزة",
             eyebrow: "أسطول مميز",
             title: "سياراتنا المميزة",
             subtitle: "أسطول من أحدث الموديلات للنقل VIP مع سائق واستقبال المطار وبرامج الجولات الخاصة.",
         },
         dailyTours: {
+            ariaLabel: "الجولات اليومية",
             eyebrow: "مسارات يومية",
             title: "الجولات اليومية الشائعة",
             subtitle: "اكتشف أجمل معالم البحر الأسود في يوم واحد مع مرشدين خبراء.",
         },
         cultureTours: {
+            ariaLabel: "جولات ثقافية مع إقامة",
             eyebrow: "ثقافة مع إقامة",
             title: "جولات ثقافية مع إقامة",
             subtitle: "برامج ثقافية متعددة الأيام تشمل الإقامة الفندقية والمرشدين الخبراء.",
         },
         bungalows: {
+            ariaLabel: "البنغالو المميزة",
             eyebrow: "إقامات خاصة",
             title: "البنغالو المميزة",
             subtitle: "بنغالو فاخرة وبيوت جبلية في أجمل مواقع البحر الأسود على تواصل مع الطبيعة.",
