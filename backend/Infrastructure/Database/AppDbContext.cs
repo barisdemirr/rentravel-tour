@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<VehicleExtra> VehicleExtras => Set<VehicleExtra>();
     public DbSet<AccommodationType> AccommodationTypes => Set<AccommodationType>();
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
