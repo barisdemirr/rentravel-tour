@@ -18,6 +18,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DailyTour> DailyTours => Set<DailyTour>();
     public DbSet<CultureTour> CultureTours => Set<CultureTour>();
     public DbSet<Bungalow> Bungalows => Set<Bungalow>();
+    public DbSet<PriceRule> PriceRules => Set<PriceRule>();
+    public DbSet<AgePriceRule> AgePriceRules => Set<AgePriceRule>();
+    public DbSet<CultureTourAccommodationPrice> CultureTourAccommodationPrices => Set<CultureTourAccommodationPrice>();
+    public DbSet<TourSession> TourSessions => Set<TourSession>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
