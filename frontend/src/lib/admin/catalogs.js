@@ -16,7 +16,7 @@ export const CATALOGS = {
             { name: "key", type: "key", label: "Anahtar", required: true, hint: "Adreste geçer: suv, vip, ekonomik" },
             { name: "label", type: "localized", label: "Etiket", required: true, maxLength: 60 },
             { name: "icon", type: "icon", label: "İkon", required: true },
-            { name: "orderIndex", type: "number", label: "Sıra", hint: "Küçük olan önce gösterilir" },
+            { name: "orderIndex", type: "order" },
         ],
     },
 
@@ -55,7 +55,7 @@ export const CATALOGS = {
             { name: "icon", type: "icon", label: "İkon", required: true },
             { name: "dailyPrice", type: "money", label: "Günlük Ücret", required: true },
             { name: "currency", type: "currency", label: "Para Birimi", required: true },
-            { name: "orderIndex", type: "number", label: "Sıra" },
+            { name: "orderIndex", type: "order" },
         ],
         extraColumns: [
             {
@@ -92,7 +92,7 @@ export const CATALOGS = {
                     { value: "Both", label: "İkisinde de" },
                 ],
             },
-            { name: "orderIndex", type: "number", label: "Sıra" },
+            { name: "orderIndex", type: "order" },
         ],
         extraColumns: [
             {
@@ -130,7 +130,7 @@ export const CATALOGS = {
                 hint: "Detay sayfasında görünür: Ayder Yaylası, Çamlıhemşin / Rize",
             },
             { name: "thumbnail", type: "media", label: "Bölge Görseli", category: "Bungalow" },
-            { name: "orderIndex", type: "number", label: "Sıra" },
+            { name: "orderIndex", type: "order" },
         ],
     },
 
@@ -153,9 +153,19 @@ export const CATALOGS = {
                 hint: "Seçim kartında etiketin altında görünür",
             },
             { name: "icon", type: "icon", label: "İkon" },
-            { name: "orderIndex", type: "number", label: "Sıra" },
+            { name: "orderIndex", type: "order" },
         ],
     },
 };
 
 export const catalogSlugs = Object.keys(CATALOGS);
+
+
+/** DTO kaydından PUT gövdesi üretir (sıralama gibi yerinde güncellemeler için) */
+export function catalogPayload(catalog, record, overrides = {}) {
+    const body = { isActive: record.isActive ?? true };
+    for (const field of catalog.fields) {
+        body[field.name] = record[field.name] ?? null;
+    }
+    return { ...body, ...overrides };
+}

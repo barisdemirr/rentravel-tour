@@ -42,6 +42,9 @@ function initialState(catalog, record) {
             case "number":
                 state[field.name] = value ?? 0;
                 break;
+            case "order":
+                state[field.name] = value ?? 0;
+                break;
             case "money":
                 state[field.name] = value ?? "";
                 break;
@@ -62,13 +65,17 @@ function initialState(catalog, record) {
     return state;
 }
 
-export default function CatalogForm({ slug, catalog, record }) {
+export default function CatalogForm({ slug, catalog, record, nextOrder = 0 }) {
     const router = useRouter();
     const toast = useToast();
     const isNew = !record;
     const base = `/admin/katalog/${slug}`;
 
-    const [form, setForm] = useState(() => initialState(catalog, record));
+    const [form, setForm] = useState(() => {
+        const state = initialState(catalog, record);
+        if (!record) state.orderIndex = nextOrder; // yeni kayıt listenin sonuna
+        return state;
+    });
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
 
@@ -91,6 +98,9 @@ export default function CatalogForm({ slug, catalog, record }) {
                     body[field.name] = cleanLocalized(value);
                     break;
                 case "number":
+                    body[field.name] = Number(value) || 0;
+                    break;
+                case "order":
                     body[field.name] = Number(value) || 0;
                     break;
                 case "money":
@@ -286,6 +296,9 @@ export default function CatalogForm({ slug, catalog, record }) {
                                         />
                                     </Field>
                                 );
+
+                            case "order":
+                                return null; // sıra listedeki "Sırala" modundan ayarlanır
 
                             case "currency":
                                 return (
