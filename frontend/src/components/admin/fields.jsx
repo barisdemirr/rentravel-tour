@@ -141,3 +141,26 @@ export function FormActions({ busy, onCancel, saveLabel = "Kaydet", extra }) {
         </div>
     );
 }
+
+
+/** Tarih alanı: ekranda her zaman gg/aa/yyyy, dokununca cihazın takvimi */
+export function DateInput({ value, onChange, error, min, max, required }) {
+    const text = value ? value.split("-").reverse().join("/") : "";
+
+    return (
+        <span className="ad-field relative flex cursor-pointer items-center justify-between gap-2">
+            <span className={text ? "" : "text-ad-faint"}>{text || "gg/aa/yyyy"}</span>
+            <Icon name="calendar_month" className="shrink-0 text-[18px] text-ad-muted" />
+            <input
+                type="date"
+                value={value ?? ""}
+                min={min}
+                max={max}
+                required={required}
+                aria-invalid={error ? "true" : undefined}
+                onChange={onChange}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            />
+        </span>
+    );
+}
