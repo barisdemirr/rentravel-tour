@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 
-const MODEL = "gemini-2.0-flash";
+const MODEL = "gemini-3.5-flash-lite";
 const MAX_CHARS = 30000; // longDescription üst sınırıyla aynı
 
 const SYSTEM = `Sen bir turizm sitesi için profesyonel çevirmensin. Şirket: Rentravel Turizm, Doğu Karadeniz bölgesinde araç kiralama, günübirlik tur, kültür turu ve bungalov konaklama hizmeti veriyor.
