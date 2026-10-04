@@ -3,12 +3,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json.Serialization;
 
 namespace Rentravel.Infrastructure.Database;
 
 public static class JsonConversionExtensions
 {
-    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web)
+    {
+        Converters = { new JsonStringEnumConverter() }
+    };
 
     public static PropertyBuilder<T> HasJsonConversion<T>(this PropertyBuilder<T> builder)
     {
