@@ -52,6 +52,11 @@ public class AgePriceRuleSaveHandler(AppDbContext db, PriceOwnerChecker owners)
                 validator.AddError("ownerId", "Sahip bulunamadı.");
         }
 
+        // Bungalovda yaş fiyatı çocuk başı gecelik ek ücrettir, yüzde anlamsız
+        var targetOwnerType = existing?.OwnerType ?? ownerType;
+        if (targetOwnerType == PriceOwnerType.Bungalow && input.Type == AgePriceType.Percentage)
+            validator.AddError("type", "Bungalovda yaş fiyatı Fixed (çocuk başı gecelik tutar) veya Free olmalı.");
+
         if (!validator.IsValid) return validator.ToFailure<AgePriceRuleDto>();
 
         var effectiveType = existing?.OwnerType ?? ownerType!.Value;
