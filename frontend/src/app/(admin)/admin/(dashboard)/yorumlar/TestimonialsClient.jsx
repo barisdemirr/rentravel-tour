@@ -16,6 +16,9 @@ const LANGS = [
     { value: "TR", label: "Türkçe" },
     { value: "EN", label: "İngilizce" },
     { value: "AR", label: "Arapça" },
+    { value: "DE", label: "Almanca" },
+    { value: "UK", label: "Ukraynaca" },
+    { value: "RU", label: "Rusça" },
 ];
 
 const emptyForm = (order) => ({
