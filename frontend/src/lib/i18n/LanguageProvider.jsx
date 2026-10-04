@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useMemo, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useNavigationPending } from "@/lib/navigation/NavigationProvider";
 import { interpolate } from "./dictionaries";
 import { getDictionary } from "./getDictionary";
 import { DIRECTIONS, LOCALES, isLocale, localizedPath, stripLocale } from "./config";
@@ -11,6 +12,10 @@ const LanguageContext = createContext(null);
 export function LanguageProvider({ locale, children }) {
     const pathname = usePathname();
     const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+
+    // Dil değişimi sürerken splash göster
+    useNavigationPending(isPending);
 
     const value = useMemo(
         () => ({
@@ -29,7 +34,9 @@ export function LanguageProvider({ locale, children }) {
                 if (!isLocale(target) || target === locale) return;
 
                 const path = localizedPath(target, stripLocale(pathname));
-                router.push(`${path}${window.location.search}${window.location.hash}`);
+                startTransition(() => {
+                    router.push(`${path}${window.location.search}${window.location.hash}`);
+                });
             },
         }),
         [locale, pathname, router]

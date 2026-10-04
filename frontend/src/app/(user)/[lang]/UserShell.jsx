@@ -6,6 +6,7 @@ import MobileDrawer from "@/components/layout/MobileDrawer";
 import Footer from "@/components/layout/Footer";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import SplashScreen from "@/components/ui/SplashScreen";
+import NavigationSplash from "@/components/ui/NavigationSplash";
 
 export default function UserShell({ children }) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export default function UserShell({ children }) {
     return (
         <>
             <SplashScreen />
+            <NavigationSplash />
             <Navbar onOpenMenu={openMenu} />
             <MobileDrawer open={menuOpen} onClose={closeMenu} />
             <main id="main" className="w-full bg-surface pt-20">
