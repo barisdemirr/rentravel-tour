@@ -31,6 +31,9 @@ builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUs
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddSingleton<ImageService>();
 
+builder.Services.AddScoped<MediaItemResolver>();
+builder.Services.AddScoped<MediaUsageChecker>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
