@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import Icon from "@/components/ui/Icon";
 
 /** Etiket + yardım metni + hata sarmalayıcısı */
@@ -143,15 +144,29 @@ export function FormActions({ busy, onCancel, saveLabel = "Kaydet", extra }) {
 }
 
 
-/** Tarih alanı: ekranda her zaman gg/aa/yyyy, dokununca cihazın takvimi */
+/** Tarih alanı: ekranda her zaman gg/aa/yyyy, tıklayınca cihazın takvimi açılır */
 export function DateInput({ value, onChange, error, min, max, required }) {
+    const ref = useRef(null);
     const text = value ? value.split("-").reverse().join("/") : "";
 
+    // Chrome takvimi yalnızca kendi simgesine basılınca açıyor, simge görünmez olduğu için elle açıyoruz
+    const openPicker = () => {
+        try {
+            ref.current?.showPicker?.();
+        } catch {
+            ref.current?.focus();
+        }
+    };
+
     return (
-        <span className="ad-field relative flex cursor-pointer items-center justify-between gap-2">
+        <span
+            onClick={openPicker}
+            className="ad-field relative flex cursor-pointer items-center justify-between gap-2"
+        >
             <span className={text ? "" : "text-ad-faint"}>{text || "gg/aa/yyyy"}</span>
             <Icon name="calendar_month" className="shrink-0 text-[18px] text-ad-muted" />
             <input
+                ref={ref}
                 type="date"
                 value={value ?? ""}
                 min={min}
