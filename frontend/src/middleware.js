@@ -83,6 +83,6 @@ export function middleware(request) {
 }
 
 export const config = {
-    // Statik dosyalar (noktalı), _next ve api dışındaki her şey. Admin dahil — admin kontrolü middleware içinde yapılır.
-    matcher: ["/((?!_next|api|.*\\..*).*)"],
+    // api, _next, sitemap.xml, robots.txt ve dosya uzantılı istekler hariç
+    matcher: ["/((?!api|_next|sitemap\\.xml|robots\\.txt|.*\\..*).*)"],
 };
