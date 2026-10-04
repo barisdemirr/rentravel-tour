@@ -231,20 +231,22 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
             <Reveal>
                 <div className="overflow-hidden rounded-3xl bg-surface-white shadow-xl">
                     {/* TABS */}
-                    <div className="flex flex-wrap border-b border-border-hairline">
+                    <div className="flex border-b border-border-hairline">
                         {TABS.map((tb) => {
                             const isActive = tab === tb.key;
                             return (
                                 <button
                                     key={tb.key}
                                     type="button"
-                                    aria-label={t.tabs[tb.key]}
+                                    aria-pressed={isActive}
                                     onClick={() => setTab(tb.key)}
-                                    className={`relative flex min-w-[140px] flex-1 items-center justify-center gap-2 px-4 py-4 font-label-uppercase text-label-uppercase tracking-wider transition-colors ${isActive ? "text-crimson-vivid" : "text-secondary hover:text-charcoal-dark"
+                                    className={`relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-3 transition-colors sm:min-w-[140px] sm:flex-row sm:gap-2 sm:px-4 sm:py-4 ${isActive ? "text-crimson-vivid" : "text-secondary hover:text-charcoal-dark"
                                         }`}
                                 >
-                                    <Icon name={tb.icon} className="text-[18px]" />
-                                    <span className="hidden sm:inline">{t.tabs[tb.key]}</span>
+                                    <Icon name={tb.icon} className="text-[20px] sm:text-[18px]" />
+                                    <span className="text-center font-label-uppercase text-[10px] font-bold leading-tight sm:text-label-uppercase sm:tracking-wider">
+                                        {t.tabs[tb.key]}
+                                    </span>
                                     {isActive && (
                                         <motion.span
                                             layoutId="booking-tab-indicator"
