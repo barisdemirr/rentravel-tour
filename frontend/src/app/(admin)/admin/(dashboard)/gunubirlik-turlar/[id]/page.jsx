@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import TourForm from "@/components/admin/TourForm";
 import { adminFetch } from "@/lib/admin/server";
-import { nextIndex } from "@/lib/admin/reorder";
+import { asList, nextIndex } from "@/lib/admin/reorder";
 
 export const dynamic = "force-dynamic";
 
@@ -23,14 +23,14 @@ export default async function DailyTourFormPage({ params }) {
     if (!isNew && !record.data) notFound();
 
     // Kategoriler kullanım alanına göre süzülür
-    const usable = (categories.data ?? []).filter((c) => c.appliesTo === "Daily" || c.appliesTo === "Both");
+    const usable = asList(categories.data).filter((c) => c.appliesTo === "Daily" || c.appliesTo === "Both");
 
     return (
         <TourForm
             variant="daily"
             record={record.data}
             categories={usable}
-            nextOrder={isNew ? nextIndex(list.data ?? []) : 0}
+            nextOrder={isNew ? nextIndex(list.data) : 0}
         />
     );
 }

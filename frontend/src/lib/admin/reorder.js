@@ -1,6 +1,14 @@
+/** Liste uçları hem dizi hem { items: [...] } dönebiliyor, ikisini de diziye çevirir */
+export function asList(data) {
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data?.items)) return data.items;
+    return [];
+}
+
+
 /** Listeyi orderIndex'e göre sıralar (eşitlik durumunda oluşturma tarihi) */
-export function sortByOrder(list) {
-    return [...list].sort(
+export function sortByOrder(data) {
+    return asList(data).sort(
         (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0) || String(a.createdAt).localeCompare(String(b.createdAt))
     );
 }
@@ -28,6 +36,7 @@ export function changed(original, next) {
 }
 
 /** Yeni kayıt için sıradaki indeks */
-export function nextIndex(list) {
+export function nextIndex(data) {
+    const list = asList(data);
     return list.length === 0 ? 0 : Math.max(...list.map((r) => r.orderIndex ?? 0)) + 1;
 }

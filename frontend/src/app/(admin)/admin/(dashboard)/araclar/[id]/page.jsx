@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import VehicleForm from "../VehicleForm";
 import { adminFetch } from "@/lib/admin/server";
-import { nextIndex } from "@/lib/admin/reorder";
+import { asList, nextIndex } from "@/lib/admin/reorder";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +27,9 @@ export default async function VehicleFormPage({ params }) {
     return (
         <VehicleForm
             record={record.data}
-            segments={segments.data ?? []}
-            extras={extras.data ?? []}
-            nextOrder={isNew ? nextIndex(list.data ?? []) : 0}
+            segments={asList(segments.data)}
+            extras={asList(extras.data)}
+            nextOrder={isNew ? nextIndex(list.data) : 0}
         />
     );
 }
