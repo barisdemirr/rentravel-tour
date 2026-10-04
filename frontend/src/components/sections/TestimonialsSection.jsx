@@ -2,30 +2,35 @@
 
 import { useRef } from "react";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { testimonials } from "@/lib/mockData";
 import { TONES } from "@/lib/tones";
 import Eyebrow from "../ui/Eyebrow";
 import Reveal from "../ui/Reveal";
 import Icon from "../ui/Icon";
 
-export default function TestimonialsSection() {
-    const { t } = useLanguage();
+export default function TestimonialsSection({ testimonials = [] }) {
+    const { t, isRtl } = useLanguage();
     const trackRef = useRef(null);
 
+    if (testimonials.length === 0) return null;
+
+    // RTL'de scrollLeft negatif çalışır: yönü ve konum hesabını buna göre yap
     const scrollByCard = (dir) => {
         const el = trackRef.current;
         if (!el || !el.firstElementChild) return;
+
+        const sign = isRtl ? -1 : 1;
         const gap = parseFloat(getComputedStyle(el).columnGap) || 0;
         const step = el.firstElementChild.getBoundingClientRect().width + gap;
-        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-        const atStart = el.scrollLeft <= 4;
+        const pos = Math.abs(el.scrollLeft);
+        const atEnd = pos + el.clientWidth >= el.scrollWidth - 4;
+        const atStart = pos <= 4;
 
         if (dir > 0 && atEnd) {
             el.scrollTo({ left: 0, behavior: "smooth" });
         } else if (dir < 0 && atStart) {
-            el.scrollTo({ left: el.scrollWidth, behavior: "smooth" });
+            el.scrollTo({ left: sign * el.scrollWidth, behavior: "smooth" });
         } else {
-            el.scrollBy({ left: dir * step, behavior: "smooth" });
+            el.scrollBy({ left: sign * dir * step, behavior: "smooth" });
         }
     };
 
@@ -37,37 +42,32 @@ export default function TestimonialsSection() {
             <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-margin md:px-margin-tablet lg:px-margin-desktop">
                 <Reveal className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                     <div className="flex flex-col gap-3">
-                        <Eyebrow>
-                            {t.reviews?.eyebrow || "GOOGLE YORUMLARI"}
-                        </Eyebrow>
+                        <Eyebrow>{t.reviews.eyebrow}</Eyebrow>
                         <h2 className="font-headline-lg-mobile text-headline-lg-mobile uppercase tracking-tight text-surface-white md:font-headline-lg md:text-headline-lg">
-                            {(t.reviews?.title1 || "Misafirlerimizin Kaleminden")}{" "}
-                            <span className="text-crimson-vivid">
-                                {t.reviews?.titleAccent || "Rentravel"}
-                            </span>{" "}
-                            {t.reviews?.title2 || "Deneyimi"}
+                            {t.reviews.title1}{" "}
+                            <span className="text-crimson-vivid">{t.reviews.titleAccent}</span>{" "}
+                            {t.reviews.title2}
                         </h2>
                         <p className="max-w-2xl font-body-md text-body-md text-secondary-fixed-dim">
-                            {t.reviews?.subtitle ||
-                                "Farklı ülkelerden misafirlerimizin Google'da bıraktığı gerçek yorumlar."}
+                            {t.reviews.subtitle}
                         </p>
                     </div>
                     <div className="flex items-center gap-2 self-start md:self-end">
                         <button
                             type="button"
-                            aria-label="Önceki yorum"
+                            aria-label={t.reviews.prev}
                             onClick={() => scrollByCard(-1)}
                             className={btnCls}
                         >
-                            <Icon name="chevron_left" className="text-[20px]" />
+                            <Icon name={isRtl ? "chevron_right" : "chevron_left"} className="text-[20px]" />
                         </button>
                         <button
                             type="button"
-                            aria-label="Sonraki yorum"
+                            aria-label={t.reviews.next}
                             onClick={() => scrollByCard(1)}
                             className={btnCls}
                         >
-                            <Icon name="chevron_right" className="text-[20px]" />
+                            <Icon name={isRtl ? "chevron_left" : "chevron_right"} className="text-[20px]" />
                         </button>
                     </div>
                 </Reveal>
@@ -84,16 +84,20 @@ export default function TestimonialsSection() {
                             >
                                 <div className="flex flex-col gap-4">
                                     <div className="flex items-center justify-between">
-                                        <div className="flex text-amber-400" role="img" aria-label="5/5">
-                                            {[0, 1, 2, 3, 4].map((n) => (
-                                                <Icon
-                                                    key={n}
-                                                    name="star"
-                                                    fill
-                                                    className="text-[18px]"
-                                                />
-                                            ))}
-                                        </div>
+                                        {/* Yıldızlar sadece yorumda puan varsa görünür */}
+                                        {r.rating ? (
+                                            <div
+                                                className="flex text-amber-400"
+                                                role="img"
+                                                aria-label={`${r.rating}/5`}
+                                            >
+                                                {Array.from({ length: r.rating }, (_, n) => (
+                                                    <Icon key={n} name="star" fill className="text-[18px]" />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span aria-hidden="true" />
+                                        )}
                                         <span className="rounded-full bg-charcoal-dark px-2.5 py-1 font-label-uppercase text-label-uppercase text-crimson-vivid">
                                             {r.lang}
                                         </span>
@@ -119,7 +123,7 @@ export default function TestimonialsSection() {
                                             {r.name}
                                         </span>
                                         <span className="font-label-sm text-label-sm text-secondary-fixed-dim">
-                                            {t.reviews?.googleReview || "Google Yorumu"}
+                                            {t.reviews.googleReview}
                                         </span>
                                     </div>
                                 </figcaption>

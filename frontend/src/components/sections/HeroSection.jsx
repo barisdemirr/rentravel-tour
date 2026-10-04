@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
-import { SITE, waHref, HOVER_RED } from "@/lib/constants";
-import { EASE, containerVariants, itemVariants } from "@/lib/motion";
+import { SITE, SLIDE_DURATION, waHref } from "@/lib/constants";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
+import { HERO_SLIDES } from "@/lib/heroSlides";
+import { containerVariants, itemVariants } from "@/lib/motion";
 import { TONES } from "@/lib/tones";
-import { heroSlides, SLIDE_DURATION } from "@/lib/mockData";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
 
 export default function HeroSection() {
+    const { t, tpl, isRtl } = useLanguage();
     const reduce = useReducedMotion();
     const sectionRef = useRef(null);
     const barRef = useRef(null);
@@ -18,11 +20,16 @@ export default function HeroSection() {
     const inView = useInView(sectionRef, { amount: 0.2 });
     const paused = tabHidden || !inView;
 
-    const slide = heroSlides[index];
+    // Metinler sözlükten, görsel ve davranış HERO_SLIDES'tan (aynı sıra)
+    const slides = useMemo(
+        () => HERO_SLIDES.map((s, i) => ({ ...s, ...t.hero.slides[i] })).filter((s) => s.line1),
+        [t]
+    );
+    const slide = slides[index];
 
     const go = useCallback(
-        (dir) => setIndex((i) => (i + dir + heroSlides.length) % heroSlides.length),
-        []
+        (dir) => setIndex((i) => (i + dir + slides.length) % slides.length),
+        [slides.length]
     );
 
     useEffect(() => {
@@ -32,34 +39,36 @@ export default function HeroSection() {
     }, []);
 
     useEffect(() => {
-        heroSlides.forEach((s) => {
+        slides.forEach((s) => {
             const i = new window.Image();
             i.src = s.image;
         });
-    }, []);
+    }, [slides]);
 
     useEffect(() => {
         const bar = barRef.current;
         if (bar) bar.style.transform = "scaleX(0)";
-        if (paused) return;
+        if (paused || slides.length === 0) return;
         const start = performance.now();
         let raf;
         const tick = (now) => {
             const p = Math.min((now - start) / SLIDE_DURATION, 1);
             if (bar) bar.style.transform = `scaleX(${p})`;
             if (p < 1) raf = requestAnimationFrame(tick);
-            else setIndex((i) => (i + 1) % heroSlides.length);
+            else setIndex((i) => (i + 1) % slides.length);
         };
         raf = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(raf);
-    }, [index, paused]);
+    }, [index, paused, slides.length]);
+
+    if (!slide) return null;
 
     const isWA = slide.altKind === "whatsapp";
     const wa = isWA ? waHref() : null;
     const altHref = wa || SITE.phoneHref;
     const altLabel = isWA && !wa ? slide.altFallback : slide.alt;
 
-    const text = slide.text.replace("{tursabNo}", SITE.tursabNo);
+    const text = tpl(slide.text, { tursabNo: SITE.tursabNo });
 
     return (
         <motion.section
@@ -76,7 +85,7 @@ export default function HeroSection() {
             <div className="absolute inset-x-0 top-0 z-30 h-[3px] bg-white/25" aria-hidden="true">
                 <div
                     ref={barRef}
-                    className="h-full origin-left rounded-full bg-white will-change-transform"
+                    className="h-full origin-left rounded-full bg-white will-change-transform rtl:origin-right"
                     style={{ transform: "scaleX(0)" }}
                 />
             </div>
@@ -147,7 +156,7 @@ export default function HeroSection() {
                                     <span>{slide.cta}</span>
                                     <Icon
                                         name="arrow_forward"
-                                        className="text-[18px] transition-transform group-hover:translate-x-1"
+                                        className="text-[18px] transition-transform group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1"
                                     />
                                 </a>
                                 <a
@@ -165,33 +174,33 @@ export default function HeroSection() {
             </AnimatePresence>
 
             {/* Kontroller */}
-            <div className="absolute bottom-16 right-margin z-30 flex items-center gap-4 rounded-2xl bg-charcoal-dark/80 px-4 py-2 text-surface-white shadow-lg backdrop-blur-md md:right-margin-tablet lg:right-margin-desktop">
-                <div className="font-label-uppercase text-label-uppercase tracking-widest">
+            <div className="absolute bottom-16 end-margin z-30 flex items-center gap-4 rounded-2xl bg-charcoal-dark/80 px-4 py-2 text-surface-white shadow-lg backdrop-blur-md md:end-margin-tablet lg:end-margin-desktop">
+                <div className="font-label-uppercase text-label-uppercase tracking-widest" dir="ltr">
                     <span className="font-bold text-crimson-vivid">
                         {String(index + 1).padStart(2, "0")}
                     </span>
                     <span className="mx-1 text-secondary-fixed-dim">/</span>
                     <span className="text-secondary-fixed-dim">
-                        {String(heroSlides.length).padStart(2, "0")}
+                        {String(slides.length).padStart(2, "0")}
                     </span>
                 </div>
                 <div className="h-4 w-px bg-charcoal-surface" />
                 <div className="flex items-center gap-1">
                     <button
                         type="button"
-                        aria-label="Önceki slayt"
+                        aria-label={t.hero.prev}
                         onClick={() => go(-1)}
                         className="flex h-8 w-8 items-center justify-center rounded-xl transition-colors hover:bg-crimson-vivid"
                     >
-                        <Icon name="west" className="text-[18px]" />
+                        <Icon name={isRtl ? "east" : "west"} className="text-[18px]" />
                     </button>
                     <button
                         type="button"
-                        aria-label="Sonraki slayt"
+                        aria-label={t.hero.next}
                         onClick={() => go(1)}
                         className="flex h-8 w-8 items-center justify-center rounded-xl transition-colors hover:bg-crimson-vivid"
                     >
-                        <Icon name="east" className="text-[18px]" />
+                        <Icon name={isRtl ? "west" : "east"} className="text-[18px]" />
                     </button>
                 </div>
             </div>
