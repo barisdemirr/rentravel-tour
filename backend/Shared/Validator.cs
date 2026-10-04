@@ -71,7 +71,31 @@ public class Validator
         return this;
     }
 
-    
+
+    public Validator Each<T>(string field, List<T>? items, int max, Action<T, string> check) where T : class
+    {
+        if (items is null) return this;
+
+        if (items.Count > max)
+        {
+            Add(field, $"En fazla {max} öğe eklenebilir.");
+            return this;
+        }
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            if (items[i] is null)
+            {
+                Add($"{field}[{i}]", "Geçersiz öğe.");
+                continue;
+            }
+
+            check(items[i], $"{field}[{i}]");
+        }
+
+        return this;
+    }
+
     public Result ToFailure() => Result.Fail(BuildError());
     public Result<T> ToFailure<T>() => Result<T>.Fail(BuildError());
 
