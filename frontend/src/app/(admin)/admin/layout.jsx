@@ -12,6 +12,12 @@ export default async function AdminRootLayout({ children }) {
 
     return (
         <html lang="tr">
+            <head>
+                <link
+                    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+                    rel="stylesheet"
+                />
+            </head>
             <body>
                 <div className="admin-root" data-signed-in={payload ? "1" : "0"}>
                     {children}
