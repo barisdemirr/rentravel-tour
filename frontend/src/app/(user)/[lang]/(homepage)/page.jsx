@@ -7,13 +7,22 @@ import FeaturedBungalows from "@/components/sections/FeaturedBungalows";
 import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import ContactBanner from "@/components/sections/ContactBanner";
 import { safe } from "@/lib/api";
-import { getCultureTours, getDailyTours, getTestimonials } from "@/services";
+import { featuredOf } from "@/lib/featured";
+import {
+    getBungalows,
+    getCultureTours,
+    getDailyTours,
+    getTestimonials,
+    getVehicles,
+} from "@/services";
 
 export default async function HomePage() {
     // Bir istek hata verirse yalnızca o bölüm boş kalır, sayfa açılır
-    const [dailyTours, cultureTours, testimonials] = await Promise.all([
+    const [vehicles, dailyTours, cultureTours, bungalows, testimonials] = await Promise.all([
+        safe(getVehicles()),
         safe(getDailyTours()),
         safe(getCultureTours()),
+        safe(getBungalows()),
         safe(getTestimonials()),
     ]);
 
@@ -21,10 +30,10 @@ export default async function HomePage() {
         <>
             <HeroSection />
             <BookingSection dailyTours={dailyTours} cultureTours={cultureTours} />
-            <FeaturedVehicles />
-            <DailyTours />
-            <CultureTours />
-            <FeaturedBungalows />
+            <FeaturedVehicles vehicles={featuredOf(vehicles)} />
+            <DailyTours tours={featuredOf(dailyTours)} />
+            <CultureTours tours={featuredOf(cultureTours)} />
+            <FeaturedBungalows bungalows={featuredOf(bungalows)} />
             <TestimonialsSection testimonials={testimonials} />
             <ContactBanner />
         </>
