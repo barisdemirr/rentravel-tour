@@ -14,6 +14,20 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
+const string CorsPolicy = "FrontendPolicy";
+
+// ---- CORS ----
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsPolicy, policy =>
+    {
+        policy.WithOrigins("https://localhost:3000", "http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
@@ -71,8 +85,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorizationBuilder()
     .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
-
-
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -89,10 +101,8 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
-
 builder.Services.AddFeatures(typeof(Program).Assembly);
 builder.Services.AddOpenApi();
-
 
 var app = builder.Build();
 
@@ -112,6 +122,10 @@ app.UseStaticFiles(new StaticFileOptions
             context.Context.Response.Headers.CacheControl = "public,max-age=31536000,immutable";
     }
 });
+
+// CORS middleware mutlaka RateLimiter, Authentication ve Authorization'dan önce çalışmalıdır
+app.UseCors(CorsPolicy);
+
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -30,3 +30,11 @@ export function formatDate(value, locale = "tr", options = { day: "numeric", mon
     if (!value) return "";
     return new Intl.DateTimeFormat(INTL_LOCALES[locale] ?? INTL_LOCALES.tr, options).format(parseDateOnly(value));
 }
+
+
+/** "2027-07-15" -> "15/07/2027" */
+export function formatDateInput(value) {
+    if (!value) return "";
+    const [y, m, d] = String(value).split("-");
+    return `${d}/${m}/${y}`;
+}
