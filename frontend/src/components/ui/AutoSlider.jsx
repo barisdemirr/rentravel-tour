@@ -5,7 +5,7 @@ import { useInView, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import Icon from "./Icon";
 
-const AUTO_INTERVAL = 3000;
+const AUTO_INTERVAL = 2500;
 
 export default function AutoSlider({ children, ariaLabel, className = "", showControls = true }) {
     const { t, isRtl } = useLanguage();
@@ -117,10 +117,10 @@ export default function AutoSlider({ children, ariaLabel, className = "", showCo
                 </div>
             )}
 
-            {/* Track */}
+            {/* Track: items-stretch kartların h-full ile eşit boylanmasını sağlar */}
             <div
                 ref={trackRef}
-                className="no-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth pb-2"
+                className="no-scrollbar flex snap-x snap-mandatory items-stretch gap-6 overflow-x-auto scroll-smooth pb-2"
             >
                 {children}
             </div>

@@ -17,6 +17,8 @@ export default function VehicleCard({ vehicle }) {
     const segment = localized(vehicle.segment?.label, locale);
     const guarantee = localized(vehicle.guarantee, locale);
 
+    const specs = (vehicle.specs ?? []).slice(0, 4);
+
     return (
         <article className="h-full w-[280px] shrink-0 snap-start sm:w-[320px]">
             {/* Kartın tamamı tek bağlantı: her yerine tıklanabilir */}
@@ -25,7 +27,7 @@ export default function VehicleCard({ vehicle }) {
                 className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl"
             >
                 {/* Görsel */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-charcoal-dark">
+                <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-charcoal-dark">
                     <SafeImage
                         src={mediaUrl(vehicle.image, "md")}
                         alt={mediaAlt(vehicle.image, locale, name)}
@@ -50,20 +52,20 @@ export default function VehicleCard({ vehicle }) {
 
                 {/* İçerik */}
                 <div className="flex flex-1 flex-col gap-4 p-5">
+                    {/* Segment satırı her zaman yer kaplar, boşsa görünmez */}
                     <div className="flex flex-col gap-1">
-                        {segment && (
-                            <span className="font-label-uppercase text-label-uppercase text-crimson-vivid">
-                                {segment}
-                            </span>
-                        )}
-                        <h3 className="font-headline-sm text-headline-sm uppercase text-charcoal-dark transition-colors group-hover:text-crimson-vivid">
+                        <span className="min-h-[1.2em] font-label-uppercase text-label-uppercase text-crimson-vivid">
+                            {segment || "\u00A0"}
+                        </span>
+                        {/* İki satırlık sabit alan: tek satırlık başlıklar da aynı yüksekliği kaplar */}
+                        <h3 className="line-clamp-2 min-h-[2.6em] font-headline-sm text-headline-sm uppercase leading-[1.3] text-charcoal-dark transition-colors group-hover:text-crimson-vivid">
                             {name}
                         </h3>
                     </div>
 
-                    {/* Özellikler: aracın ilk 4 özelliği (vites, yakıt, kapasite, bagaj) */}
-                    <div className="grid grid-cols-2 gap-2 font-label-sm text-label-sm text-secondary">
-                        {vehicle.specs.slice(0, 4).map((spec, i) => (
+                    {/* Özellikler: her zaman iki satırlık ızgara (dörtten az olsa da) */}
+                    <div className="grid min-h-[3.4em] grid-cols-2 content-start gap-2 font-label-sm text-label-sm text-secondary">
+                        {specs.map((spec, i) => (
                             <span key={i} className="flex min-w-0 items-center gap-1.5">
                                 <Icon name={spec.icon} className="shrink-0 text-[16px] text-crimson-vivid" />
                                 <span className="truncate">{localized(spec.value, locale)}</span>
@@ -71,17 +73,17 @@ export default function VehicleCard({ vehicle }) {
                         ))}
                     </div>
 
-                    {/* Garanti etiketi */}
-                    {guarantee && (
-                        <div className="flex flex-wrap gap-1.5">
-                            <span className="rounded-full bg-canvas-offwhite px-2.5 py-1 font-label-sm text-label-sm text-secondary">
+                    {/* Garanti etiketi: yoksa da yeri korunur */}
+                    <div className="min-h-[2em]">
+                        {guarantee && (
+                            <span className="inline-block max-w-full truncate rounded-full bg-canvas-offwhite px-2.5 py-1 font-label-sm text-label-sm text-secondary">
                                 {guarantee}
                             </span>
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {/* CTA: kartın kendisi bağlantı, bu sadece görsel ipucu */}
-                    <span className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-charcoal-dark px-4 py-3 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container">
+                    <span className="mt-auto inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-charcoal-dark px-4 py-3 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container">
                         {t.cards.details}
                         <Icon name="arrow_forward" className="text-[16px] rtl:-scale-x-100" />
                     </span>
