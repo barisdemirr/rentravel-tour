@@ -7,3 +7,4 @@ export * from "./cultureTours";
 export * from "./bungalows";
 export * from "./testimonials";
 export * from "./vipRequests"
+export * from "./corporateRequests"

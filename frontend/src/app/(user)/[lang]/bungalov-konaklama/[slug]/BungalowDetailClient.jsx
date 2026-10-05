@@ -365,26 +365,7 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             <span>{copied ? d.copied : d.share}</span>
                         </button>
 
-                        {bungalow.ratingScore != null && (
-                            <div className="flex items-center gap-3 rounded-2xl bg-charcoal-dark px-4 py-2.5 text-white shadow-md">
-                                <div className="flex flex-col leading-tight">
-                                    <span className="font-label-md text-label-md font-bold">
-                                        {localized(bungalow.ratingLabel, locale)}
-                                    </span>
-                                    {bungalow.ratingCount > 0 && (
-                                        <span className="font-body-sm text-body-sm opacity-80">
-                                            {tpl(d.reviews, { count: bungalow.ratingCount })}
-                                        </span>
-                                    )}
-                                </div>
-                                <span
-                                    dir="ltr"
-                                    className="rounded-xl bg-white px-2.5 py-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark"
-                                >
-                                    {Number(bungalow.ratingScore).toFixed(1)}
-                                </span>
-                            </div>
-                        )}
+                        
                     </div>
                 </div>
 

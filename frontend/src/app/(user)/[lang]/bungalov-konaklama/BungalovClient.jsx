@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
 import { mediaAlt, mediaUrl } from "@/lib/media";
 import { quoteBungalow } from "@/services";
+import Link from "@/components/ui/LocalizedLink";
 
 const PAGE_SIZE = 12;
 const SLIDE_MS = 3000; // hero görselinin değişim süresi
@@ -58,10 +59,10 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
             bungalows
                 .filter((b) => b.image)
                 .map((b) => ({
+                    slug: b.slug,
                     image: b.image,
                     title: localized(b.title, locale),
                     location: localized(b.location, locale),
-                    rating: b.ratingScore ?? null,
                 })),
         [bungalows, locale]
     );
@@ -279,7 +280,11 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
                         {slide && (
                             <div className="relative hidden md:block lg:col-span-5">
                                 <TiltCard max={9} scale={1.02} className="group">
-                                    <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-white/10 shadow-2xl lg:aspect-square">
+                                    <Link
+                                        href={`/bungalov-konaklama/${slide.slug}${query}`}
+                                        aria-label={slide.title}
+                                        className="relative block aspect-[16/10] overflow-hidden rounded-3xl border border-white/10 shadow-2xl lg:aspect-square"
+                                    >
                                         <AnimatePresence mode="wait">
                                             <motion.div
                                                 key={slideIndex}
@@ -307,12 +312,8 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
                                             style={{ transform: "translateZ(40px)" }}
                                         >
                                             <div className="flex min-w-0 items-center gap-3">
-                                                <div className="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-full bg-emerald-50 px-2 font-headline-sm text-headline-sm font-bold text-emerald-700 shadow-inner">
-                                                    {slide.rating != null ? (
-                                                        <span dir="ltr">★ {Number(slide.rating).toFixed(1)}</span>
-                                                    ) : (
-                                                        <Icon name="cottage" className="text-[20px]" />
-                                                    )}
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crimson-vivid/10 text-crimson-vivid shadow-inner">
+                                                    <Icon name="cottage" className="text-[20px]" />
                                                 </div>
                                                 <div className="min-w-0">
                                                     <h4 className="truncate font-headline-sm text-headline-sm font-bold leading-tight text-charcoal-dark">
@@ -324,7 +325,7 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 </TiltCard>
                             </div>
                         )}

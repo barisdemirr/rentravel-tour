@@ -7,14 +7,13 @@ import SafeImage from "@/components/ui/SafeImage";
 import Link from "@/components/ui/LocalizedLink";
 import { SITE, waHref } from "@/lib/constants";
 import { plusDays, rentalDays as calcDays, todayISO } from "@/lib/dates";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, parseDateOnly } from "@/lib/format";
+import { createCorporateRequest, quoteVehicle } from "@/services";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
 import { mediaAlt, mediaUrl } from "@/lib/media";
 import { TONES } from "@/lib/tones";
-import { corporateMessage } from "@/lib/whatsapp";
-import { quoteVehicle } from "@/services";
 import DateField from "@/components/ui/DateField";
 import TimeField from "@/components/ui/TimeField";
 
@@ -404,7 +403,7 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
    KURUMSAL AYLIK KİRALAMA FORMU
    ───────────────────────────────────────────── */
 function CorporateForm() {
-    const { t, locale } = useLanguage();
+    const { t, tpl, locale } = useLanguage();
     const f = t.carRental.corporate;
     const typeKeys = Object.keys(f.types);
 
@@ -415,31 +414,75 @@ function CorporateForm() {
         email: "",
         startDate: "",
         endDate: "",
-        months: "",
         vehicleType: typeKeys[0],
         quantity: "1",
         notes: "",
+        website: "", // tuzak alan
     });
+    const [errors, setErrors] = useState({});
+    const [busy, setBusy] = useState(false);
+    const [sendError, setSendError] = useState("");
+    const [done, setDone] = useState(false);
 
-    const update = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+    const update = (key) => (e) => {
+        setForm((prev) => ({ ...prev, [key]: e.target.value }));
+        if (errors[key]) setErrors((x) => ({ ...x, [key]: null }));
+    };
 
-    const onSubmit = (e) => {
+    /* Süre tarihlerden hesaplanır */
+    const days = useMemo(() => {
+        if (!form.startDate || !form.endDate) return 0;
+        const diff = parseDateOnly(form.endDate) - parseDateOnly(form.startDate);
+        return Math.max(0, Math.round(diff / 86400000));
+    }, [form.startDate, form.endDate]);
+
+    const onSubmit = async (e) => {
         e.preventDefault();
+        if (busy) return;
 
-        // Mesaj her zaman Türkçe
-        const message = corporateMessage({
-            ...form,
-            vehicleType: getDictionary("tr").carRental.corporate.types[form.vehicleType],
-            locale,
-        });
+        setBusy(true);
+        setErrors({});
+        setSendError("");
 
-        const url = waHref(message);
-        if (url) window.open(url, "_blank", "noopener,noreferrer");
+        try {
+            await createCorporateRequest({
+                company: form.company.trim(),
+                contactName: form.contactName.trim(),
+                phone: form.phone.trim(),
+                email: form.email.trim(),
+                startDate: form.startDate,
+                endDate: form.endDate,
+                // Araç tipi her zaman Türkçe gönderilir, maili okuyan Türkçe görsün
+                vehicleType: getDictionary("tr").carRental.corporate.types[form.vehicleType],
+                quantity: Number(form.quantity) || 1,
+                notes: form.notes.trim(),
+                locale,
+                website: form.website,
+            });
+            setDone(true);
+        } catch (error) {
+            if (error?.errors) {
+                setErrors(Object.fromEntries(Object.entries(error.errors).map(([k, v]) => [k, v[0]])));
+                setSendError(error.title || f.errorTitle);
+            } else {
+                setSendError(error?.detail || error?.message || f.errorTitle);
+            }
+        } finally {
+            setBusy(false);
+        }
     };
 
     const fieldCls =
         "w-full rounded-xl border border-surface-variant bg-canvas-offwhite px-4 py-3 font-label-md text-label-md text-charcoal-dark outline-none transition-all placeholder:text-secondary/50 focus:border-crimson-vivid focus:bg-white focus:ring-2 focus:ring-crimson-vivid/15";
     const labelCls = "mb-1.5 flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary";
+
+    const fieldError = (name) =>
+        errors[name] ? (
+            <p className="mt-1.5 flex items-start gap-1 font-label-md text-label-md text-crimson-vivid">
+                <Icon name="error" className="mt-0.5 shrink-0 text-[14px]" />
+                {errors[name]}
+            </p>
+        ) : null;
 
     return (
         <div className="overflow-hidden rounded-3xl bg-surface-white shadow-[0_20px_40px_-15px_rgba(15,17,21,0.09)]">
@@ -449,111 +492,259 @@ function CorporateForm() {
                         <Icon name="corporate_fare" className="text-[24px]" />
                     </span>
                     <div>
-                        <span className="mb-1 block font-label-uppercase text-label-uppercase text-crimson-vivid">{f.eyebrow}</span>
-                        <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-white">{f.title}</h2>
+                        <span className="mb-1 block font-label-uppercase text-label-uppercase text-crimson-vivid">
+                            {f.eyebrow}
+                        </span>
+                        <h2 className="font-headline-md text-headline-md font-bold tracking-tight text-white">
+                            {f.title}
+                        </h2>
                         <p className="mt-1 max-w-xl font-body-sm text-body-sm text-white/75">{f.text}</p>
                     </div>
                 </div>
             </div>
 
-            <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 sm:p-8">
-                <div className="sm:col-span-2">
-                    <label htmlFor="corp-company" className={labelCls}>
-                        <Icon name="business" className="text-[14px] text-crimson-vivid" />
-                        {f.company}
-                    </label>
-                    <input id="corp-company" required type="text" placeholder={f.companyPh} value={form.company} onChange={update("company")} className={fieldCls} />
+            {done ? (
+                /* Başarı ekranı */
+                <div className="flex flex-col items-center gap-4 p-8 text-center sm:p-12">
+                    <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
+                        <Icon name="check_circle" fill className="text-[34px]" />
+                    </span>
+                    <div>
+                        <h3 className="font-headline-md text-headline-md font-bold text-charcoal-dark">
+                            {f.successTitle}
+                        </h3>
+                        <p className="mt-2 max-w-md font-body-md text-body-md text-secondary">{f.successText}</p>
+                    </div>
+                    <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                        <a
+                            href={SITE.phoneHref}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-charcoal-dark px-6 py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white transition-colors hover:bg-charcoal-surface"
+                        >
+                            <Icon name="call" className="text-[18px] text-crimson-vivid" />
+                            <span dir="ltr">{SITE.phone}</span>
+                        </a>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setDone(false);
+                                setForm((p) => ({ ...p, company: "", notes: "" }));
+                            }}
+                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-surface-variant px-6 py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-charcoal-dark transition-colors hover:bg-canvas-offwhite"
+                        >
+                            <Icon name="add_circle" className="shrink-0 text-[18px] text-crimson-vivid" />
+                            {f.newRequest}
+                        </button>
+                    </div>
                 </div>
+            ) : (
+                <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2 sm:p-8">
+                    <div className="sm:col-span-2">
+                        <label htmlFor="corp-company" className={labelCls}>
+                            <Icon name="business" className="text-[14px] text-crimson-vivid" />
+                            {f.company}
+                        </label>
+                        <input
+                            id="corp-company"
+                            required
+                            type="text"
+                            placeholder={f.companyPh}
+                            value={form.company}
+                            onChange={update("company")}
+                            className={fieldCls}
+                        />
+                        {fieldError("company")}
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-name" className={labelCls}>
-                        <Icon name="person" className="text-[14px] text-crimson-vivid" />
-                        {f.contactName}
-                    </label>
-                    <input id="corp-name" required type="text" placeholder={f.contactNamePh} value={form.contactName} onChange={update("contactName")} className={fieldCls} />
-                </div>
+                    <div>
+                        <label htmlFor="corp-name" className={labelCls}>
+                            <Icon name="person" className="text-[14px] text-crimson-vivid" />
+                            {f.contactName}
+                        </label>
+                        <input
+                            id="corp-name"
+                            required
+                            type="text"
+                            placeholder={f.contactNamePh}
+                            value={form.contactName}
+                            onChange={update("contactName")}
+                            className={fieldCls}
+                        />
+                        {fieldError("contactName")}
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-phone" className={labelCls}>
-                        <Icon name="call" className="text-[14px] text-crimson-vivid" />
-                        {f.phone}
-                    </label>
-                    <input id="corp-phone" required type="tel" dir="ltr" placeholder={f.phonePh} value={form.phone} onChange={update("phone")} className={fieldCls} />
-                </div>
+                    <div>
+                        <label htmlFor="corp-phone" className={labelCls}>
+                            <Icon name="call" className="text-[14px] text-crimson-vivid" />
+                            {f.phone}
+                        </label>
+                        <input
+                            id="corp-phone"
+                            required
+                            type="tel"
+                            dir="ltr"
+                            placeholder={f.phonePh}
+                            value={form.phone}
+                            onChange={update("phone")}
+                            className={fieldCls}
+                        />
+                        {fieldError("phone")}
+                    </div>
 
-                <div className="sm:col-span-2">
-                    <label htmlFor="corp-email" className={labelCls}>
-                        <Icon name="mail" className="text-[14px] text-crimson-vivid" />
-                        {f.email} <span className="text-secondary/60">{f.optional}</span>
-                    </label>
-                    <input id="corp-email" type="email" dir="ltr" placeholder={f.emailPh} value={form.email} onChange={update("email")} className={fieldCls} />
-                </div>
+                    <div className="sm:col-span-2">
+                        <label htmlFor="corp-email" className={labelCls}>
+                            <Icon name="mail" className="text-[14px] text-crimson-vivid" />
+                            {f.email} <span className="text-secondary/60">{f.optional}</span>
+                        </label>
+                        <input
+                            id="corp-email"
+                            type="email"
+                            dir="ltr"
+                            placeholder={f.emailPh}
+                            value={form.email}
+                            onChange={update("email")}
+                            className={fieldCls}
+                        />
+                        {fieldError("email")}
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-start" className={labelCls}>
-                        <Icon name="calendar_today" className="text-[14px] text-crimson-vivid" />
-                        {f.startDate}
-                    </label>
-                    <DateField id="corp-start" required min={todayISO()} value={form.startDate} onChange={update("startDate")} className={fieldCls} />
-                </div>
+                    <div>
+                        <label htmlFor="corp-start" className={labelCls}>
+                            <Icon name="calendar_today" className="text-[14px] text-crimson-vivid" />
+                            {f.startDate}
+                        </label>
+                        <DateField
+                            id="corp-start"
+                            required
+                            min={todayISO()}
+                            value={form.startDate}
+                            onChange={update("startDate")}
+                            className={fieldCls}
+                        />
+                        {fieldError("startDate")}
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-end" className={labelCls}>
-                        <Icon name="event_repeat" className="text-[14px] text-crimson-vivid" />
-                        {f.endDate} <span className="text-secondary/60">{f.optional}</span>
-                    </label>
-                    <DateField id="corp-end" min={form.startDate || todayISO()} value={form.endDate} onChange={update("endDate")} className={fieldCls} />
-                </div>
+                    <div>
+                        <label htmlFor="corp-end" className={labelCls}>
+                            <Icon name="event_repeat" className="text-[14px] text-crimson-vivid" />
+                            {f.endDate}
+                        </label>
+                        <DateField
+                            id="corp-end"
+                            required
+                            min={form.startDate ? plusDays(form.startDate, 1) : todayISO()}
+                            value={form.endDate}
+                            onChange={update("endDate")}
+                            className={fieldCls}
+                        />
+                        {fieldError("endDate")}
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-months" className={labelCls}>
-                        <Icon name="timelapse" className="text-[14px] text-crimson-vivid" />
-                        {f.months}
-                    </label>
-                    <input id="corp-months" required type="number" min="1" max="24" placeholder={f.monthsPh} value={form.months} onChange={update("months")} className={fieldCls} />
-                </div>
+                    {/* Süre: tarihlerden hesaplanır, kullanıcı girmez */}
+                    <div className="sm:col-span-2">
+                        <div className="flex items-center justify-between gap-3 rounded-xl bg-canvas-offwhite px-4 py-3">
+                            <span className="flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary">
+                                <Icon name="timelapse" className="text-[14px] text-crimson-vivid" />
+                                {f.duration}
+                            </span>
+                            <span
+                                className={`font-headline-sm text-headline-sm font-bold ${days > 0 ? "text-charcoal-dark" : "text-secondary/60"
+                                    }`}
+                            >
+                                {days > 0 ? tpl(f.durationDays, { days }) : f.durationEmpty}
+                            </span>
+                        </div>
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-type" className={labelCls}>
-                        <Icon name="directions_car" className="text-[14px] text-crimson-vivid" />
-                        {f.vehicleType}
-                    </label>
-                    <select id="corp-type" value={form.vehicleType} onChange={update("vehicleType")} className={`${fieldCls} cursor-pointer`}>
-                        {typeKeys.map((key) => (
-                            <option key={key} value={key}>
-                                {f.types[key]}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                    <div>
+                        <label htmlFor="corp-type" className={labelCls}>
+                            <Icon name="directions_car" className="text-[14px] text-crimson-vivid" />
+                            {f.vehicleType}
+                        </label>
+                        <select
+                            id="corp-type"
+                            value={form.vehicleType}
+                            onChange={update("vehicleType")}
+                            className={`${fieldCls} cursor-pointer`}
+                        >
+                            {typeKeys.map((key) => (
+                                <option key={key} value={key}>
+                                    {f.types[key]}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div>
-                    <label htmlFor="corp-qty" className={labelCls}>
-                        <Icon name="inventory_2" className="text-[14px] text-crimson-vivid" />
-                        {f.quantity}
-                    </label>
-                    <input id="corp-qty" type="number" min="1" max="50" value={form.quantity} onChange={update("quantity")} className={fieldCls} />
-                </div>
+                    <div>
+                        <label htmlFor="corp-qty" className={labelCls}>
+                            <Icon name="inventory_2" className="text-[14px] text-crimson-vivid" />
+                            {f.quantity}
+                        </label>
+                        <input
+                            id="corp-qty"
+                            type="number"
+                            min="1"
+                            max="50"
+                            value={form.quantity}
+                            onChange={update("quantity")}
+                            className={fieldCls}
+                        />
+                        {fieldError("quantity")}
+                    </div>
 
-                <div className="sm:col-span-2">
-                    <label htmlFor="corp-notes" className={labelCls}>
-                        <Icon name="notes" className="text-[14px] text-crimson-vivid" />
-                        {f.notes} <span className="text-secondary/60">{f.optional}</span>
-                    </label>
-                    <textarea id="corp-notes" rows={3} placeholder={f.notesPh} value={form.notes} onChange={update("notes")} className={`${fieldCls} resize-none`} />
-                </div>
+                    <div className="sm:col-span-2">
+                        <label htmlFor="corp-notes" className={labelCls}>
+                            <Icon name="notes" className="text-[14px] text-crimson-vivid" />
+                            {f.notes} <span className="text-secondary/60">{f.optional}</span>
+                        </label>
+                        <textarea
+                            id="corp-notes"
+                            rows={3}
+                            placeholder={f.notesPh}
+                            value={form.notes}
+                            onChange={update("notes")}
+                            className={`${fieldCls} resize-none`}
+                        />
+                        {fieldError("notes")}
+                    </div>
 
-                <div className="sm:col-span-2">
-                    <button
-                        type="submit"
-                        className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container px-6 py-4 font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_10px_25px_-5px_rgba(187,0,38,0.35)] transition-all hover:bg-crimson-vivid active:scale-[0.98]"
-                    >
-                        <Icon name="send" className="text-[20px] transition-transform group-hover:translate-x-0.5 rtl:-scale-x-100" />
-                        <span>{f.submit}</span>
-                    </button>
-                    <p className="mt-3 text-center font-body-sm text-body-sm text-secondary">{f.hint}</p>
-                </div>
-            </form>
+                    {/* Tuzak alan: botlar doldurur, insanlar görmez */}
+                    <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        aria-hidden="true"
+                        value={form.website}
+                        onChange={update("website")}
+                        className="pointer-events-none absolute h-0 w-0 opacity-0"
+                    />
+
+                    {sendError && (
+                        <p
+                            role="alert"
+                            className="flex items-start gap-2 rounded-xl bg-crimson-vivid/10 px-4 py-3 font-body-sm text-body-sm text-crimson-vivid sm:col-span-2"
+                        >
+                            <Icon name="error" className="mt-0.5 shrink-0 text-[18px]" />
+                            <span className="min-w-0">{sendError}</span>
+                        </p>
+                    )}
+
+                    <div className="sm:col-span-2">
+                        <button
+                            type="submit"
+                            disabled={busy}
+                            className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container px-6 py-4 font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_10px_25px_-5px_rgba(187,0,38,0.35)] transition-all hover:bg-crimson-vivid active:scale-[0.98] disabled:opacity-60"
+                        >
+                            <Icon
+                                name={busy ? "progress_activity" : "request_quote"}
+                                className={`text-[20px] ${busy ? "animate-spin" : "transition-transform group-hover:scale-110"}`}
+                            />
+                            <span>{busy ? f.sending : f.submit}</span>
+                        </button>
+                        <p className="mt-3 text-center font-body-sm text-body-sm text-secondary">{f.hint}</p>
+                    </div>
+                </form>
+            )}
         </div>
     );
 }

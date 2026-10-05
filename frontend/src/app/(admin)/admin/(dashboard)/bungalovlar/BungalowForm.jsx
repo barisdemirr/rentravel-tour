@@ -148,9 +148,9 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                     title: cleanLocalized(r.title),
                     text: cleanLocalized(r.text),
                 })),
-            ratingLabel: cleanLocalized(form.ratingLabel),
-            ratingScore: form.ratingScore === "" ? null : Number(form.ratingScore),
-            ratingCount: form.ratingCount === "" ? null : Number(form.ratingCount),
+            ratingLabel: null,
+            ratingScore: null,
+            ratingCount: null,
             seoTitle: cleanLocalized(form.seoTitle),
             seoDescription: cleanLocalized(form.seoDescription),
             seoKeywords: cleanLocalized(form.seoKeywords),
@@ -573,45 +573,6 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                 />
             </FormSection>
 
-            {/* PUAN */}
-            <FormSection
-                title="Değerlendirme"
-                description="Gerçek bir kaynaktan (Google, Booking) alınan puanı girin. Boş bırakılırsa gösterilmez."
-                columns={2}
-            >
-                <Field label="Puan" hint="0 ile 10 arası" error={fieldError("ratingScore")}>
-                    <NumberInput
-                        min="0"
-                        max="10"
-                        step="0.1"
-                        value={form.ratingScore}
-                        error={fieldError("ratingScore")}
-                        onChange={(e) => set("ratingScore")(e.target.value)}
-                    />
-                </Field>
-
-                <Field label="Değerlendirme Sayısı" error={fieldError("ratingCount")}>
-                    <NumberInput
-                        min="0"
-                        step="1"
-                        value={form.ratingCount}
-                        error={fieldError("ratingCount")}
-                        onChange={(e) => set("ratingCount")(e.target.value)}
-                    />
-                </Field>
-
-                <div className="sm:col-span-2">
-                    <LocalizedField
-                        name="ratingLabel"
-                        label="Puan Etiketi"
-                        hint="Mükemmel, Çok iyi gibi"
-                        maxLength={60}
-                        value={form.ratingLabel}
-                        onChange={set("ratingLabel")}
-                        errors={flatErrors}
-                    />
-                </div>
-            </FormSection>
 
             {/* SEO */}
             <FormSection title="Arama motoru" description="Boş bırakılırsa tesis adı ve açıklaması kullanılır." columns={1}>
