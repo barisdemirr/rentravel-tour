@@ -9,8 +9,9 @@ import FormDialog from "@/components/admin/FormDialog";
 import OwnerPicker from "@/components/admin/OwnerPicker";
 import { useToast } from "@/components/admin/Toast";
 import LocalizedField, { cleanLocalized, emptyLocalized, toLocalized } from "@/components/admin/LocalizedField";
-import { DateInput, Field, NumberInput, Switch } from "@/components/admin/fields";
+import { DateInput, Field, NumberInput, Switch, SelectInput } from "@/components/admin/fields";
 import { adminDelete, adminPost, adminPut } from "@/lib/admin/client";
+
 
 const fmtDate = (iso) => (iso ? iso.split("-").reverse().join("/") : "");
 const money = (amount, currency) =>
@@ -23,11 +24,21 @@ function overlaps(rule, others) {
     );
 }
 
+/* Öncelik: kullanıcı sayı girmesin, üç seviye yeterli */
+const PRIORITIES = [
+    { value: 1, label: "Düşük", hint: "Genel sezon fiyatları" },
+    { value: 2, label: "Orta", hint: "Tatil ve yoğun dönemler" },
+    { value: 3, label: "Yüksek", hint: "Bayram, özel günler" },
+];
+
+const priorityLabel = (value) =>
+    PRIORITIES.find((p) => p.value === Number(value))?.label ?? `Özel (${value})`;
+
 const emptyForm = () => ({
     startDate: "",
     endDate: "",
     price: "",
-    priority: 0,
+    priority: 1,
     label: emptyLocalized(),
     isActive: true,
 });
@@ -149,8 +160,19 @@ export default function PriceRulesClient({ groups, ownerType, ownerId, ownerLabe
             key: "priority",
             header: "Öncelik",
             hideOnMobile: true,
-            className: "w-24",
-            render: (row) => row.priority,
+            className: "w-28",
+            render: (row) => (
+                <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${row.priority >= 3
+                        ? "bg-ad-brand-soft text-ad-brand"
+                        : row.priority === 2
+                            ? "bg-ad-warn-soft text-ad-warn"
+                            : "bg-ad-sunken text-ad-muted"
+                        }`}
+                >
+                    {priorityLabel(row.priority)}
+                </span>
+            ),
         },
         { key: "status", header: "Durum", className: "w-28", render: (row) => <StatusBadge active={row.isActive} /> },
     ];
@@ -269,15 +291,25 @@ export default function PriceRulesClient({ groups, ownerType, ownerId, ownerLabe
 
                 <Field
                     label="Öncelik"
-                    hint="Aynı tarihte birden fazla dönemsel fiyat olursa, öncelik değeri daha büyük olan esas alınır. örn: 2>1"
+                    hint="Aynı tarihte birden fazla dönem varsa yüksek öncelikli olan uygulanır."
                     error={fieldError("priority")}
                 >
-                    <NumberInput
-                        step="1"
+                    <SelectInput
                         value={form.priority}
                         error={fieldError("priority")}
-                        onChange={(e) => set("priority")(e.target.value)}
-                    />
+                        onChange={(e) => set("priority")(Number(e.target.value))}
+                    >
+                        {PRIORITIES.map((p) => (
+                            <option key={p.value} value={p.value}>
+                                {p.label} — {p.hint}
+                            </option>
+                        ))}
+
+                        {/* Eski kayıtlarda listede olmayan bir değer varsa kaybolmasın */}
+                        {!PRIORITIES.some((p) => p.value === Number(form.priority)) && (
+                            <option value={form.priority}>{priorityLabel(form.priority)}</option>
+                        )}
+                    </SelectInput>
                 </Field>
 
                 <div className="sm:col-span-2">
