@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
+import IconField from "@/components/admin/IconField";
 import LocalizedListField from "@/components/admin/LocalizedListField";
 import MediaPicker from "@/components/admin/MediaPicker";
 import RepeaterField from "@/components/admin/RepeaterField";
@@ -16,7 +17,6 @@ import LocalizedField, {
 } from "@/components/admin/LocalizedField";
 import { Field, FormActions, FormSection, NumberInput, SelectInput, Switch, TextInput } from "@/components/admin/fields";
 import { adminPost, adminPut } from "@/lib/admin/client";
-import { slugify } from "@/lib/admin/slug";
 
 const CURRENCIES = ["TRY", "USD", "EUR"];
 const TONES = [
@@ -33,7 +33,6 @@ const emptyStop = () => ({ icon: "", time: "", title: emptyLocalized(), descript
 /** DTO'dan form durumu */
 function initialState(record, variant, nextOrder) {
     const state = {
-        slug: record?.slug ?? "",
         categoryId: record?.category?.id ?? "",
         title: toLocalized(record?.title),
         description: toLocalized(record?.description),
@@ -59,12 +58,6 @@ function initialState(record, variant, nextOrder) {
             sub: toLocalized(s.sub),
             tone: s.tone ?? "",
         })),
-        editorialOn: Boolean(record?.editorial),
-        editorialEyebrow: toLocalized(record?.editorial?.eyebrow),
-        editorialEyebrowIcon: record?.editorial?.eyebrowIcon ?? "",
-        editorialTitle: toLocalized(record?.editorial?.title),
-        editorialParagraphs: (record?.editorial?.paragraphs ?? []).map(toLocalized),
-        editorialHighlights: (record?.editorial?.highlights ?? []).map(toLocalized),
         itinerary: (record?.itinerary ?? []).map((i) => ({
             icon: i.icon ?? "",
             time: i.time ?? "",
@@ -94,8 +87,6 @@ function initialState(record, variant, nextOrder) {
 const cleanList = (list) =>
     list.filter((i) => i.text?.tr?.trim()).map((i) => ({ icon: i.icon?.trim() || null, text: cleanLocalized(i.text) }));
 
-const cleanTexts = (list) => list.filter((t) => t?.tr?.trim()).map(cleanLocalized);
-
 export default function TourForm({ variant, record, categories, nextOrder }) {
     const router = useRouter();
     const toast = useToast();
@@ -114,9 +105,6 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
     const fieldError = (name) => errors[name]?.[0] ?? errors[`${name}.tr`]?.[0] ?? null;
     const flatErrors = Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, v[0]]));
 
-    const onTitleChange = (value) =>
-        setForm((f) => ({ ...f, title: value, slug: isNew && !f.slugTouched ? slugify(value.tr) : f.slug }));
-
     const submit = async (e) => {
         e.preventDefault();
         if (busy) return;
@@ -125,7 +113,8 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
         setErrors({});
 
         const body = {
-            slug: form.slug.trim() || null,
+            // Yeni kayıtta adres addan üretilir, düzenlemede mevcut adres korunur
+            slug: isNew ? null : record.slug,
             categoryId: form.categoryId || null,
             title: cleanLocalized(form.title),
             description: cleanLocalized(form.description),
@@ -155,16 +144,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     sub: cleanLocalized(s.sub),
                     tone: s.tone || null,
                 })),
-            editorial:
-                form.editorialOn && form.editorialTitle?.tr?.trim()
-                    ? {
-                        eyebrow: cleanLocalized(form.editorialEyebrow),
-                        eyebrowIcon: form.editorialEyebrowIcon.trim() || null,
-                        title: cleanLocalized(form.editorialTitle),
-                        paragraphs: cleanTexts(form.editorialParagraphs),
-                        highlights: cleanTexts(form.editorialHighlights),
-                    }
-                    : null,
+            editorial: null, // tanıtım bölümü kullanılmıyor
             itinerary: form.itinerary
                 .filter((i) => i.title?.tr?.trim())
                 .map((i) => ({
@@ -218,7 +198,6 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
         { name: "description", label: "Kart açıklaması", value: form.description, set: set("description") },
         { name: "longDescription", label: "Detaylı açıklama", value: form.longDescription, set: set("longDescription") },
         { name: "transport", label: "Ulaşım bilgisi", value: form.transport, set: set("transport") },
-        { name: "editorialTitle", label: "Tanıtım başlığı", value: form.editorialTitle, set: set("editorialTitle") },
         { name: "seoTitle", label: "SEO başlığı", value: form.seoTitle, set: set("seoTitle") },
         { name: "seoDescription", label: "SEO açıklaması", value: form.seoDescription, set: set("seoDescription") },
     ];
@@ -232,14 +211,14 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     aria-label="Listeye dön"
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-ad-line text-ad-muted transition-colors hover:bg-ad-sunken hover:text-ad-ink"
                 >
-                    <Icon name="arrow_back" className="text-[20px] rtl:-scale-x-100" />
+                    <Icon name="arrow_back" className="text-[20px]" />
                 </Link>
                 <div className="min-w-0">
                     <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
                         {isNew ? `Yeni ${label}` : form.title.tr || `${label} Düzenle`}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew ? "Zorunlu alanlar: ad, taban fiyat." : `/${form.slug}`}
+                        {isNew ? "Zorunlu alanlar: ad, taban fiyat." : `Adres: /${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -251,23 +230,14 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         name="title"
                         label="Tur Adı"
                         required
+                        hint={isNew ? "Sitedeki adres bu addan otomatik oluşturulur." : undefined}
                         maxLength={150}
                         value={form.title}
-                        onChange={onTitleChange}
+                        onChange={set("title")}
                         errors={flatErrors}
                         translateHint="Tur adı. Uzungöl, Ayder gibi yer adları çevrilmez"
                     />
                 </div>
-
-                <Field label="Adres (slug)" hint="Boş bırakılırsa addan üretilir" error={fieldError("slug")}>
-                    <TextInput
-                        dir="ltr"
-                        placeholder="uzungol-sumela-turu"
-                        value={form.slug}
-                        error={fieldError("slug")}
-                        onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value, slugTouched: true }))}
-                    />
-                </Field>
 
                 <Field label="Kategori" error={fieldError("categoryId")}>
                     <SelectInput value={form.categoryId} onChange={(e) => set("categoryId")(e.target.value)}>
@@ -280,6 +250,8 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         ))}
                     </SelectInput>
                 </Field>
+
+                <div />
 
                 <div className="sm:col-span-2">
                     <LocalizedField
@@ -322,7 +294,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     label="Galeri"
                     multiple
                     category={isCulture ? "CultureTour" : "DailyTour"}
-                    hint="Detay sayfasındaki fotoğraflar"
+                    hint="Detay sayfasındaki fotoğraflar. Seçili bir görsele tekrar tıklarsanız listeden çıkar."
                     value={form.gallery}
                     onChange={set("gallery")}
                 />
@@ -396,8 +368,8 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         {isCulture ? (
                             <>
                                 Kültür turlarında misafir fiyatı{" "}
-                                <strong className="text-ad-body">yalnızca konaklama tipinden</strong> hesaplanır.
-                                Tipleri ve fiyatlarını listedeki{" "}
+                                <strong className="text-ad-body">yalnızca konaklama tipinden</strong> hesaplanır. Tipleri
+                                ve fiyatlarını listedeki{" "}
                                 <Icon name="hotel" className="align-middle text-[14px] text-ad-brand" /> düğmesinden
                                 girin.
                             </>
@@ -432,19 +404,12 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     />
                 </div>
 
-                <Field label="Ulaşım İkonu">
-                    <div className="flex items-center gap-2">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ad-sunken text-ad-brand">
-                            <Icon name={form.transportIcon || "directions_bus"} className="text-[20px]" />
-                        </span>
-                        <TextInput
-                            dir="ltr"
-                            placeholder="directions_bus"
-                            value={form.transportIcon}
-                            onChange={(e) => set("transportIcon")(e.target.value)}
-                        />
-                    </div>
-                </Field>
+                <IconField
+                    label="Ulaşım İkonu"
+                    value={form.transportIcon}
+                    onChange={set("transportIcon")}
+                    placeholder="directions_bus"
+                />
 
                 <div />
 
@@ -460,7 +425,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         addLabel="Rozet ekle"
                         renderRow={(item, update) => (
                             <>
-                                <IconField value={item.icon} onChange={(v) => update({ icon: v })} />
+                                <IconField value={item.icon} onChange={(v) => update({ icon: v })} placeholder="verified" />
                                 <Field label="Renk">
                                     <SelectInput value={item.tone} onChange={(e) => update({ tone: e.target.value })}>
                                         {TONES.map((t) => (
@@ -496,7 +461,12 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         addLabel="Durak ekle"
                         renderRow={(item, update) => (
                             <>
-                                <IconField value={item.icon} onChange={(v) => update({ icon: v })} optional />
+                                <IconField
+                                    label="İkon (opsiyonel)"
+                                    value={item.icon}
+                                    onChange={(v) => update({ icon: v })}
+                                    placeholder="place"
+                                />
                                 <div className="flex items-end">
                                     <Switch
                                         label="Vurgulu"
@@ -532,7 +502,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                         addLabel="Bilgi ekle"
                         renderRow={(item, update) => (
                             <>
-                                <IconField value={item.icon} onChange={(v) => update({ icon: v })} />
+                                <IconField value={item.icon} onChange={(v) => update({ icon: v })} placeholder="schedule" />
                                 <Field label="Renk">
                                     <SelectInput value={item.tone} onChange={(e) => update({ tone: e.target.value })}>
                                         {TONES.map((t) => (
@@ -562,65 +532,6 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 </div>
             </FormSection>
 
-            {/* TANITIM */}
-            <FormSection title="Tanıtım bölümü" description="Detay sayfasındaki anlatı bloğu. Boş bırakılırsa gösterilmez." columns={1}>
-                <Switch
-                    label="Tanıtım bölümü kullanılsın"
-                    checked={form.editorialOn}
-                    onChange={set("editorialOn")}
-                />
-
-                {form.editorialOn && (
-                    <>
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <LocalizedField
-                                name="editorialEyebrow"
-                                label="Üst Etiket"
-                                maxLength={60}
-                                value={form.editorialEyebrow}
-                                onChange={set("editorialEyebrow")}
-                            />
-                            <IconField
-                                value={form.editorialEyebrowIcon}
-                                onChange={set("editorialEyebrowIcon")}
-                                optional
-                            />
-                        </div>
-
-                        <LocalizedField
-                            name="editorialTitle"
-                            label="Başlık"
-                            maxLength={150}
-                            value={form.editorialTitle}
-                            onChange={set("editorialTitle")}
-                            errors={flatErrors}
-                        />
-
-                        <LocalizedListField
-                            label="Paragraflar"
-                            multiline
-                            maxLength={1000}
-                            max={6}
-                            namePrefix="para"
-                            addLabel="Paragraf ekle"
-                            value={form.editorialParagraphs}
-                            onChange={set("editorialParagraphs")}
-                        />
-
-                        <LocalizedListField
-                            label="Vurgular"
-                            hint="Paragrafların altındaki etiketler"
-                            maxLength={80}
-                            max={8}
-                            namePrefix="highlight"
-                            addLabel="Vurgu ekle"
-                            value={form.editorialHighlights}
-                            onChange={set("editorialHighlights")}
-                        />
-                    </>
-                )}
-            </FormSection>
-
             {/* PROGRAM */}
             <FormSection
                 title={isCulture ? "Gün gün program" : "Dakika dakika program"}
@@ -637,7 +548,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     addLabel="Adım ekle"
                     renderRow={(item, update) => (
                         <>
-                            <IconField value={item.icon} onChange={(v) => update({ icon: v })} />
+                            <IconField value={item.icon} onChange={(v) => update({ icon: v })} placeholder="directions_bus" />
                             <Field
                                 label={isCulture ? "Gün / Saat" : "Saat"}
                                 hint={isCulture ? "1. Gün veya 09:30" : "09:30"}
@@ -685,6 +596,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 <LocalizedListField
                     label="Fiyata Dahil"
                     withIcon
+                    iconPlaceholder="check_circle"
                     maxLength={200}
                     max={15}
                     namePrefix="inc"
@@ -695,6 +607,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 <LocalizedListField
                     label="Fiyata Dahil Değil"
                     withIcon
+                    iconPlaceholder="cancel"
                     maxLength={200}
                     max={15}
                     namePrefix="exc"
@@ -710,6 +623,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                     label="Tavsiyeler"
                     hint="Rahat ayakkabı, yağmurluk, kimlik gibi"
                     withIcon
+                    iconPlaceholder="lightbulb"
                     multiline
                     maxLength={300}
                     max={10}
@@ -721,7 +635,17 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
             </FormSection>
 
             {/* SEO */}
-            <FormSection title="Arama motoru" description="Boş bırakılırsa tur adı ve açıklaması kullanılır." columns={1}>
+            <FormSection title="Arama motoru" columns={1}>
+                <p className="rounded-xl bg-ad-sunken px-4 py-3 text-xs leading-relaxed text-ad-muted">
+                    Bu alanlar Google sonuçlarında ve bağlantı paylaşımlarında görünür.
+                    <br />
+                    <strong className="text-ad-body">Sayfa başlığını</strong> boş bırakırsanız tur adı kullanılır.
+                    <br />
+                    <strong className="text-ad-body">Açıklamayı</strong> boş bırakırsanız kart açıklaması kullanılır.
+                    <br />
+                    <strong className="text-ad-body">Paylaşım görselini</strong> boş bırakırsanız kapak görseli kullanılır.
+                </p>
+
                 <LocalizedField
                     name="seoTitle"
                     label="Sayfa Başlığı"
@@ -733,6 +657,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 <LocalizedField
                     name="seoDescription"
                     label="Açıklama"
+                    hint="Arama sonuçlarında başlığın altında görünen iki satır"
                     multiline
                     rows={3}
                     maxLength={300}
@@ -743,7 +668,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 <LocalizedField
                     name="seoKeywords"
                     label="Anahtar Kelimeler"
-                    hint="Virgülle ayırın"
+                    hint="Virgülle ayırın. Zorunlu değildir."
                     maxLength={300}
                     value={form.seoKeywords}
                     onChange={set("seoKeywords")}
@@ -751,7 +676,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 />
                 <MediaPicker
                     label="Paylaşım Görseli"
-                    hint="Boşsa kapak görseli kullanılır"
+                    hint="WhatsApp ve sosyal medyada bağlantı paylaşılınca görünür"
                     category={isCulture ? "CultureTour" : "DailyTour"}
                     value={form.ogImage}
                     onChange={set("ogImage")}
@@ -776,18 +701,5 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 extra={<TranslateAllButton fields={translatable} />}
             />
         </form>
-    );
-}
-
-function IconField({ value, onChange, optional = false }) {
-    return (
-        <Field label={optional ? "İkon (opsiyonel)" : "İkon"}>
-            <div className="flex items-center gap-2">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ad-sunken text-ad-brand">
-                    <Icon name={value || "help"} className="text-[20px]" />
-                </span>
-                <TextInput dir="ltr" placeholder="place" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
-            </div>
-        </Field>
     );
 }

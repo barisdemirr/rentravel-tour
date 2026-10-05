@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 
-const MODEL = "gemini-2.0-flash";
+const MODEL = "gemini-3.5-flash-lite";
 
-const SYSTEM = `Sen Material Symbols ikon kütüphanesi uzmanısın. Kullanıcının Türkçe yazdığı kavrama en uygun ikonları seçersin.
+const SYSTEM = `Sen Material Symbols ikon küt   üphanesi uzmanısın. Kullanıcının Türkçe yazdığı kavrama en uygun ikonları seçersin.
 
 Kurallar:
 - Yalnızca Google Material Symbols (Outlined) kütüphanesinde GERÇEKTEN var olan ikon adlarını döndür. Uydurma.

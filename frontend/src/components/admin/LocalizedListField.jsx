@@ -1,9 +1,9 @@
 "use client";
 
 import Icon from "@/components/ui/Icon";
+import IconField from "@/components/admin/IconField";
 import LocalizedField, { emptyLocalized, toLocalized } from "@/components/admin/LocalizedField";
 import { move } from "@/lib/admin/reorder";
-import { TextInput } from "./fields";
 
 /**
  * Çok dilli metinlerden oluşan liste.
@@ -21,6 +21,7 @@ export default function LocalizedListField({
     max = 15,
     addLabel = "Madde ekle",
     namePrefix = "item",
+    iconPlaceholder = "check_circle",
 }) {
     const textOf = (item) => (withIcon ? toLocalized(item.text) : toLocalized(item));
     const setText = (index, next) =>
@@ -50,19 +51,14 @@ export default function LocalizedListField({
 
                     <div className="flex min-w-0 flex-1 flex-col gap-2">
                         {withIcon && (
-                            <div className="flex items-center gap-2">
-                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ad-sunken text-ad-brand">
-                                    <Icon name={item.icon || "check"} className="text-[18px]" />
-                                </span>
-                                <TextInput
-                                    dir="ltr"
-                                    placeholder="İkon adı (boş bırakılabilir)"
-                                    value={item.icon ?? ""}
-                                    onChange={(e) =>
-                                        onChange(value.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)))
-                                    }
-                                />
-                            </div>
+                            <IconField
+                                label="İkon (opsiyonel)"
+                                value={item.icon ?? ""}
+                                placeholder={iconPlaceholder}
+                                onChange={(next) =>
+                                    onChange(value.map((x, j) => (j === i ? { ...x, icon: next } : x)))
+                                }
+                            />
                         )}
 
                         <LocalizedField
