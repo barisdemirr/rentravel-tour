@@ -613,6 +613,48 @@ export const dictionaries = {
             contactWhatsapp: "WhatsApp ile yazın",
             otherPages: "Diğer Sayfalar",
         },
+        vip: {
+            metaTitle: "VIP Talep",
+            metaDescription:
+                "Özel transfer, balayı düzenlemesi veya kurumsal organizasyon: talebinizi iletin, bölge uzmanımız sizi arasın.",
+            eyebrow: "Özel Organizasyon",
+            introTitle: "Size özel bir plan hazırlayalım.",
+            introText:
+                "Üç kısa soru. Talebinizi aldıktan sonra bölge uzmanımız en kısa sürede sizi arar.",
+            start: "Başlayalım",
+            stepOf: "{current} / {total}",
+            next: "Devam",
+            back: "Geri",
+            submit: "Talebi Gönder",
+            sending: "Gönderiliyor",
+            enterHint: "Enter tuşuyla devam edebilirsiniz",
+
+            nameQuestion: "Adınız ve soyadınız nedir?",
+            nameHint: "Size nasıl hitap edeceğimizi bilelim.",
+            namePlaceholder: "Adınız Soyadınız",
+            nameError: "Lütfen ad ve soyadınızı yazın.",
+
+            phoneQuestion: "Sizi hangi numaradan arayalım?",
+            phoneHint: "WhatsApp'ınız varsa oradan da yazabiliriz.",
+            phonePlaceholder: "05XX XXX XX XX",
+            phoneError: "Geçerli bir telefon numarası girin.",
+
+            messageQuestion: "Nasıl bir organizasyon planlıyorsunuz?",
+            messageHint: "Tarih, kişi sayısı ve aklınızdaki detayları yazabilirsiniz.",
+            messagePlaceholder: "Örnek: 12-15 Temmuz arası 4 kişilik aile, Ayder'de şömineli bungalov ve havalimanı transferi.",
+            messageError: "Talebinizi biraz daha açıklayın.",
+
+            successTitle: "Talebiniz bize ulaştı.",
+            successText: "En kısa sürede sizi arayacağız. Acele bir durumda WhatsApp'tan da yazabilirsiniz.",
+            successWhatsapp: "WhatsApp'tan yaz",
+            successHome: "Ana sayfaya dön",
+            newRequest: "Yeni talep oluştur",
+            errorTitle: "Talep gönderilemedi",
+
+            trust1: "TÜRSAB belgeli acente",
+            trust2: "Bilgileriniz üçüncü kişilerle paylaşılmaz",
+            trust3: "Ortalama yanıt süresi: birkaç saat",
+        },
     },
 
     EN: {
@@ -1170,6 +1212,48 @@ export const dictionaries = {
             contactText: "Reach out to us about anything related to the topics on this page.",
             contactWhatsapp: "Message us on WhatsApp",
             otherPages: "Other Pages",
+        },
+        vip: {
+            metaTitle: "VIP Request",
+            metaDescription:
+                "Private transfers, honeymoon arrangements or corporate events: send your request and our regional expert will call you.",
+            eyebrow: "Private Arrangements",
+            introTitle: "Let us build a plan around you.",
+            introText: "Three short questions. Our regional expert will call you shortly after we receive your request.",
+            start: "Let's begin",
+            stepOf: "{current} / {total}",
+            next: "Continue",
+            back: "Back",
+            submit: "Send Request",
+            sending: "Sending",
+            enterHint: "Press Enter to continue",
+
+            nameQuestion: "What is your full name?",
+            nameHint: "So we know how to address you.",
+            namePlaceholder: "Your full name",
+            nameError: "Please enter your first and last name.",
+
+            phoneQuestion: "Which number should we call?",
+            phoneHint: "If you use WhatsApp, we can message you there too.",
+            phonePlaceholder: "+90 5XX XXX XX XX",
+            phoneError: "Please enter a valid phone number.",
+
+            messageQuestion: "What kind of arrangement are you planning?",
+            messageHint: "Dates, number of guests and anything else you have in mind.",
+            messagePlaceholder:
+                "Example: family of 4, July 12-15, a bungalow with a fireplace in Ayder and airport transfer.",
+            messageError: "Please describe your request in a bit more detail.",
+
+            successTitle: "We have received your request.",
+            successText: "We will call you shortly. If it is urgent, you can also message us on WhatsApp.",
+            successWhatsapp: "Message on WhatsApp",
+            successHome: "Back to home",
+            newRequest: "Send another request",
+            errorTitle: "Request could not be sent",
+
+            trust1: "TÜRSAB licensed agency",
+            trust2: "Your details are never shared with third parties",
+            trust3: "Typical response time: a few hours",
         },
     },
 
@@ -1729,6 +1813,48 @@ export const dictionaries = {
         contactText: "تواصل معنا بشأن أي أمر يتعلق بمواضيع هذه الصفحة.",
         contactWhatsapp: "راسلنا على واتساب",
         otherPages: "صفحات أخرى",
+    },
+    vip: {
+        metaTitle: "طلب VIP",
+        metaDescription:
+            "نقل خاص أو ترتيبات شهر العسل أو فعاليات الشركات: أرسل طلبك وسيتصل بك خبير المنطقة لدينا.",
+        eyebrow: "ترتيبات خاصة",
+        introTitle: "دعنا نعدّ خطة خاصة بك.",
+        introText: "ثلاثة أسئلة قصيرة. سيتصل بك خبير المنطقة بعد استلام طلبك بوقت قصير.",
+        start: "لنبدأ",
+        stepOf: "{current} / {total}",
+        next: "متابعة",
+        back: "رجوع",
+        submit: "إرسال الطلب",
+        sending: "جارٍ الإرسال",
+        enterHint: "اضغط Enter للمتابعة",
+
+        nameQuestion: "ما اسمك الكامل؟",
+        nameHint: "لنعرف كيف نخاطبك.",
+        namePlaceholder: "الاسم الكامل",
+        nameError: "يرجى كتابة الاسم واللقب.",
+
+        phoneQuestion: "على أي رقم نتصل بك؟",
+        phoneHint: "إن كان لديك واتساب يمكننا مراسلتك هناك أيضًا.",
+        phonePlaceholder: "+90 5XX XXX XX XX",
+        phoneError: "يرجى إدخال رقم هاتف صحيح.",
+
+        messageQuestion: "ما نوع الترتيب الذي تخطط له؟",
+        messageHint: "التواريخ وعدد الأشخاص وأي تفاصيل تخطر لك.",
+        messagePlaceholder:
+            "مثال: عائلة من 4 أفراد بين 12 و15 يوليو، بنغالو بمدفأة في أيدر مع نقل من المطار.",
+        messageError: "يرجى توضيح طلبك أكثر قليلًا.",
+
+        successTitle: "وصلنا طلبك.",
+        successText: "سنتصل بك قريبًا. إن كان الأمر عاجلًا يمكنك مراسلتنا على واتساب.",
+        successWhatsapp: "راسلنا على واتساب",
+        successHome: "العودة للرئيسية",
+        newRequest: "إرسال طلب آخر",
+        errorTitle: "تعذّر إرسال الطلب",
+
+        trust1: "وكالة مرخّصة من TÜRSAB",
+        trust2: "لا تتم مشاركة بياناتك مع أي طرف ثالث",
+        trust3: "متوسط وقت الرد: بضع ساعات",
     },
 };
 

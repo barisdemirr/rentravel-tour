@@ -104,12 +104,15 @@ builder.Services.AddRateLimiter(options =>
             }));
 
     // VIP talep: IP başına dakikada en fazla 3 deneme
-    options.AddFixedWindowLimiter("vip", limiter =>
-    {
-        limiter.PermitLimit = 3;
-        limiter.Window = TimeSpan.FromMinutes(1);
-        limiter.QueueLimit = 0;
-    });
+    options.AddPolicy("vip", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 });
 
 builder.Services.AddFeatures(typeof(Program).Assembly);
