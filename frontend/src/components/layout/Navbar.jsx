@@ -57,24 +57,24 @@ export default function Navbar({ onOpenMenu }) {
                 : "bg-surface-white/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
                 }`}
         >
-            <div className="relative mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-margin md:h-20 md:px-margin-tablet lg:px-margin-desktop">
+            <div className="relative mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-margin md:h-20 md:px-margin-tablet 2xl:h-24 2xl:px-margin-desktop">
                 {/* Hamburger: sadece telefon ve tablet */}
                 <button
                     type="button"
                     aria-label={t.nav.openMenu}
                     onClick={onOpenMenu}
-                    className="-ms-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-charcoal-dark transition-colors hover:bg-canvas-offwhite lg:hidden"
+                    className="-ms-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-charcoal-dark transition-colors hover:bg-canvas-offwhite 2xl:hidden"
                 >
                     <Icon name="menu" className="text-[28px]" />
                 </button>
 
                 {/* Logo: telefonda ortada, masaüstünde başta */}
-                <div className="flex flex-1 justify-center lg:flex-none lg:justify-start">
+                <div className="flex flex-1 justify-center 2xl:flex-none 2xl:justify-start">
                     <Link href="/" aria-label="Rentravel" className="flex items-center">
                         <SafeImage
                             src={IMG.logo}
                             alt="Rentravel Turizm"
-                            className="h-9 w-auto object-contain md:h-10 lg:h-8"
+                            className="h-10 w-auto object-contain md:h-12 2xl:h-14"
                         />
                     </Link>
                 </div>
@@ -82,7 +82,7 @@ export default function Navbar({ onOpenMenu }) {
                 {/* Masaüstü menü: sayfanın tam ortasında, öğeler eşit kutularda */}
                 <nav
                     aria-label="Ana menü"
-                    className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 lg:flex"
+                    className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 2xl:flex"
                 >
                     <NavItem href="/" active={isActive("/")}>
                         {t.nav.home}
@@ -116,13 +116,12 @@ export default function Navbar({ onOpenMenu }) {
                 </nav>
 
                 {/* Sağ taraf: masaüstünde en sağa yapışır */}
-                <div className="flex shrink-0 items-center gap-1.5 lg:ms-auto lg:gap-3">
+                <div className="flex shrink-0 items-center gap-1.5 2xl:ms-auto 2xl:gap-3">
                     <LanguageMenu />
 
-                    {/* VIP Talep butonu: SADECE masaüstünde (mobilde drawer içinde) */}
                     <Link
                         href="/vip-talep"
-                        className="hidden items-center justify-center rounded-xl bg-primary-container px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-on-primary transition-colors hover:bg-crimson-vivid lg:inline-flex"
+                        className="hidden items-center justify-center rounded-xl bg-primary-container px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-on-primary transition-colors hover:bg-crimson-vivid 2xl:inline-flex"
                     >
                         {t.nav.vipRequest}
                     </Link>

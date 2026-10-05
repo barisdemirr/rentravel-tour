@@ -7,6 +7,7 @@ import { interpolate } from "@/lib/i18n/dictionaries";
 import { getDictionary } from "@/lib/i18n/getDictionary";
 import { DIRECTIONS, LOCALES, OG_LOCALES, isLocale } from "@/lib/i18n/config";
 import Analytics from "@/components/seo/Analytics";
+import StructuredData from "@/components/seo/StructuredData";
 import { SITE_URL } from "@/lib/siteUrl";
 import { safe } from "@/lib/api";
 import { getSiteSettings } from "@/services/siteSettings";
@@ -16,7 +17,8 @@ import { buildAlternates } from "@/lib/seo";
 export const viewport = {
     width: "device-width",
     initialScale: 1,
-    maximumScale: 1,
+    // maximumScale kaldırıldı: yakınlaştırmayı engellemek erişilebilirlik hatası
+    themeColor: "#d90429",
 };
 
 export function generateStaticParams() {
@@ -36,16 +38,25 @@ export async function generateMetadata({ params }) {
         alternates: buildAlternates("/", lang),
         title: { default: title, template: "%s | Rentravel Turizm" },
         description,
+        keywords: t.meta.keywords,
+        applicationName: "Rentravel Turizm",
+        authors: [{ name: "Rentravel Turizm" }],
+        creator: "Rentravel Turizm",
+        publisher: "Rentravel Turizm",
+        category: "travel",
+        // Telefon numaralarını tarayıcı kendi başına bağlantıya çevirmesin
+        formatDetection: { telephone: false, address: false, email: false },
         icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
         openGraph: {
             title,
             description,
             siteName: "Rentravel Turizm",
-            images: [{ url: "/icon.png", width: 512, height: 512, alt: "Rentravel Turizm Logo" }],
+            url: SITE_URL,
+            images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Rentravel Turizm" }],
             locale: OG_LOCALES[lang],
             type: "website",
         },
-        twitter: { card: "summary_large_image", title, description, images: ["/icon.png"] },
+        twitter: { card: "summary_large_image", title, description, images: ["/og-image.jpg"] },
         robots: {
             index: true,
             follow: true,
@@ -71,6 +82,9 @@ export default async function LangLayout({ children, params }) {
     return (
         <html lang={lang} dir={DIRECTIONS[lang]} suppressHydrationWarning>
             <head>
+                {/* Font sunucusuna erken bağlan: ikonlar daha hızlı gelsin */}
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link
                     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
                     rel="stylesheet"
@@ -85,6 +99,7 @@ export default async function LangLayout({ children, params }) {
                     <UserShell pages={pages}>{children}</UserShell>
                 </Providers>
 
+                <StructuredData locale={lang} />
                 <Analytics settings={settings} />
             </body>
         </html>

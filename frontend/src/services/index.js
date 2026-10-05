@@ -6,5 +6,8 @@ export * from "./dailyTours";
 export * from "./cultureTours";
 export * from "./bungalows";
 export * from "./testimonials";
-export * from "./vipRequests"
-export * from "./corporateRequests"
+export * from "./vipRequests";
+export * from "./corporateRequests";
+export * from "./siteSettings";
+export * from "./sitemap";
+export * from "./staticPages";

@@ -3,8 +3,11 @@
 export const dictionaries = {
     TR: {
         meta: {
-            title: "Rentravel Turizm | Premium Rotalar ve VIP Transfer",
-            description: "TÜRSAB A Grubu {tursabNo} lisanslı Rentravel ile Karadeniz, Kapadokya, Batum turları, yayla konaklamaları ve VIP şoförlü lüks transfer hizmetleri.",
+            title: "Rentravel Turizm | Trabzon Araç Kiralama, Karadeniz Turları ve Bungalov",
+            description:
+                "TÜRSAB {tursabNo} belgeli acente. Trabzon havalimanı araç kiralama, günübirlik Karadeniz turları, konaklamalı kültür turları ve Ayder bungalov tatili. Anlık fiyat, WhatsApp ile hızlı rezervasyon.",
+            keywords:
+                "trabzon araç kiralama, trabzon rent a car, trabzon havalimanı araç kiralama, karadeniz turu, günübirlik tur trabzon, uzungöl turu, ayder turu, sümela manastırı turu, pokut yaylası, çamlıhemşin bungalov, ayder bungalov, karadeniz bungalov evleri, rize araç kiralama, trabzon tur şirketi, karadeniz tatil paketleri, vip transfer trabzon, şoförlü araç kiralama trabzon, doğu karadeniz turu, zigana, hamsiköy, fırtına vadisi",
         },
         common: {
             loading: "Yükleniyor",
@@ -692,8 +695,11 @@ export const dictionaries = {
 
     EN: {
         meta: {
-            title: "Rentravel Tourism | Premium Routes and VIP Transfer",
-            description: "With Rentravel, a TÜRSAB Group A licensed agency (No. {tursabNo}): Black Sea, Cappadocia and Batumi tours, plateau stays and luxury chauffeured VIP transfers.",
+            title: "Rentravel Turizm | Trabzon Car Rental, Black Sea Tours & Bungalows",
+            description:
+                "TÜRSAB {tursabNo} licensed agency. Trabzon airport car rental, daily Black Sea tours, cultural tours with accommodation and bungalow stays in Ayder. Instant pricing, quick booking via WhatsApp.",
+            keywords:
+                "trabzon car rental, rent a car trabzon, trabzon airport car hire, black sea tours, uzungol tour, ayder tour, sumela monastery tour, pokut plateau, camlihemsin bungalow, ayder bungalow, black sea holiday, rize car rental, trabzon travel agency, vip transfer trabzon, eastern black sea tour, firtina valley",
         },
         common: {
             loading: "Loading",
@@ -1325,8 +1331,11 @@ export const dictionaries = {
 
     AR: {
         meta: {
-            title: "Rentravel للسياحة | مسارات مميزة ونقل VIP",
-            description: "مع Rentravel، وكالة مرخصة من TÜRSAB فئة A برقم {tursabNo}: جولات البحر الأسود وكبادوكيا وباتومي، وإقامات الهضاب وخدمات النقل الفاخر VIP مع سائق.",
+            title: "Rentravel Turizm | تأجير سيارات طرابزون وجولات البحر الأسود والبنغالو",
+            description:
+                "وكالة مرخّصة من TÜRSAB برقم {tursabNo}. تأجير سيارات من مطار طرابزون، جولات يومية في البحر الأسود، جولات ثقافية مع إقامة، وبنغالو في أيدر. أسعار فورية وحجز سريع عبر واتساب.",
+            keywords:
+                "تأجير سيارات طرابزون, تأجير سيارات مطار طرابزون, جولات البحر الأسود, رحلة أوزنجول, رحلة أيدر, دير سوميلا, هضبة بوكوت, بنغالو أيدر, بنغالو تشامليهمشين, عطلة البحر الأسود, تأجير سيارات ريزا, وكالة سياحة طرابزون, نقل VIP طرابزون, وادي فيرتينا",
         },
         common: {
             loading: "جارٍ التحميل",

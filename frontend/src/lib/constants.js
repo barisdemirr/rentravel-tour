@@ -15,8 +15,8 @@ export const SITE = {
 export const HOVER_RED = "#ff1e38";
 
 export const IMG = {
-    logo: "/logo.png",
-    logoMobile: "/logohamburger.png",
+    logo: "rentravel-logo-renkli-600.png",
+    logoMobile: "/rentravel-logo-kirmizi-beyaz-600.png",
     hero1: "/hero_images/hero1.jpg",
     hero2: "/hero_images/hero2.jpg",
     hero3: "/hero_images/hero3.jpg",

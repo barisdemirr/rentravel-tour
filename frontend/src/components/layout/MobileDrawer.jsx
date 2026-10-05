@@ -97,7 +97,7 @@ export default function MobileDrawer({ open, onClose, pages = [] }) {
                         <SafeImage
                             src={IMG.logoMobile || IMG.logo}
                             alt="Rentravel"
-                            className="h-9 w-auto object-contain"
+                            className="h-11 w-auto object-contain"
                         />
                         <button
                             ref={closeRef}
