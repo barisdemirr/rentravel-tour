@@ -56,16 +56,7 @@ export const CATALOGS = {
             { name: "currency", type: "currency", label: "Para Birimi", required: true },
             { name: "orderIndex", type: "order" },
         ],
-        extraColumns: [
-            {
-                key: "price",
-                header: "Günlük",
-                render: (row) =>
-                    new Intl.NumberFormat("tr-TR", { style: "currency", currency: row.currency || "TRY" }).format(
-                        row.dailyPrice ?? 0
-                    ),
-            },
-        ],
+        extraColumns: [{ key: "price", header: "Günlük", render: "money" }],
     },
 
     "tur-kategorileri": {
@@ -92,14 +83,7 @@ export const CATALOGS = {
             },
             { name: "orderIndex", type: "order" },
         ],
-        extraColumns: [
-            {
-                key: "appliesTo",
-                header: "Kullanım",
-                render: (row) =>
-                    ({ Daily: "Günübirlik", Culture: "Kültür", Both: "İkisi de" })[row.appliesTo] ?? row.appliesTo,
-            },
-        ],
+        extraColumns: [{ key: "appliesTo", header: "Kullanım", render: "appliesTo" }],
     },
 
     "bungalov-bolgeleri": {

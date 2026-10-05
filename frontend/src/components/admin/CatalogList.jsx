@@ -55,6 +55,16 @@ export default function CatalogList({ slug, catalog, rows, failed }) {
         </div>
     );
 
+    /* Sunucudan fonksiyon geçemediği için çiziciler burada, adla eşleşiyor */
+    const RENDERERS = {
+        money: (row) =>
+            new Intl.NumberFormat("tr-TR", { style: "currency", currency: row.currency || "TRY" }).format(
+                row.dailyPrice ?? 0
+            ),
+        appliesTo: (row) =>
+            ({ Daily: "Günübirlik", Culture: "Kültür", Both: "İkisi de" })[row.appliesTo] ?? row.appliesTo,
+    };
+
     const columns = [
         {
             key: "title",
@@ -74,8 +84,10 @@ export default function CatalogList({ slug, catalog, rows, failed }) {
                 </div>
             ),
         },
-        ...(catalog.extraColumns ?? []),
-        { key: "status", header: "Durum", className: "w-28", render: (row) => <StatusBadge active={row.isActive} /> },
+        ...(catalog.extraColumns ?? []).map((c) => ({
+            ...c,
+            render: RENDERERS[c.render] ?? (() => null),
+        })),
     ];
 
     return (
