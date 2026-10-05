@@ -1,20 +1,22 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/ui/LocalizedLink";
+import { IMG, SITE } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
-import { SITE, IMG } from "@/lib/constants";
+import { localized } from "@/lib/i18n/localized";
 import Icon from "../ui/Icon";
+import PaymentLogos from "../ui/PaymentLogos";
 import SafeImage from "../ui/SafeImage";
 import TursabBadge from "../ui/TursabBadge";
-import PaymentLogos from "../ui/PaymentLogos";
 
-export default function Footer() {
-    const { t } = useLanguage();
+export default function Footer({ pages = [] }) {
+    const { t, locale } = useLanguage();
     const year = new Date().getFullYear();
 
     const navLinks = [
         { label: t.nav.home, href: "/" },
-        { label: t.nav.tours, href: "/tur-rezervasyonu" },
+        { label: t.nav.dailyTours, href: "/gunubirlik-turlar" },
+        { label: t.nav.cultureTours, href: "/konaklamali-turlar" },
         { label: t.nav.cars, href: "/arac-kiralama" },
         { label: t.nav.bungalow, href: "/bungalov-konaklama" },
         { label: t.footer.vipConcierge, href: "/vip-talep" },
@@ -25,34 +27,26 @@ export default function Footer() {
         { label: t.nav.contact, href: "/iletisim" },
     ];
 
-    const legal = [
-        { label: t.footer.legal.privacy, href: "/gizlilik-politikasi" },
-        { label: t.footer.legal.terms, href: "/kullanim-kosullari" },
-        { label: t.footer.legal.kvkk, href: "/kvkk" },
-    ];
-
     return (
-        <footer className="w-full bg-[#0D1017] pb-8 pt-16 text-surface-white">
+        <footer className="w-full bg-[#0D1017] pb-8 pt-12 text-surface-white md:pt-16">
             <div className="mx-auto max-w-[1440px] px-margin md:px-margin-tablet lg:px-margin-desktop">
                 {/* ÜST BLOK */}
-                <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-12">
+                <div className="mb-10 grid grid-cols-1 gap-8 sm:grid-cols-2 md:gap-10 lg:grid-cols-12">
                     {/* Marka + TÜRSAB */}
-                    <div className="flex flex-col gap-4 lg:col-span-4">
-                        <div className="flex items-center gap-2">
+                    <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-4">
+                        <div className="flex items-center gap-2.5">
                             <SafeImage
                                 src={IMG.logo}
-                                alt="Rentravel Turizm Logo"
-                                className="h-8 w-auto object-contain"
+                                alt="Rentravel Turizm"
+                                className="h-8 w-auto shrink-0 object-contain"
                             />
                             <span className="font-headline-sm text-headline-sm uppercase tracking-tight text-surface-white">
                                 Rentravel Turizm
                             </span>
                         </div>
-                        <p className="max-w-sm font-body-sm text-body-sm text-secondary-fixed-dim">
-                            {t.footer.desc}
-                        </p>
 
-                        {/* TÜRSAB rozeti — küçültülmüş */}
+                        <p className="max-w-sm font-body-sm text-body-sm text-secondary-fixed-dim">{t.footer.desc}</p>
+
                         <TursabBadge />
                     </div>
 
@@ -61,12 +55,12 @@ export default function Footer() {
                         <span className="font-label-uppercase text-label-uppercase uppercase text-crimson-vivid">
                             {t.footer.quickAccess}
                         </span>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-2">
                             {navLinks.map((l) => (
                                 <Link
                                     key={l.href}
                                     href={l.href}
-                                    className="rounded-md font-body-sm text-body-sm text-secondary-fixed-dim transition-colors hover:text-surface-white"
+                                    className="font-body-sm text-body-sm text-secondary-fixed-dim transition-colors hover:text-surface-white"
                                 >
                                     {l.label}
                                 </Link>
@@ -81,25 +75,26 @@ export default function Footer() {
                         </span>
                         <div className="flex flex-col gap-3 font-body-sm text-body-sm text-secondary-fixed-dim">
                             <div className="flex items-start gap-2">
-                                <Icon name="location_on" className="mt-0.5 text-[18px] text-crimson-vivid" />
-                                <span>{SITE.address}</span>
+                                <Icon name="location_on" className="mt-0.5 shrink-0 text-[18px] text-crimson-vivid" />
+                                <span className="min-w-0">{SITE.address}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Icon name="call" className="text-[18px] text-crimson-vivid" />
-                                <a href={SITE.phoneHref} className="rounded-md transition-colors hover:text-surface-white">
-                                    {SITE.phone}
-                                </a>
-                            </div>
+                            <a
+                                href={SITE.phoneHref}
+                                className="flex items-center gap-2 transition-colors hover:text-surface-white"
+                            >
+                                <Icon name="call" className="shrink-0 text-[18px] text-crimson-vivid" />
+                                <span dir="ltr">{SITE.phone}</span>
+                            </a>
                             {SITE.email && (
-                                <div className="flex items-center gap-2">
-                                    <Icon name="mail" className="text-[18px] text-crimson-vivid" />
-                                    <a
-                                        href={`mailto:${SITE.email}`}
-                                        className="rounded-md transition-colors hover:text-surface-white"
-                                    >
+                                <a
+                                    href={`mailto:${SITE.email}`}
+                                    className="flex items-center gap-2 transition-colors hover:text-surface-white"
+                                >
+                                    <Icon name="mail" className="shrink-0 text-[18px] text-crimson-vivid" />
+                                    <span dir="ltr" className="min-w-0 break-all">
                                         {SITE.email}
-                                    </a>
-                                </div>
+                                    </span>
+                                </a>
                             )}
                         </div>
                     </div>
@@ -109,12 +104,12 @@ export default function Footer() {
                         <span className="font-label-uppercase text-label-uppercase uppercase text-crimson-vivid">
                             {t.footer.corporate}
                         </span>
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-2">
                             {corporateLinks.map((l) => (
                                 <Link
                                     key={l.href}
                                     href={l.href}
-                                    className="rounded-md font-body-sm text-body-sm text-secondary-fixed-dim transition-colors hover:text-surface-white"
+                                    className="font-body-sm text-body-sm text-secondary-fixed-dim transition-colors hover:text-surface-white"
                                 >
                                     {l.label}
                                 </Link>
@@ -124,23 +119,32 @@ export default function Footer() {
                 </div>
 
                 {/* ÖDEME YÖNTEMLERİ */}
-                <div className="mb-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] px-5 py-4 sm:flex-row">
-                    <span className="font-label-uppercase text-label-uppercase text-secondary-fixed-dim">
-                        {t.footer?.paymentMethods || "Güvenli Ödeme Yöntemleri"}
+                <div className="mb-8 flex flex-col items-center justify-between gap-3 rounded-2xl border border-white/5 bg-white/[0.02] px-4 py-4 sm:flex-row sm:gap-4 sm:px-5">
+                    <span className="text-center font-label-uppercase text-label-uppercase text-secondary-fixed-dim sm:text-start">
+                        {t.footer.paymentMethods}
                     </span>
                     <PaymentLogos />
                 </div>
 
-                {/* ALT SATIR */}
+                {/* ALT SATIR: yasal sayfalar panelden gelir */}
                 <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 font-label-sm text-label-sm text-secondary-fixed-dim sm:flex-row">
-                    <p>© {year} Rentravel Turizm. {t.footer.rights}</p>
-                    <div className="flex flex-wrap items-center justify-center gap-4">
-                        {legal.map((l) => (
-                            <Link key={l.href} href={l.href} className="rounded-md transition-colors hover:text-surface-white">
-                                {l.label}
-                            </Link>
-                        ))}
-                    </div>
+                    <p className="text-center sm:text-start">
+                        © {year} Rentravel Turizm. {t.footer.rights}
+                    </p>
+
+                    {pages.length > 0 && (
+                        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+                            {pages.map((page) => (
+                                <Link
+                                    key={page.slug}
+                                    href={`/${page.slug}`}
+                                    className="transition-colors hover:text-surface-white"
+                                >
+                                    {localized(page.title, locale)}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </footer>

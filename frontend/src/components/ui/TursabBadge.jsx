@@ -1,37 +1,41 @@
 "use client";
 
-import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { SITE } from "@/lib/constants";
+import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import Icon from "./Icon";
 
+/** Güven rozeti: belge numarası ve TÜRSAB doğrulama bağlantısı */
 export default function TursabBadge() {
-    const { t } = useLanguage();
+    const { t, tpl } = useLanguage();
+    const f = t.footer;
 
     return (
         <a
-            href={SITE.tursabUrl}
+            href="https://www.tursab.org.tr/tr/ddsv"
             target="_blank"
             rel="noopener noreferrer"
-            aria-label={`TÜRSAB Belge No ${SITE.tursabNo} — Doğrula`}
-            className="group flex items-center gap-3 rounded-2xl bg-charcoal-surface px-4 py-3 transition-colors hover:bg-[#20242d]"
+            className="group flex items-center gap-3.5 rounded-2xl border border-white/10 bg-white/[0.04] p-3.5 transition-colors hover:border-crimson-vivid/40 hover:bg-white/[0.07] sm:p-4"
         >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-charcoal-dark text-crimson-vivid">
-                <Icon name="verified" fill className="text-[22px]" />
+            {/* Mühür */}
+            <span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-crimson-vivid to-[#8f0019] shadow-[0_6px_18px_-6px_rgba(217,4,41,0.7)] sm:h-16 sm:w-16">
+                <Icon name="verified_user" fill className="text-[28px] text-white sm:text-[32px]" />
             </span>
 
-            <div className="flex min-w-0 flex-col">
-                <span className="font-label-uppercase text-label-uppercase text-crimson-vivid">
-                    {t.footer?.tursabEyebrow || "Resmi Doğrulama"}
+            <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="font-headline-sm text-headline-sm font-bold leading-tight text-surface-white">
+                    {f.tursabTitle}
                 </span>
-                <span className="truncate font-label-md text-label-md text-surface-white">
-                    TÜRSAB — {SITE.tursabNo}
+                <span dir="ltr" className="font-label-md text-label-md font-semibold text-crimson-vivid">
+                    {tpl(f.tursabNo, { no: SITE.tursabNo })}
                 </span>
-            </div>
-
-            <Icon
-                name="open_in_new"
-                className="ml-auto shrink-0 text-[16px] text-secondary-fixed-dim transition-colors group-hover:text-surface-white"
-            />
+                <span className="flex items-center gap-1 font-label-sm text-label-sm text-secondary-fixed-dim">
+                    {f.tursabNote}
+                    <Icon
+                        name="arrow_outward"
+                        className="text-[13px] opacity-0 transition-opacity group-hover:opacity-100 rtl:-scale-x-100"
+                    />
+                </span>
+            </span>
         </a>
     );
 }

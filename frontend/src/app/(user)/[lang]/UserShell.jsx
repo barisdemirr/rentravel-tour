@@ -22,7 +22,7 @@ export default function UserShell({ children }) {
             <main id="main" className="w-full bg-surface pt-20">
                 {children}
             </main>
-            <Footer />
+            <Footer pages={pages} />
             <WhatsAppFloat />
         </>
     );

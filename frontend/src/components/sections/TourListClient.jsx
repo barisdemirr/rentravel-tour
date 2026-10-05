@@ -120,7 +120,7 @@ export default function TourListClient({
     return (
         <>
             {/* HERO */}
-            <section className="relative w-full px-margin pb-14 pt-4 md:px-margin-tablet lg:px-margin-desktop">
+            <section className="relative w-full px-margin pb-12 pt-4 md:px-margin-tablet md:pb-14 lg:px-margin-desktop">
                 <div className="relative mx-auto w-full max-w-7xl overflow-hidden rounded-3xl bg-charcoal-dark shadow-2xl">
                     <div
                         className="absolute inset-0 scale-105 bg-cover bg-center"
@@ -129,20 +129,21 @@ export default function TourListClient({
                     <div className="absolute inset-0 bg-gradient-to-t from-charcoal-dark via-charcoal-dark/60 to-charcoal-dark/30" />
                     <div className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-primary-container/20 blur-3xl" />
 
-                    <div className="relative z-10 flex max-w-3xl flex-col items-start gap-4 px-5 pb-20 pt-10 text-surface-white sm:px-6 md:px-10 md:pb-28 md:pt-20">
+                    <div className="relative z-10 flex max-w-3xl flex-col items-start gap-3.5 px-5 pb-16 pt-10 text-surface-white sm:gap-4 sm:px-6 sm:pb-20 md:px-10 md:pb-28 md:pt-20">
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold shadow-sm backdrop-blur-md">
-                            <Icon name={heroIcon} fill className="text-[16px] text-crimson-vivid" />
+                            <Icon name={heroIcon} fill className="shrink-0 text-[16px] text-crimson-vivid" />
                             <span>{l.heroBadge}</span>
                         </div>
 
-                        <h1 className="break-words font-display-hero-mobile text-display-hero-mobile font-extrabold uppercase leading-tight tracking-tight text-surface-white md:font-display-hero md:text-display-hero">
+                        {/* w-full: items-start kutuyu daraltmasın, text-pretty: satır sonları dengeli */}
+                        <h1 className="w-full break-words text-pretty font-display-hero-mobile text-display-hero-mobile font-extrabold uppercase leading-tight tracking-tight text-surface-white md:font-display-hero md:text-display-hero">
                             {l.heroTitle}
                         </h1>
 
                         <div className="flex flex-col gap-2 pt-1 font-label-md text-label-md text-surface-white/90 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
                             {[l.trust1, l.trust2, l.trust3].map((text, i) => (
                                 <span key={i} className="flex items-center gap-1.5">
-                                    <Icon name={trustIcons[i]} fill className="text-[18px] text-crimson-vivid" />
+                                    <Icon name={trustIcons[i]} fill className="shrink-0 text-[18px] text-crimson-vivid" />
                                     {text}
                                 </span>
                             ))}
@@ -151,7 +152,7 @@ export default function TourListClient({
                 </div>
 
                 {/* ARAMA ÇUBUĞU */}
-                <div className="relative z-20 mx-auto -mt-10 w-full max-w-5xl px-2 sm:px-4 md:-mt-12">
+                <div className="relative z-20 mx-auto -mt-8 w-full max-w-5xl md:-mt-12">
                     <form
                         role="search"
                         onSubmit={(e) => {
@@ -184,7 +185,7 @@ export default function TourListClient({
 
                         <button
                             type="submit"
-                            className="flex items-center justify-center gap-2 rounded-xl bg-primary-container px-8 py-3.5 font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_4px_18px_-2px_rgba(187,0,38,0.4)] transition-all hover:bg-crimson-vivid active:scale-95 md:rounded-full md:py-4"
+                            className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary-container px-8 py-3.5 font-headline-sm text-headline-sm font-bold text-on-primary shadow-[0_4px_18px_-2px_rgba(187,0,38,0.4)] transition-all hover:bg-crimson-vivid active:scale-95 md:rounded-full md:py-4"
                         >
                             <Icon name="search" className="text-[20px]" />
                             <span>{l.searchButton}</span>
@@ -201,7 +202,7 @@ export default function TourListClient({
                 {/* Başlık + sonuç sayısı */}
                 <div className="mb-4 flex flex-col gap-1.5">
                     <span className="flex items-center gap-2 font-label-uppercase text-label-uppercase text-crimson-vivid">
-                        <span className="inline-block h-[2px] w-5 bg-crimson-vivid" />
+                        <span className="inline-block h-[2px] w-5 shrink-0 bg-crimson-vivid" />
                         {l.eyebrow}
                     </span>
                     <h2 className="font-headline-md text-headline-md font-semibold text-secondary">
@@ -209,9 +210,9 @@ export default function TourListClient({
                     </h2>
                 </div>
 
-                {/* Kategori sekmeleri (yatay kaydırılır) */}
+                {/* Kategori sekmeleri: yatay kaydırılır, sağ uçta nefes payı */}
                 {tabs.length > 0 && (
-                    <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:px-0">
+                    <div className="no-scrollbar mb-4 flex gap-2 overflow-x-auto pb-1 pe-4 md:pe-0">
                         {[{ key: "all", label: null }, ...tabs].map((c) => {
                             const selected = category === c.key;
                             return (
@@ -233,9 +234,9 @@ export default function TourListClient({
                     </div>
                 )}
 
-                {/* Sıralama + fiyat (+ süre) */}
-                <div className="mb-4 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-                    <label className={`relative block sm:min-w-[210px] ${isCulture ? "col-span-2 sm:col-span-1" : ""}`}>
+                {/* Sıralama + fiyat (+ süre): telefonda alt alta, tam genişlik */}
+                <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                    <label className="relative block w-full sm:w-auto sm:min-w-[210px]">
                         <span className="sr-only">{l.sortLabel}</span>
                         <Icon
                             name="swap_vert"
@@ -253,7 +254,7 @@ export default function TourListClient({
                     </label>
 
                     {isCulture && (
-                        <label className="relative block sm:min-w-[190px]">
+                        <label className="relative block w-full sm:w-auto sm:min-w-[190px]">
                             <span className="sr-only">{l.nightsLabel}</span>
                             <Icon
                                 name="nights_stay"
@@ -280,7 +281,7 @@ export default function TourListClient({
                         type="button"
                         aria-expanded={priceOpen}
                         onClick={() => setPriceOpen((v) => !v)}
-                        className={`flex items-center justify-between gap-2 rounded-xl border bg-surface-white px-3 py-3 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors sm:min-w-[190px] ${priceOpen || hasPrice ? "border-crimson-vivid" : "border-surface-variant"
+                        className={`flex w-full items-center justify-between gap-2 rounded-xl border bg-surface-white px-3 py-3 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors sm:w-auto sm:min-w-[190px] ${priceOpen || hasPrice ? "border-crimson-vivid" : "border-surface-variant"
                             }`}
                     >
                         <span className="flex min-w-0 items-center gap-2">
@@ -302,12 +303,13 @@ export default function TourListClient({
                                 { key: "min", text: l.priceMin, ph: "0" },
                                 { key: "max", text: l.priceMax, ph: l.priceUnlimited },
                             ].map((f) => (
-                                <label key={f.key} className="flex flex-col gap-1">
-                                    <span className="font-label-uppercase text-label-uppercase text-secondary">
+                                <label key={f.key} className="flex min-w-0 flex-col gap-1">
+                                    <span className="truncate font-label-uppercase text-label-uppercase text-secondary">
                                         {f.text}
                                     </span>
                                     <span className="relative block">
-                                        <span className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 font-label-md text-label-md text-secondary">
+                                        {/* Girdi dir="ltr" olduğu için simge ve dolgu fiziksel (left/pl) */}
+                                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-label-md text-label-md text-secondary">
                                             ₺
                                         </span>
                                         <input
@@ -316,7 +318,7 @@ export default function TourListClient({
                                             placeholder={f.ph}
                                             value={price[f.key]}
                                             onChange={setPriceField(f.key)}
-                                            className={`${fieldCls} ps-8 text-start`}
+                                            className={`${fieldCls} pl-8 text-left`}
                                         />
                                     </span>
                                 </label>
@@ -399,7 +401,7 @@ function ResultsGrid({ tours, variant, l }) {
 
             {tours.length > limit && (
                 <div className="mt-8 flex flex-col items-center gap-3">
-                    <span className="font-body-sm text-body-sm text-secondary">
+                    <span className="text-center font-body-sm text-body-sm text-secondary">
                         {tpl(l.shown, { shown: shown.length, total: tours.length })}
                     </span>
                     <button
@@ -423,7 +425,7 @@ function Chip({ label, onRemove }) {
             className="group inline-flex max-w-full items-center gap-1.5 rounded-full border border-surface-variant bg-canvas-offwhite py-1.5 ps-3 pe-2 font-label-md text-label-md text-charcoal-dark transition-colors hover:border-crimson-vivid"
         >
             <span className="max-w-[200px] truncate">{label}</span>
-            <Icon name="close" className="text-[14px] text-secondary group-hover:text-crimson-vivid" />
+            <Icon name="close" className="shrink-0 text-[14px] text-secondary group-hover:text-crimson-vivid" />
         </button>
     );
 }
@@ -431,7 +433,7 @@ function Chip({ label, onRemove }) {
 function Notice({ icon, title, text, children }) {
     return (
         <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-surface-variant bg-surface-white px-5 py-14 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-canvas-offwhite">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas-offwhite">
                 <Icon name={icon} className="text-[28px] text-crimson-vivid" />
             </div>
             <h3 className="font-headline-sm text-headline-sm text-charcoal-dark">{title}</h3>
