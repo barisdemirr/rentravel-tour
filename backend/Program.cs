@@ -50,6 +50,9 @@ builder.Services.AddScoped<MediaItemResolver>();
 builder.Services.AddScoped<MediaUsageChecker>();
 builder.Services.AddScoped<PriceOwnerChecker>();
 
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("Mail"));
+builder.Services.AddScoped<MailService>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -99,6 +102,14 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
+
+    // VIP talep: IP başına dakikada en fazla 3 deneme
+    options.AddFixedWindowLimiter("vip", limiter =>
+    {
+        limiter.PermitLimit = 3;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
+    });
 });
 
 builder.Services.AddFeatures(typeof(Program).Assembly);
