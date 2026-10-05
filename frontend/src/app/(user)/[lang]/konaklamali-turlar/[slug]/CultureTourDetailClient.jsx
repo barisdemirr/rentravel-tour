@@ -22,6 +22,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
 import { cultureTourMessage } from "@/lib/whatsapp";
 import { quoteCultureTour } from "@/services";
+import { toHtml } from "@/lib/richText";
 
 const MAX_ADULTS = 50;
 const MAX_CHILDREN = 10;
@@ -171,8 +172,8 @@ export default function CultureTourDetailClient({ tour, sessions = [], options =
                                     aria-checked={selected}
                                     onClick={() => setAccommodationId(o.accommodationTypeId)}
                                     className={`flex items-center gap-3 rounded-2xl border-2 p-3 text-start transition-colors ${selected
-                                            ? "border-crimson-vivid bg-crimson-vivid/5"
-                                            : "border-transparent bg-canvas-offwhite hover:border-surface-variant"
+                                        ? "border-crimson-vivid bg-crimson-vivid/5"
+                                        : "border-transparent bg-canvas-offwhite hover:border-surface-variant"
                                         }`}
                                 >
                                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-white text-crimson-vivid shadow-sm">
@@ -467,8 +468,8 @@ export default function CultureTourDetailClient({ tour, sessions = [], options =
                             <span key={i} className="flex shrink-0 items-center gap-2">
                                 <span
                                     className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 font-label-md text-label-md font-semibold shadow-sm ${p.highlight
-                                            ? "bg-crimson-vivid text-on-primary"
-                                            : "bg-surface-white text-charcoal-dark"
+                                        ? "bg-crimson-vivid text-on-primary"
+                                        : "bg-surface-white text-charcoal-dark"
                                         }`}
                                 >
                                     {p.icon && <Icon name={p.icon} className="text-[14px]" />}
@@ -505,8 +506,8 @@ export default function CultureTourDetailClient({ tour, sessions = [], options =
                                 </h2>
                                 {longDescription ? (
                                     <div
-                                        className="font-body-md text-body-md leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
-                                        dangerouslySetInnerHTML={{ __html: longDescription }}
+                                        className="rich-text font-body-md text-body-md leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
+                                        dangerouslySetInnerHTML={{ __html: toHtml(longDescription) }}
                                     />
                                 ) : (
                                     <p className="font-body-md text-body-md leading-relaxed text-secondary">

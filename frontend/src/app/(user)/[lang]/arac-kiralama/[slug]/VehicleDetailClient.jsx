@@ -14,6 +14,7 @@ import { localized } from "@/lib/i18n/localized";
 import { mediaAlt, mediaUrl } from "@/lib/media";
 import { carMessage } from "@/lib/whatsapp";
 import { quoteVehicle } from "@/services";
+import { toHtml } from "@/lib/richText";
 
 export default function VehicleDetailClient({ vehicle, initialDates }) {
     const { t, tpl, locale } = useLanguage();
@@ -29,7 +30,6 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
     const [returnTime, setReturnTime] = useState(initialDates?.returnTime ?? "10:00");
     const [selected, setSelected] = useState([]); // seçilen ekstraların extraId listesi
     const [quote, setQuote] = useState({ status: "idle" });
-    const [activeImage, setActiveImage] = useState(0);
 
     /* Tarihler client'ta kurulur (hydration güvenliği). Listeden gelen tarih geçmişse bugüne çekilir. */
     useEffect(() => {
@@ -104,7 +104,6 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
         );
     }, [vehicle, selected, pickupDate, pickupTime, returnDate, returnTime, q, locale]);
 
-    const images = [vehicle.image, ...(vehicle.gallery ?? [])].filter(Boolean);
     const specs = vehicle.detailedSpecs ?? [];
 
     /* Rezervasyon paneli: mobilde hero kartının hemen altında, masaüstünde sağda sabit */
@@ -291,29 +290,13 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
 
                             {/* Araç görseli (+ galeri küçük resimleri) */}
-                            <div className="relative mb-4 flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/60 px-3 py-4 sm:mb-5 sm:px-4 sm:py-6">
+                            <div className="relative mb-4 flex w-full items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/60 px-3 py-4 sm:mb-5 sm:px-4 sm:py-6">
                                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-surface-white/40 to-surface-white/80" />
                                 <SafeImage
-                                    src={mediaUrl(images[activeImage])}
-                                    alt={mediaAlt(images[activeImage], locale, name)}
+                                    src={mediaUrl(vehicle.image)}
+                                    alt={mediaAlt(vehicle.image, locale, name)}
                                     className="relative z-10 max-h-48 w-auto max-w-full object-contain transition-transform duration-500 hover:scale-105 sm:max-h-72"
                                 />
-                                {images.length > 1 && (
-                                    <div className="relative z-10 mt-4 flex flex-wrap justify-center gap-2">
-                                        {images.map((img, i) => (
-                                            <button
-                                                key={img.id}
-                                                type="button"
-                                                onClick={() => setActiveImage(i)}
-                                                aria-label={`${name} ${i + 1}`}
-                                                className={`h-14 w-20 overflow-hidden rounded-xl bg-surface-white ring-2 transition-all ${i === activeImage ? "ring-crimson-vivid" : "opacity-70 ring-transparent hover:opacity-100"
-                                                    }`}
-                                            >
-                                                <SafeImage src={mediaUrl(img, "thumb")} alt="" className="h-full w-full object-cover" />
-                                            </button>
-                                        ))}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Teknik özellikler */}
@@ -347,14 +330,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                     {/* ═══ DİĞER BÖLÜMLER ═══ */}
                     <div className="flex min-w-0 flex-col gap-5 lg:col-span-8 lg:col-start-1 lg:row-start-2">
                         {/* Açıklama (backend'de girildiyse, HTML sunucuda temizlenmiş) */}
-                        {vehicle.description && localized(vehicle.description, locale) && (
+                        {localized(vehicle.description, locale) && (
                             <div className="rounded-3xl bg-surface-white p-4 shadow-sm sm:p-7">
                                 <h2 className="mb-3 font-headline-sm text-headline-sm font-bold text-charcoal-dark md:font-headline-md md:text-headline-md">
                                     {d.about}
                                 </h2>
                                 <div
-                                    className="font-body-sm text-body-sm leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
-                                    dangerouslySetInnerHTML={{ __html: localized(vehicle.description, locale) }}
+                                    className="rich-text"
+                                    dangerouslySetInnerHTML={{ __html: toHtml(localized(vehicle.description, locale)) }}
                                 />
                             </div>
                         )}
@@ -581,8 +564,8 @@ function ExtraRow({ item, active, days, onToggle }) {
                 onClick={onToggle}
                 aria-pressed={active}
                 className={`flex w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-5 py-2.5 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-sm transition-colors sm:w-auto ${active
-                        ? "bg-primary-container text-on-primary hover:bg-crimson-vivid"
-                        : "bg-surface-white text-charcoal-dark hover:bg-surface-variant"
+                    ? "bg-primary-container text-on-primary hover:bg-crimson-vivid"
+                    : "bg-surface-white text-charcoal-dark hover:bg-surface-variant"
                     }`}
             >
                 <Icon name={active ? "check" : "add"} className="text-[16px]" />

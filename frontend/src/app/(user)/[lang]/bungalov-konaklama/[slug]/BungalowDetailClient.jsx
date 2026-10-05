@@ -17,6 +17,7 @@ import { localized } from "@/lib/i18n/localized";
 import { mediaAlt, mediaUrl } from "@/lib/media";
 import { bungalowMessage } from "@/lib/whatsapp";
 import { quoteBungalow } from "@/services";
+import { toHtml } from "@/lib/richText";
 
 const MAX_ADULTS = 20;
 const MAX_CHILDREN = 10;
@@ -365,7 +366,7 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             <span>{copied ? d.copied : d.share}</span>
                         </button>
 
-                        
+
                     </div>
                 </div>
 
@@ -406,8 +407,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                         <Block id="konaklama" title={d.aboutTitle}>
                             {longDescription ? (
                                 <div
-                                    className="font-body-md text-body-md leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
-                                    dangerouslySetInnerHTML={{ __html: longDescription }}
+                                    className="rich-text"
+                                    dangerouslySetInnerHTML={{ __html: toHtml(longDescription) }}
                                 />
                             ) : (
                                 <p className="font-body-md text-body-md leading-relaxed text-secondary">
@@ -631,8 +632,8 @@ function AnchorPills({ sections }) {
                         key={s.id}
                         href={`#${s.id}`}
                         className={`whitespace-nowrap rounded-full px-4 py-1.5 font-label-md text-label-md transition-all ${active === s.id
-                                ? "bg-charcoal-dark text-white shadow-sm"
-                                : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
+                            ? "bg-charcoal-dark text-white shadow-sm"
+                            : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
                             }`}
                     >
                         {s.label}

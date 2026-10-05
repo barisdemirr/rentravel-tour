@@ -13,6 +13,7 @@ import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
 import { dailyTourMessage } from "@/lib/whatsapp";
 import { quoteDailyTour } from "@/services";
+import { toHtml } from "@/lib/richText";
 import {
     Card,
     Editorial,
@@ -448,8 +449,8 @@ export default function DailyTourDetailClient({ tour, sessions = [] }) {
                                     {d.about}
                                 </h2>
                                 <div
-                                    className="font-body-md text-body-md leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
-                                    dangerouslySetInnerHTML={{ __html: longDescription }}
+                                    className="rich-text font-body-md text-body-md leading-relaxed text-secondary [&_a]:text-crimson-vivid [&_p]:mb-3 [&_ul]:list-disc [&_ul]:ps-5"
+                                    dangerouslySetInnerHTML={{ __html: toHtml(longDescription) }}
                                 />
                             </Card>
                         )}
