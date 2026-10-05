@@ -61,8 +61,11 @@ export default async function StaticPage({ params }) {
         settle(getStaticPages(), []),
     ]);
 
-    // Bilinmeyen adres: 404. Başka bir hata varsa Next hata sayfası devralır.
-    if (page.error instanceof ApiError && page.error.status === 404) notFound();
+    // Kayıt yoksa veya backend 404 dönüyorsa: 404 sayfası.
+    // instanceof kullanmıyoruz: geliştirme sırasında modül iki kez yüklenince güvenilmez.
+    if (page.error?.status === 404 || !page.data) notFound();
+
+    // Başka bir hata (sunucu kapalı, 500): hata sayfası devralsın
     if (page.error) throw page.error;
     if (!page.data) notFound();
 
