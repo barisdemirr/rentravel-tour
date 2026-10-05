@@ -22,6 +22,8 @@ import {
     TextInput,
 } from "@/components/admin/fields";
 import { adminPost, adminPut } from "@/lib/admin/client";
+import IconField from "@/components/admin/IconField";
+import { slugify } from "@/lib/admin/slug";
 
 const CURRENCIES = [
     { value: "TRY", label: "₺ Türk Lirası" },
@@ -114,6 +116,10 @@ export default function CatalogForm({ slug, catalog, record, nextOrder = 0 }) {
             }
         }
 
+        // Anahtar etiketten üretilir: yeni kayıtta addan, düzenlemede mevcut anahtar korunur
+        const titleValue = form[catalog.titleField]?.tr ?? "";
+        body.key = isNew ? slugify(titleValue) : record.key;
+
         try {
             if (isNew) {
                 await adminPost(`/admin/${catalog.api}`, body);
@@ -158,7 +164,16 @@ export default function CatalogForm({ slug, catalog, record, nextOrder = 0 }) {
                         {isNew ? `Yeni ${catalog.singular}` : `${catalog.singular} Düzenle`}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew ? catalog.description : record[catalog.titleField]?.tr || record.key}
+                        {isNew ? (
+                            catalog.description
+                        ) : (
+                            <>
+                                {record[catalog.titleField]?.tr}
+                                <code dir="ltr" className="ms-2 text-ad-faint">
+                                    {record.key}
+                                </code>
+                            </>
+                        )}
                     </p>
                 </div>
             </div>
@@ -167,7 +182,7 @@ export default function CatalogForm({ slug, catalog, record, nextOrder = 0 }) {
             <FormSection title="Bilgiler" columns={2}>
                 {catalog.fields.map((field) => {
                     const error = firstError(field.name) || firstError(`${field.name}.tr`);
-                    const wide = field.type === "localized" || field.type === "media";
+                    const wide = field.type === "localized" || field.type === "media" || field.type === "icon";
 
                     const content = (() => {
                         switch (field.type) {
@@ -204,62 +219,17 @@ export default function CatalogForm({ slug, catalog, record, nextOrder = 0 }) {
 
                             case "icon":
                                 return (
-                                    <Field
+                                    <IconField
                                         key={field.name}
                                         label={field.label}
                                         required={field.required}
                                         error={error}
-                                        hint={
-                                            <>
-                                                Material Symbols adı.{" "}
-                                                <a
-                                                    href="https://fonts.google.com/icons"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="font-semibold text-ad-brand hover:underline"
-                                                >
-                                                    İkon listesi
-                                                </a>
-                                            </>
-                                        }
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ad-sunken text-ad-brand">
-                                                <Icon name={form[field.name] || "help"} className="text-[22px]" />
-                                            </span>
-                                            <TextInput
-                                                dir="ltr"
-                                                placeholder="directions_car"
-                                                error={error}
-                                                value={form[field.name]}
-                                                onChange={(e) => set(field.name)(e.target.value)}
-                                            />
-                                        </div>
-                                    </Field>
+                                        value={form[field.name]}
+                                        onChange={set(field.name)}
+                                        placeholder={catalog.icon}
+                                    />
                                 );
 
-                            case "key":
-                                return (
-                                    <Field
-                                        key={field.name}
-                                        label={field.label}
-                                        required={field.required}
-                                        hint={field.hint}
-                                        error={error}
-                                    >
-                                        <TextInput
-                                            dir="ltr"
-                                            error={error}
-                                            value={form[field.name]}
-                                            onChange={(e) => set(field.name)(e.target.value)}
-                                        />
-                                        {!isNew && (
-                                            <p className="text-xs text-ad-warn">
-                                                Anahtarı değiştirmek site adreslerini ve kayıtlı filtreleri etkiler.
-                                            </p>
-                                        )}
-                                    </Field>
-                                );
 
                             case "money":
                                 return (

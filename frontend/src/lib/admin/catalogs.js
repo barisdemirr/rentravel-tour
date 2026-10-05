@@ -13,7 +13,6 @@ export const CATALOGS = {
         icon: "label",
         titleField: "label",
         fields: [
-            { name: "key", type: "key", label: "Anahtar", required: true, hint: "Adreste geçer: suv, vip, ekonomik" },
             { name: "label", type: "localized", label: "Etiket", required: true, maxLength: 60 },
             { name: "icon", type: "icon", label: "İkon", required: true },
             { name: "orderIndex", type: "order" },
@@ -77,7 +76,6 @@ export const CATALOGS = {
         icon: "sell",
         titleField: "label",
         fields: [
-            { name: "key", type: "key", label: "Anahtar", required: true, hint: "yayla, tarih, deniz" },
             { name: "label", type: "localized", label: "Etiket", required: true, maxLength: 60 },
             { name: "icon", type: "icon", label: "İkon", required: true },
             {
@@ -112,7 +110,6 @@ export const CATALOGS = {
         icon: "map",
         titleField: "shortLabel",
         fields: [
-            { name: "key", type: "key", label: "Anahtar", required: true, hint: "ayder, firtina, pokut" },
             {
                 name: "shortLabel",
                 type: "localized",
@@ -142,7 +139,6 @@ export const CATALOGS = {
         icon: "hotel",
         titleField: "label",
         fields: [
-            { name: "key", type: "key", label: "Anahtar", required: true, hint: "standart, deluxe, suit" },
             { name: "label", type: "localized", label: "Etiket", required: true, maxLength: 60 },
             {
                 name: "description",
