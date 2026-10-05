@@ -102,9 +102,11 @@ public class Validator
     private Error BuildError() =>
         Error.Validation(_errors.ToDictionary(x => x.Key, x => x.Value.ToArray()));
 
-    private void Add(string field, string message)
+    // ✅ PUBLIC ve FLUENT — dışarıdan da çağrılabilir
+    public Validator Add(string field, string message)
     {
         if (!_errors.TryGetValue(field, out var list)) _errors[field] = list = [];
         list.Add(message);
+        return this;
     }
 }
