@@ -4,13 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/ui/Icon";
+import IconField from "@/components/admin/IconField";
 import MediaPicker from "@/components/admin/MediaPicker";
 import RepeaterField, { MultiSelect } from "@/components/admin/RepeaterField";
 import { useToast } from "@/components/admin/Toast";
-import LocalizedField, { TranslateAllButton, cleanLocalized, emptyLocalized, toLocalized } from "@/components/admin/LocalizedField";
-import { Field, FormActions, FormSection, NumberInput, SelectInput, Switch, TextInput } from "@/components/admin/fields";
+import LocalizedField, {
+    TranslateAllButton,
+    cleanLocalized,
+    emptyLocalized,
+    toLocalized,
+} from "@/components/admin/LocalizedField";
+import { Field, FormActions, FormSection, NumberInput, SelectInput, Switch } from "@/components/admin/fields";
 import { adminPost, adminPut } from "@/lib/admin/client";
-import { slugify } from "@/lib/admin/slug";
 
 const CURRENCIES = ["TRY", "USD", "EUR"];
 
@@ -42,16 +47,12 @@ const toBlock = (b) =>
 
 function initialState(record, nextOrder) {
     return {
-        slug: record?.slug ?? "",
-        segmentId: record?.segment?.id ?? "",
         name: toLocalized(record?.name),
+        segmentId: record?.segment?.id ?? "",
         tagline: toLocalized(record?.tagline),
         description: toLocalized(record?.description),
         guarantee: toLocalized(record?.guarantee),
-        badge: toLocalized(record?.badge),
-        badgeTone: record?.badgeTone ?? "",
         image: record?.image ?? null,
-        gallery: record?.gallery ?? [],
         specs: (record?.specs ?? []).map(toSpec),
         detailedSpecs: (record?.detailedSpecs ?? []).map(toSpec),
         delivery: toBlock(record?.delivery),
@@ -71,7 +72,6 @@ function initialState(record, nextOrder) {
         seoTitle: toLocalized(record?.seoTitle),
         seoDescription: toLocalized(record?.seoDescription),
         seoKeywords: toLocalized(record?.seoKeywords),
-        ogImage: record?.ogImage ?? null,
         isFeatured: record?.isFeatured ?? false,
         isActive: record?.isActive ?? true,
         orderIndex: record?.orderIndex ?? nextOrder,
@@ -97,13 +97,26 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
     const fieldError = (name) => errors[name]?.[0] ?? errors[`${name}.tr`]?.[0] ?? null;
     const flatErrors = Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, v[0]]));
 
-    /* Ad yazılırken adres otomatik üretilir (yeni kayıtta) */
-    const onNameChange = (value) => {
-        setForm((f) => ({
-            ...f,
-            name: value,
-            slug: isNew && !f.slugTouched ? slugify(value.tr) : f.slug,
-        }));
+    /* Kart özelliklerini detay listesine kopyala */
+    const copySpecsToDetailed = () => {
+        const source = form.specs.filter((s) => s.label?.tr?.trim() || s.value?.tr?.trim());
+
+        if (source.length === 0) {
+            toast.error("Önce kart özelliklerini doldurun.");
+            return;
+        }
+
+        // Aynı etiketten ikinci kez eklenmesin
+        const existing = new Set(form.detailedSpecs.map((s) => s.label?.tr?.trim().toLocaleLowerCase("tr")));
+        const added = source.filter((s) => !existing.has(s.label?.tr?.trim().toLocaleLowerCase("tr")));
+
+        if (added.length === 0) {
+            toast.info("Bu özellikler zaten detay listesinde.");
+            return;
+        }
+
+        setForm((f) => ({ ...f, detailedSpecs: [...f.detailedSpecs, ...added.map((s) => ({ ...s }))] }));
+        toast.success(`${added.length} özellik detay listesine eklendi.`);
     };
 
     const submit = async (e) => {
@@ -114,17 +127,18 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
         setErrors({});
 
         const body = {
-            slug: form.slug.trim() || null,
+            // Yeni kayıtta adres addan üretilir, düzenlemede mevcut adres korunur
+            slug: isNew ? null : record.slug,
             segmentId: form.segmentId || null,
             name: cleanLocalized(form.name),
             tagline: cleanLocalized(form.tagline),
             description: cleanLocalized(form.description),
             guarantee: cleanLocalized(form.guarantee),
-            badge: cleanLocalized(form.badge),
-            badgeTone: form.badgeTone.trim() || null,
+            badge: null, // site tarafında kullanılmıyor
+            badgeTone: null,
             rating: null, // araç puanı sitede gösterilmiyor
             image: form.image,
-            gallery: form.gallery,
+            gallery: [], // araçlarda galeri yok, tek ana görsel
             specs: cleanSpecs(form.specs),
             detailedSpecs: cleanSpecs(form.detailedSpecs),
             delivery: form.delivery?.title?.tr?.trim()
@@ -158,7 +172,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
             seoTitle: cleanLocalized(form.seoTitle),
             seoDescription: cleanLocalized(form.seoDescription),
             seoKeywords: cleanLocalized(form.seoKeywords),
-            ogImage: form.ogImage,
+            ogImage: form.image, // paylaşımda ana görsel kullanılır
             defaultDailyPrice: Number(form.defaultDailyPrice) || 0,
             currency: form.currency,
             isFeatured: form.isFeatured,
@@ -205,14 +219,14 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                     aria-label="Listeye dön"
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-ad-line text-ad-muted transition-colors hover:bg-ad-sunken hover:text-ad-ink"
                 >
-                    <Icon name="arrow_back" className="text-[20px] rtl:-scale-x-100" />
+                    <Icon name="arrow_back" className="text-[20px]" />
                 </Link>
                 <div className="min-w-0">
                     <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
                         {isNew ? "Yeni Araç" : form.name.tr || "Araç Düzenle"}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew ? "Zorunlu alanlar: ad, günlük fiyat, depozito." : `/${form.slug}`}
+                        {isNew ? "Zorunlu alanlar: ad, günlük fiyat, depozito." : `Adres: /${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -224,27 +238,14 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                         name="name"
                         label="Araç Adı"
                         required
+                        hint={isNew ? "Sitedeki adres bu addan otomatik oluşturulur." : undefined}
                         maxLength={120}
                         value={form.name}
-                        onChange={onNameChange}
+                        onChange={set("name")}
                         errors={flatErrors}
                         translateHint="Araç modeli, marka adları çevrilmez"
                     />
                 </div>
-
-                <Field
-                    label="Adres (slug)"
-                    hint="Boş bırakılırsa addan üretilir"
-                    error={fieldError("slug")}
-                >
-                    <TextInput
-                        dir="ltr"
-                        placeholder="mercedes-vito-vip"
-                        value={form.slug}
-                        error={fieldError("slug")}
-                        onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value, slugTouched: true }))}
-                    />
-                </Field>
 
                 <Field label="Segment" error={fieldError("segmentId")}>
                     <SelectInput
@@ -261,6 +262,8 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                         ))}
                     </SelectInput>
                 </Field>
+
+                <div />
 
                 <div className="sm:col-span-2">
                     <LocalizedField
@@ -300,22 +303,19 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 </div>
             </FormSection>
 
-            {/* GÖRSELLER */}
-            <FormSection title="Görseller" description="İlk galeri görseli detay sayfasında kapak olarak kullanılır." columns={1}>
+            {/* GÖRSEL */}
+            <FormSection
+                title="Görsel"
+                description="Araç listelerinde, detay sayfasında ve bağlantı paylaşımlarında bu görsel kullanılır."
+                columns={1}
+            >
                 <MediaPicker
-                    label="Ana Görsel"
+                    label="Araç Görseli"
                     category="Vehicle"
+                    hint="Arka planı sade, aracın tamamının göründüğü bir fotoğraf tercih edin."
                     error={fieldError("image")}
                     value={form.image}
                     onChange={set("image")}
-                />
-                <MediaPicker
-                    label="Galeri"
-                    multiple
-                    category="Vehicle"
-                    hint="Detay sayfasındaki küçük resimler"
-                    value={form.gallery}
-                    onChange={set("gallery")}
                 />
             </FormSection>
 
@@ -401,7 +401,11 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
             </FormSection>
 
             {/* ÖZELLİKLER */}
-            <FormSection title="Teknik özellikler" description="Kartta kısa, detay sayfasında geniş liste görünür." columns={1}>
+            <FormSection
+                title="Teknik özellikler"
+                description="Kart özellikleri araç listelerinde, detay özellikleri araç sayfasında görünür."
+                columns={1}
+            >
                 <RepeaterField
                     label="Kart Özellikleri"
                     hint="Araç kartında görünen 3-4 kısa bilgi"
@@ -413,6 +417,19 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                     addLabel="Özellik ekle"
                     renderRow={(item, update) => <SpecRow item={item} update={update} />}
                 />
+
+                {/* Kopyalama: aynı bilgileri iki kez yazmaya gerek kalmasın */}
+                {form.specs.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={copySpecsToDetailed}
+                        className="flex h-11 items-center justify-center gap-2 rounded-xl border border-ad-brand-line bg-ad-brand-soft px-4 text-sm font-bold text-ad-brand transition-colors hover:brightness-95"
+                    >
+                        <Icon name="content_copy" className="text-[18px]" />
+                        Kart özelliklerini detay listesine kopyala
+                    </button>
+                )}
+
                 <RepeaterField
                     label="Detay Sayfası Özellikleri"
                     hint="Yakıt, vites, bagaj, yolcu kapasitesi gibi"
@@ -475,18 +492,27 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
             </FormSection>
 
             {/* TESLİMAT */}
-            <FormSection title="Teslimat ve ofis" description="Detay sayfasındaki iki bilgi kartı. Boş bırakılırsa gösterilmez." columns={1}>
-                <BlockFields
-                    title="Teslimat Kartı"
-                    value={form.delivery}
-                    onChange={set("delivery")}
-                    prefix="delivery"
-                />
+            <FormSection
+                title="Teslimat ve ofis"
+                description="Detay sayfasındaki iki bilgi kartı. Boş bırakılırsa gösterilmez."
+                columns={1}
+            >
+                <BlockFields title="Teslimat Kartı" value={form.delivery} onChange={set("delivery")} prefix="delivery" />
                 <BlockFields title="Ofis Kartı" value={form.office} onChange={set("office")} prefix="office" />
             </FormSection>
 
             {/* SEO */}
-            <FormSection title="Arama motoru" description="Boş bırakılırsa araç adı ve açıklaması kullanılır." columns={1}>
+            <FormSection title="Arama motoru" columns={1}>
+                <p className="rounded-xl bg-ad-sunken px-4 py-3 text-xs leading-relaxed text-ad-muted">
+                    Bu alanlar Google sonuçlarında ve bağlantı paylaşımlarında görünür.
+                    <br />
+                    <strong className="text-ad-body">Sayfa başlığını</strong> boş bırakırsanız araç adı kullanılır.
+                    <br />
+                    <strong className="text-ad-body">Açıklamayı</strong> boş bırakırsanız kısa açıklama kullanılır.
+                    <br />
+                    Paylaşım görseli olarak her zaman yukarıdaki araç görseli kullanılır.
+                </p>
+
                 <LocalizedField
                     name="seoTitle"
                     label="Sayfa Başlığı"
@@ -498,6 +524,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 <LocalizedField
                     name="seoDescription"
                     label="Açıklama"
+                    hint="Arama sonuçlarında başlığın altında görünen iki satır"
                     multiline
                     rows={3}
                     maxLength={300}
@@ -508,18 +535,11 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 <LocalizedField
                     name="seoKeywords"
                     label="Anahtar Kelimeler"
-                    hint="Virgülle ayırın"
+                    hint="Virgülle ayırın. Zorunlu değildir."
                     maxLength={300}
                     value={form.seoKeywords}
                     onChange={set("seoKeywords")}
                     errors={flatErrors}
-                />
-                <MediaPicker
-                    label="Paylaşım Görseli"
-                    hint="WhatsApp ve sosyal medyada görünür, boşsa ana görsel kullanılır"
-                    category="Vehicle"
-                    value={form.ogImage}
-                    onChange={set("ogImage")}
                 />
             </FormSection>
 
@@ -554,19 +574,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
 function SpecRow({ item, update }) {
     return (
         <>
-            <Field label="İkon">
-                <div className="flex items-center gap-2">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ad-sunken text-ad-brand">
-                        <Icon name={item.icon || "help"} className="text-[20px]" />
-                    </span>
-                    <TextInput
-                        dir="ltr"
-                        placeholder="local_gas_station"
-                        value={item.icon}
-                        onChange={(e) => update({ icon: e.target.value })}
-                    />
-                </div>
-            </Field>
+            <IconField value={item.icon} onChange={(v) => update({ icon: v })} placeholder="local_gas_station" />
             <div />
             <LocalizedField
                 name="spec-label"
@@ -589,9 +597,7 @@ function SpecRow({ item, update }) {
 }
 
 function BlockFields({ title, value, onChange, prefix }) {
-    const active = Boolean(value);
-
-    if (!active) {
+    if (!value) {
         return (
             <button
                 type="button"
@@ -621,19 +627,7 @@ function BlockFields({ title, value, onChange, prefix }) {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="İkon">
-                    <div className="flex items-center gap-2">
-                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ad-sunken text-ad-brand">
-                            <Icon name={value.icon || "help"} className="text-[20px]" />
-                        </span>
-                        <TextInput
-                            dir="ltr"
-                            placeholder="local_shipping"
-                            value={value.icon}
-                            onChange={(e) => update({ icon: e.target.value })}
-                        />
-                    </div>
-                </Field>
+                <IconField value={value.icon} onChange={(v) => update({ icon: v })} placeholder="local_shipping" />
                 <LocalizedField
                     name={`${prefix}-label`}
                     label="Üst Etiket"
