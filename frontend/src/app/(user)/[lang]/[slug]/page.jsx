@@ -10,6 +10,7 @@ import { buildAlternates } from "@/lib/seo";
 import { infoMessage } from "@/lib/whatsapp";
 import { getStaticPageBySlug, getStaticPages } from "@/services/staticPages";
 import { formatDateTime } from "@/lib/format";
+import { toHtml } from "@/lib/richText";
 
 export const revalidate = 300;
 
@@ -67,7 +68,6 @@ export default async function StaticPage({ params }) {
 
     // Başka bir hata (sunucu kapalı, 500): hata sayfası devralsın
     if (page.error) throw page.error;
-    if (!page.data) notFound();
 
     const doc = page.data;
     const title = localized(doc.title, locale);
@@ -108,7 +108,7 @@ export default async function StaticPage({ params }) {
             </header>
 
             {/* İçerik: panelde kaydedilirken temizlenmiş HTML */}
-            <article className="rich-text" dangerouslySetInnerHTML={{ __html: content }} />
+            <article className="rich-text" dangerouslySetInnerHTML={{ __html: toHtml(content) }} />
 
             {/* İletişim */}
             <section className="mt-10 flex flex-col gap-4 rounded-3xl bg-canvas-offwhite p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">

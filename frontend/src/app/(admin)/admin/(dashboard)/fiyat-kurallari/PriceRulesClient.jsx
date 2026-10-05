@@ -269,7 +269,7 @@ export default function PriceRulesClient({ groups, ownerType, ownerId, ownerLabe
 
                 <Field
                     label="Öncelik"
-                    hint="Çakışmada yüksek kazanır, 0 => en yüksek öncelik"
+                    hint="Aynı tarihte birden fazla dönemsel fiyat olursa, öncelik değeri daha büyük olan esas alınır. örn: 2>1"
                     error={fieldError("priority")}
                 >
                     <NumberInput
