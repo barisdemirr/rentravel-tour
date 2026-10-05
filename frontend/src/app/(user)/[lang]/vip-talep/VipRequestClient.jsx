@@ -4,14 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Icon from "@/components/ui/Icon";
 import Link from "@/components/ui/LocalizedLink";
+import PhoneField from "@/components/ui/PhoneField";
 import { ApiError } from "@/lib/api";
 import { SITE, waHref } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { EASE } from "@/lib/motion";
+import { findCountry, fullPhone, isPhoneComplete } from "@/lib/phone";
 import { infoMessage } from "@/lib/whatsapp";
 import { createVipRequest } from "@/services";
 
 const STEPS = ["fullName", "phone", "message"];
+
+const emptyForm = () => ({
+    fullName: "",
+    phone: { country: "TR", digits: "" },
+    message: "",
+    website: "",
+});
 
 export default function VipRequestClient() {
     const { t, tpl, locale, isRtl } = useLanguage();
@@ -19,7 +28,7 @@ export default function VipRequestClient() {
 
     const [step, setStep] = useState(-1); // -1: giriş ekranı
     const [direction, setDirection] = useState(1); // 1 ileri, -1 geri
-    const [form, setForm] = useState({ fullName: "", phone: "", message: "", website: "" });
+    const [form, setForm] = useState(emptyForm);
     const [errors, setErrors] = useState({});
     const [busy, setBusy] = useState(false);
     const [sendError, setSendError] = useState("");
@@ -34,20 +43,38 @@ export default function VipRequestClient() {
         }
     }, [step]);
 
+    /* Metin alanları için ortak değiştirici */
     const set = (name) => (e) => {
         setForm((f) => ({ ...f, [name]: e.target.value }));
         if (errors[name]) setErrors((x) => ({ ...x, [name]: null }));
     };
 
+    /* Telefon nesne döndürdüğü için ayrı */
+    const setPhone = (next) => {
+        setForm((f) => ({ ...f, phone: next }));
+        if (errors.phone) setErrors((x) => ({ ...x, phone: null }));
+    };
+
+    /* Tuzak alan: botlar doldurur, insanlar görmez */
+    const setHoneypot = (e) => setForm((f) => ({ ...f, website: e.target.value }));
+
     /* Tarayıcıda ön kontrol, asıl doğrulama backend'de */
     const validate = (name) => {
-        const value = form[name].trim();
-        if (name === "fullName") return value.length >= 3 ? null : v.nameError;
+        if (name === "fullName") return form.fullName.trim().length >= 3 ? null : v.nameError;
+
         if (name === "phone") {
-            const digits = value.replace(/\D/g, "").length;
-            return digits >= 10 && digits <= 15 ? null : v.phoneError;
+            const country = findCountry(form.phone.country);
+            if (!form.phone.digits) return v.phoneError;
+            if (!isPhoneComplete(form.phone.digits, country)) {
+                return tpl(v.phoneLengthError, {
+                    country: country.name,
+                    digits: country.digits.join(" / "),
+                });
+            }
+            return null;
         }
-        if (name === "message") return value.length >= 10 ? null : v.messageError;
+
+        if (name === "message") return form.message.trim().length >= 10 ? null : v.messageError;
         return null;
     };
 
@@ -79,10 +106,10 @@ export default function VipRequestClient() {
         try {
             await createVipRequest({
                 fullName: form.fullName.trim(),
-                phone: form.phone.trim(),
+                phone: fullPhone(form.phone.digits, findCountry(form.phone.country)),
                 message: form.message.trim(),
                 locale,
-                website: form.website, // tuzak alan
+                website: form.website,
             });
             setDone(true);
         } catch (error) {
@@ -110,6 +137,15 @@ export default function VipRequestClient() {
         if (isTextarea && !e.ctrlKey && !e.metaKey) return;
         e.preventDefault();
         goNext();
+    };
+
+    const reset = () => {
+        setDone(false);
+        setStep(-1);
+        setDirection(1);
+        setForm(emptyForm());
+        setErrors({});
+        setSendError("");
     };
 
     const whatsapp = waHref(infoMessage({ topic: "VIP talep", locale }));
@@ -167,11 +203,7 @@ export default function VipRequestClient() {
                                 transition={transition}
                                 className="w-full"
                             >
-                                <Success v={v} whatsapp={whatsapp} onReset={() => {
-                                    setDone(false);
-                                    setStep(-1);
-                                    setForm({ fullName: "", phone: "", message: "", website: "" });
-                                }} />
+                                <Success v={v} whatsapp={whatsapp} onReset={reset} />
                             </motion.div>
                         ) : step === -1 ? (
                             <motion.div
@@ -184,7 +216,13 @@ export default function VipRequestClient() {
                                 transition={transition}
                                 className="w-full"
                             >
-                                <Intro v={v} onStart={() => { setDirection(1); setStep(0); }} />
+                                <Intro
+                                    v={v}
+                                    onStart={() => {
+                                        setDirection(1);
+                                        setStep(0);
+                                    }}
+                                />
                             </motion.div>
                         ) : (
                             <motion.div
@@ -202,7 +240,8 @@ export default function VipRequestClient() {
                                     name={STEPS[step]}
                                     value={form[STEPS[step]]}
                                     error={errors[STEPS[step]]}
-                                    onChange={set(STEPS[step])}
+                                    onChange={STEPS[step] === "phone" ? setPhone : set(STEPS[step])}
+                                    onHoneypot={setHoneypot}
                                     onKeyDown={onKeyDown}
                                     inputRef={inputRef}
                                 />
@@ -229,7 +268,7 @@ export default function VipRequestClient() {
                             type="button"
                             onClick={goBack}
                             disabled={busy}
-                            className="flex h-12 items-center gap-1.5 rounded-xl px-4 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white/60 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-40"
+                            className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl px-3 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white/60 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-40 sm:px-4"
                         >
                             <Icon name="arrow_back" className="text-[18px] rtl:-scale-x-100" />
                             {v.back}
@@ -243,12 +282,14 @@ export default function VipRequestClient() {
                             type="button"
                             onClick={goNext}
                             disabled={busy}
-                            className="ms-auto flex h-12 shrink-0 items-center gap-2 rounded-xl bg-gradient-to-br from-crimson-vivid to-[#a80320] px-6 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-[0_8px_24px_-8px_rgba(217,4,41,0.8)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-60 sm:ms-0"
+                            className="ms-auto flex h-12 min-w-0 shrink items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-crimson-vivid to-[#a80320] px-5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white shadow-[0_8px_24px_-8px_rgba(217,4,41,0.8)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-60 sm:ms-0 sm:shrink-0 sm:px-6"
                         >
-                            {busy && <Icon name="progress_activity" className="animate-spin text-[18px]" />}
-                            {busy ? v.sending : step === STEPS.length - 1 ? v.submit : v.next}
+                            {busy && <Icon name="progress_activity" className="shrink-0 animate-spin text-[18px]" />}
+                            <span className="truncate">
+                                {busy ? v.sending : step === STEPS.length - 1 ? v.submit : v.next}
+                            </span>
                             {!busy && step < STEPS.length - 1 && (
-                                <Icon name="arrow_forward" className="text-[18px] rtl:-scale-x-100" />
+                                <Icon name="arrow_forward" className="shrink-0 text-[18px] rtl:-scale-x-100" />
                             )}
                         </button>
                     </div>
@@ -263,7 +304,7 @@ function Intro({ v, onStart }) {
     return (
         <div className="flex flex-col items-start gap-5">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-crimson-vivid backdrop-blur-md">
-                <Icon name="workspace_premium" fill className="text-[16px]" />
+                <Icon name="workspace_premium" fill className="shrink-0 text-[16px]" />
                 {v.eyebrow}
             </span>
 
@@ -286,8 +327,8 @@ function Intro({ v, onStart }) {
 
             <div className="mt-6 flex flex-col gap-2.5 border-t border-white/10 pt-6 font-label-md text-label-md text-white/45">
                 {[v.trust1, v.trust2, v.trust3].map((text) => (
-                    <span key={text} className="flex items-center gap-2">
-                        <Icon name="check_circle" fill className="shrink-0 text-[16px] text-emerald-400" />
+                    <span key={text} className="flex items-start gap-2">
+                        <Icon name="check_circle" fill className="mt-0.5 shrink-0 text-[16px] text-emerald-400" />
                         {text}
                     </span>
                 ))}
@@ -297,7 +338,7 @@ function Intro({ v, onStart }) {
 }
 
 /* ── Tek soru ── */
-function Question({ v, name, value, error, onChange, onKeyDown, inputRef }) {
+function Question({ v, name, value, error, onChange, onHoneypot, onKeyDown, inputRef }) {
     const copy = {
         fullName: { q: v.nameQuestion, hint: v.nameHint, ph: v.namePlaceholder, icon: "person" },
         phone: { q: v.phoneQuestion, hint: v.phoneHint, ph: v.phonePlaceholder, icon: "call" },
@@ -311,7 +352,7 @@ function Question({ v, name, value, error, onChange, onKeyDown, inputRef }) {
 
     return (
         <div className="flex w-full flex-col gap-4">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-crimson-vivid/15 text-crimson-vivid">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-crimson-vivid/15 text-crimson-vivid">
                 <Icon name={copy.icon} className="text-[22px]" />
             </span>
 
@@ -322,7 +363,8 @@ function Question({ v, name, value, error, onChange, onKeyDown, inputRef }) {
                 <p className="mt-2 font-body-sm text-body-sm text-white/50">{copy.hint}</p>
             </div>
 
-            <div className="mt-2">
+            {/* relative: tuzak alan bu kutunun içinde kalsın */}
+            <div className="relative mt-2">
                 {name === "message" ? (
                     <textarea
                         ref={inputRef}
@@ -334,18 +376,25 @@ function Question({ v, name, value, error, onChange, onKeyDown, inputRef }) {
                         maxLength={2000}
                         className={`${fieldCls} ${borderCls} resize-none font-body-lg text-body-lg leading-relaxed md:font-headline-sm md:text-headline-sm`}
                     />
+                ) : name === "phone" ? (
+                    <PhoneField
+                        value={value}
+                        onChange={onChange}
+                        error={error}
+                        inputRef={inputRef}
+                        onKeyDown={onKeyDown}
+                        placeholder={copy.ph}
+                    />
                 ) : (
                     <input
                         ref={inputRef}
-                        type={name === "phone" ? "tel" : "text"}
-                        inputMode={name === "phone" ? "tel" : "text"}
-                        dir={name === "phone" ? "ltr" : undefined}
-                        autoComplete={name === "phone" ? "tel" : "name"}
+                        type="text"
+                        autoComplete="name"
                         value={value}
                         onChange={onChange}
                         onKeyDown={onKeyDown}
                         placeholder={copy.ph}
-                        maxLength={name === "phone" ? 30 : 120}
+                        maxLength={120}
                         className={`${fieldCls} ${borderCls}`}
                     />
                 )}
@@ -358,14 +407,17 @@ function Question({ v, name, value, error, onChange, onKeyDown, inputRef }) {
                         tabIndex={-1}
                         autoComplete="off"
                         aria-hidden="true"
-                        className="pointer-events-none absolute h-0 w-0 opacity-0"
-                        onChange={onChange}
+                        className="pointer-events-none absolute left-0 top-0 h-0 w-0 opacity-0"
+                        onChange={onHoneypot}
                     />
                 )}
 
                 {error && (
-                    <p role="alert" className="mt-3 flex items-center gap-1.5 font-label-md text-label-md text-crimson-vivid">
-                        <Icon name="error" className="shrink-0 text-[15px]" />
+                    <p
+                        role="alert"
+                        className="mt-3 flex items-start gap-1.5 font-label-md text-label-md text-crimson-vivid"
+                    >
+                        <Icon name="error" className="mt-0.5 shrink-0 text-[15px]" />
                         {error}
                     </p>
                 )}
@@ -382,7 +434,7 @@ function Success({ v, whatsapp, onReset }) {
                 initial={{ scale: 0.6, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.15, duration: 0.45, ease: EASE }}
-                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400"
+                className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400"
             >
                 <Icon name="check_circle" fill className="text-[34px]" />
             </motion.span>
@@ -395,21 +447,21 @@ function Success({ v, whatsapp, onReset }) {
                 {v.successText}
             </p>
 
-            <div className="mt-2 flex w-full flex-col gap-2.5 sm:flex-row">
+            <div className="mt-2 flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
                 <a
                     href={whatsapp ?? "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-13 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white transition-colors hover:bg-emerald-500"
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white transition-colors hover:bg-emerald-500"
                 >
-                    <Icon name="chat" className="text-[18px]" />
+                    <Icon name="chat" className="shrink-0 text-[18px]" />
                     {v.successWhatsapp}
                 </a>
                 <a
                     href={SITE.phoneHref}
                     className="flex items-center justify-center gap-2 rounded-2xl border border-white/15 px-6 py-3.5 font-label-uppercase text-label-uppercase font-bold tracking-wider text-white transition-colors hover:bg-white/10"
                 >
-                    <Icon name="call" className="text-[18px] text-crimson-vivid" />
+                    <Icon name="call" className="shrink-0 text-[18px] text-crimson-vivid" />
                     <span dir="ltr">{SITE.phone}</span>
                 </a>
             </div>
@@ -418,11 +470,7 @@ function Success({ v, whatsapp, onReset }) {
                 <Link href="/" className="text-white/50 transition-colors hover:text-white">
                     {v.successHome}
                 </Link>
-                <button
-                    type="button"
-                    onClick={onReset}
-                    className="text-white/50 transition-colors hover:text-white"
-                >
+                <button type="button" onClick={onReset} className="text-white/50 transition-colors hover:text-white">
                     {v.newRequest}
                 </button>
             </div>

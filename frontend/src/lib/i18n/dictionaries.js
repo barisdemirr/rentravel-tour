@@ -655,6 +655,11 @@ export const dictionaries = {
             trust2: "Bilgileriniz üçüncü kişilerle paylaşılmaz",
             trust3: "Ortalama yanıt süresi: birkaç saat",
         },
+        phoneHint: "WhatsApp'ınız varsa oradan da yazabiliriz.",
+        phonePlaceholder: "5XX XXX XX XX",
+        countryLabel: "Ülke kodu",
+        phoneLabel: "Telefon numarası",
+        phoneLengthError: "{country} için {digits} haneli numara girin.",
     },
 
     EN: {
@@ -1255,6 +1260,11 @@ export const dictionaries = {
             trust2: "Your details are never shared with third parties",
             trust3: "Typical response time: a few hours",
         },
+        phoneHint: "If you use WhatsApp, we can message you there too.",
+        phonePlaceholder: "5XX XXX XX XX",
+        countryLabel: "Country code",
+        phoneLabel: "Phone number",
+        phoneLengthError: "Enter a {digits}-digit number for {country}.",
     },
 
     AR: {
@@ -1856,6 +1866,11 @@ export const dictionaries = {
         trust2: "لا تتم مشاركة بياناتك مع أي طرف ثالث",
         trust3: "متوسط وقت الرد: بضع ساعات",
     },
+    phoneHint: "إن كان لديك واتساب يمكننا مراسلتك هناك أيضًا.",
+    phonePlaceholder: "5XX XXX XX XX",
+    countryLabel: "رمز الدولة",
+    phoneLabel: "رقم الهاتف",
+    phoneLengthError: "أدخل رقمًا من {digits} أرقام لـ {country}.",
 };
 
 export function interpolate(str, vars = {}) {
