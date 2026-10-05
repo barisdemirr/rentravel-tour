@@ -10,6 +10,14 @@ import Icon from "../ui/Icon";
 import LanguageMenu from "../ui/LanguageMenu";
 import SafeImage from "../ui/SafeImage";
 
+/* Menü öğelerinin ortak kutusu: ikonlu ve ikonsuz öğeler aynı hizada dursun */
+const ITEM_BASE =
+    "group relative inline-flex h-10 items-center justify-center gap-1 rounded-lg px-3 font-label-uppercase text-label-uppercase uppercase leading-none transition-colors duration-200";
+
+/* Alt çizgi: kutunun ortasından başlar, her öğede aynı genişlikte */
+const UNDERLINE =
+    "pointer-events-none absolute bottom-1 left-1/2 h-[2px] w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-crimson-vivid transition-transform duration-300 ease-out";
+
 export default function Navbar({ onOpenMenu }) {
     const { t } = useLanguage();
     const pathname = usePathname();
@@ -71,10 +79,10 @@ export default function Navbar({ onOpenMenu }) {
                     </Link>
                 </div>
 
-                {/* Masaüstü menü: sayfanın tam ortasında */}
+                {/* Masaüstü menü: sayfanın tam ortasında, öğeler eşit kutularda */}
                 <nav
                     aria-label="Ana menü"
-                    className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 lg:flex"
+                    className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-1 lg:flex"
                 >
                     <NavItem href="/" active={isActive("/")}>
                         {t.nav.home}
@@ -130,14 +138,12 @@ function NavItem({ href, active, children }) {
         <Link
             href={href}
             aria-current={active ? "page" : undefined}
-            className={`group relative inline-flex items-center rounded-lg px-2.5 py-2 font-label-uppercase text-label-uppercase uppercase transition-colors duration-200 ${active ? "text-crimson-vivid" : "text-on-surface-variant hover:text-crimson-vivid"
-                }`}
+            className={`${ITEM_BASE} ${active ? "text-crimson-vivid" : "text-on-surface-variant hover:text-crimson-vivid"}`}
         >
-            {children}
+            <span className="whitespace-nowrap">{children}</span>
             <span
                 aria-hidden="true"
-                className={`pointer-events-none absolute inset-x-2.5 bottom-0.5 h-[2px] origin-[left] rounded-full bg-crimson-vivid transition-transform duration-300 ease-out rtl:origin-[right] ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                    }`}
+                className={`${UNDERLINE} ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}
             />
         </Link>
     );
@@ -163,8 +169,9 @@ function Dropdown({ label, links, isActive, open, onToggle, onClose }) {
     return (
         <div
             ref={ref}
-            className="group relative"
-            onMouseEnter={onToggle === undefined ? undefined : () => !open && onToggle()}
+            /* inline-flex: sarmalayıcı da diğer öğelerle aynı yükseklikte kalsın */
+            className="relative inline-flex"
+            onMouseEnter={() => !open && onToggle()}
             onMouseLeave={onClose}
         >
             <button
@@ -172,30 +179,29 @@ function Dropdown({ label, links, isActive, open, onToggle, onClose }) {
                 aria-haspopup="true"
                 aria-expanded={open}
                 onClick={onToggle}
-                className={`group/nav relative inline-flex items-center gap-1 rounded-lg px-2.5 py-2 font-label-uppercase text-label-uppercase uppercase transition-colors duration-200 ${active || open ? "text-crimson-vivid" : "text-on-surface-variant hover:text-crimson-vivid"
-                    }`}
+                className={`${ITEM_BASE} ${active || open ? "text-crimson-vivid" : "text-on-surface-variant hover:text-crimson-vivid"}`}
             >
-                <span>{label}</span>
+                <span className="whitespace-nowrap">{label}</span>
                 <Icon
                     name="expand_more"
-                    className={`text-[16px] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                    className={`-me-1 shrink-0 text-[16px] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
                 />
                 <span
                     aria-hidden="true"
-                    className={`pointer-events-none absolute inset-x-2.5 bottom-0.5 h-[2px] origin-[left] rounded-full bg-crimson-vivid transition-transform duration-300 ease-out rtl:origin-[right] ${active ? "scale-x-100" : "scale-x-0 group-hover/nav:scale-x-100"
-                        }`}
+                    className={`${UNDERLINE} ${active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"}`}
                 />
             </button>
 
+            {/* Açılır panel: tetikleyicinin ortasına hizalı */}
             <div
-                className={`absolute start-0 top-full z-50 min-w-[240px] overflow-hidden rounded-xl bg-surface-white p-1 shadow-[0_8px_24px_rgba(15,17,21,0.14)] transition-all duration-200 ${open ? "visible translate-y-0 opacity-100" : "invisible translate-y-1 opacity-0"
+                className={`absolute left-1/2 top-full z-50 min-w-[240px] -translate-x-1/2 overflow-hidden rounded-xl bg-surface-white p-1 shadow-[0_8px_24px_rgba(15,17,21,0.14)] transition-all duration-200 ${open ? "visible translate-y-0 opacity-100" : "invisible translate-y-1 opacity-0"
                     }`}
             >
                 {links.map((l) => (
                     <Link
                         key={l.href}
                         href={l.href}
-                        className={`block rounded-lg px-3 py-2.5 font-label-md text-label-md transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid ${isActive(l.href) ? "text-crimson-vivid" : "text-on-surface-variant"
+                        className={`block whitespace-nowrap rounded-lg px-3 py-2.5 font-label-md text-label-md transition-colors hover:bg-canvas-offwhite hover:text-crimson-vivid ${isActive(l.href) ? "text-crimson-vivid" : "text-on-surface-variant"
                             }`}
                     >
                         {l.label}
