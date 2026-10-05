@@ -8,7 +8,7 @@ import { parseApiResponse, ApiError } from "./error";
  * @param {string} path - "/api/vehicle-segments"
  * @param {object} options
  * @param {RequestInit} options.fetchOptions - fetch ayarları (method, body vs.)
- * @param {number} options.revalidate - cache süresi (saniye). 0 = no cache
+ * @param {number} options.revalidate - cache süresi (saniye). 0 = önbelleğe alma
  * @param {string[]} options.tags - cache tag'leri (revalidateTag için)
  * @returns {Promise<any>}
  */
@@ -16,6 +16,9 @@ export async function apiFetch(path, options = {}) {
     const { fetchOptions = {}, revalidate, tags } = options;
 
     const url = buildApiUrl(path);
+
+    const isBrowser = typeof window !== "undefined";
+    const noStore = revalidate === 0;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(
@@ -32,14 +35,21 @@ export async function apiFetch(path, options = {}) {
                 ...fetchOptions.headers,
             },
             signal: controller.signal,
-            // Next.js cache kontrolü
-            next: {
-                revalidate:
-                    revalidate !== undefined
-                        ? revalidate
-                        : API_CONFIG.defaultRevalidate,
-                tags: tags || undefined,
-            },
+            // Next'te next.revalidate = 0 "süresiz önbellek" demek, istediğimiz bu değil.
+            // Yazma işlemleri ve fiyat sorguları için gerçekten önbelleksiz olmalı.
+            ...(noStore ? { cache: "no-store" } : {}),
+            // Next.js cache kontrolü yalnızca sunucu tarafında anlamlı
+            ...(!isBrowser && !noStore
+                ? {
+                    next: {
+                        revalidate:
+                            revalidate !== undefined
+                                ? revalidate
+                                : API_CONFIG.defaultRevalidate,
+                        tags: tags || undefined,
+                    },
+                }
+                : {}),
         });
 
         return await parseApiResponse(response);

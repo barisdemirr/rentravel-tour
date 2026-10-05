@@ -10,8 +10,8 @@ import Analytics from "@/components/seo/Analytics";
 import { SITE_URL } from "@/lib/siteUrl";
 import { safe } from "@/lib/api";
 import { getSiteSettings } from "@/services/siteSettings";
+import { getStaticPages } from "@/services/staticPages";
 import { buildAlternates } from "@/lib/seo";
-
 
 export const viewport = {
     width: "device-width",
@@ -54,15 +54,19 @@ export async function generateMetadata({ params }) {
     };
 }
 
-// Ölçümleme kodları ve site doğrulama etiketi panelden gelir
-const settings = await safe(getSiteSettings(), null);
-
 // Splash daha önce görüldüyse, sayfa boyanmadan önce işaretler (flaş olmasın)
 const splashSeenScript = `try{if(sessionStorage.getItem("${SPLASH_STORAGE_KEY}")==="1")document.documentElement.setAttribute("data-splash-seen","1")}catch(e){}`;
 
 export default async function LangLayout({ children, params }) {
     const { lang } = await params;
     if (!isLocale(lang)) notFound();
+
+    // Ölçümleme kodları, doğrulama etiketi ve alt menü bağlantıları panelden gelir.
+    // İstek içinde çekilir: panelde yapılan değişiklik yeniden başlatmadan yansısın.
+    const [settings, pages] = await Promise.all([
+        safe(getSiteSettings(), null),
+        safe(getStaticPages(), []),
+    ]);
 
     return (
         <html lang={lang} dir={DIRECTIONS[lang]} suppressHydrationWarning>
@@ -78,7 +82,7 @@ export default async function LangLayout({ children, params }) {
             </head>
             <body>
                 <Providers locale={lang}>
-                    <UserShell>{children}</UserShell>
+                    <UserShell pages={pages}>{children}</UserShell>
                 </Providers>
 
                 <Analytics settings={settings} />
