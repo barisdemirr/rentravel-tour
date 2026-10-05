@@ -660,6 +660,17 @@ export const dictionaries = {
         countryLabel: "Ülke kodu",
         phoneLabel: "Telefon numarası",
         phoneLengthError: "{country} için {digits} haneli numara girin.",
+        notFound: {
+            metaTitle: "Sayfa Bulunamadı",
+            code: "404",
+            title: "Bu sayfayı bulamadık.",
+            text: "Aradığınız sayfa kaldırılmış, adı değişmiş veya adres yanlış yazılmış olabilir.",
+            home: "Ana sayfaya dön",
+            popular: "Belki bunları arıyordunuz",
+            help: "Aradığınızı bulamadınız mı?",
+            helpText: "WhatsApp'tan yazın, birkaç dakika içinde yönlendirelim.",
+            whatsapp: "WhatsApp'tan yaz",
+        },
     },
 
     EN: {
@@ -1265,6 +1276,17 @@ export const dictionaries = {
         countryLabel: "Country code",
         phoneLabel: "Phone number",
         phoneLengthError: "Enter a {digits}-digit number for {country}.",
+        notFound: {
+            metaTitle: "Page Not Found",
+            code: "404",
+            title: "We couldn't find that page.",
+            text: "The page may have been removed, renamed, or the address may be mistyped.",
+            home: "Back to home",
+            popular: "Perhaps you were looking for",
+            help: "Still can't find it?",
+            helpText: "Message us on WhatsApp and we'll point you in the right direction.",
+            whatsapp: "Message on WhatsApp",
+        },
     },
 
     AR: {
@@ -1871,6 +1893,17 @@ export const dictionaries = {
     countryLabel: "رمز الدولة",
     phoneLabel: "رقم الهاتف",
     phoneLengthError: "أدخل رقمًا من {digits} أرقام لـ {country}.",
+    notFound: {
+        metaTitle: "الصفحة غير موجودة",
+        code: "404",
+        title: "لم نتمكّن من العثور على هذه الصفحة.",
+        text: "ربما تمت إزالة الصفحة أو تغيير اسمها أو أن العنوان مكتوب بشكل خاطئ.",
+        home: "العودة للرئيسية",
+        popular: "ربما كنت تبحث عن",
+        help: "لم تجد ما تبحث عنه؟",
+        helpText: "راسلنا على واتساب وسنوجّهك خلال دقائق.",
+        whatsapp: "راسلنا على واتساب",
+    },
 };
 
 export function interpolate(str, vars = {}) {

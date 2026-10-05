@@ -13,9 +13,28 @@ import { formatDateTime } from "@/lib/format";
 
 export const revalidate = 300;
 
+/**
+ * Statik sayfa olamayacak adresler: bot taramaları ve yanlış yazımlar
+ * backend'e gitmeden 404 alsın.
+ */
+const INVALID_SLUG = /^[^a-z0-9]|[^a-z0-9-]|--|^.{0,1}$|^.{101,}$/;
+
+const BLOCKED = new Set([
+    "favicon.ico",
+    "robots.txt",
+    "sitemap.xml",
+    "wp-admin",
+    "wp-login.php",
+    "admin",
+    "api",
+    "_next",
+]);
+
+const isLikelySlug = (slug) => !BLOCKED.has(slug) && !INVALID_SLUG.test(slug);
+
 export async function generateMetadata({ params }) {
     const { lang, slug } = await params;
-    if (!isLocale(lang)) return {};
+    if (!isLocale(lang) || !isLikelySlug(slug)) return {};
 
     const { data: page } = await settle(getStaticPageBySlug(slug), null);
     if (!page) return {};
@@ -33,6 +52,7 @@ export async function generateMetadata({ params }) {
 
 export default async function StaticPage({ params }) {
     const { lang, slug } = await params;
+    if (!isLikelySlug(slug)) notFound();
     const locale = isLocale(lang) ? lang : "tr";
     const t = getDictionary(locale).staticPage;
 
