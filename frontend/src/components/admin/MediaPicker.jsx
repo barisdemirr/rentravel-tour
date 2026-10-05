@@ -18,13 +18,21 @@ export default function MediaPicker({ label, value, onChange, multiple = false, 
 
     const pick = (asset) => {
         const item = { id: asset.id, url: asset.urls.original, alt: asset.altText ?? null, order: 0 };
-        if (multiple) {
-            if ((value ?? []).some((v) => v.id === asset.id)) return;
-            onChange([...(value ?? []), { ...item, order: (value ?? []).length }]);
-        } else {
+
+        if (!multiple) {
             onChange(item);
             setOpen(false);
+            return;
         }
+
+        const current = value ?? [];
+        // Seçili bir görsele tekrar tıklamak onu listeden çıkarır
+        if (current.some((v) => v.id === asset.id)) {
+            onChange(current.filter((v) => v.id !== asset.id).map((v, i) => ({ ...v, order: i })));
+            return;
+        }
+
+        onChange([...current, { ...item, order: current.length }]);
     };
 
     const remove = (id) => {
