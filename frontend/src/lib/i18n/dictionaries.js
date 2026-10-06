@@ -451,6 +451,9 @@ export const dictionaries = {
             loadError: "Turlar şu anda yüklenemedi. Lütfen daha sonra tekrar deneyin.",
             loadMore: "Daha Fazla Göster",
             shown: "{total} turdan {shown} tanesi gösteriliyor",
+            searchDate: "{date} tarihi için",
+            searchAdults: "{count} yetişkin",
+            dateNote: "Seçtiğiniz tarih tur detayına taşınır; kalkış durumunu orada görebilirsiniz.",
         },
         tourDetail: {
             home: "Anasayfa",
@@ -1182,6 +1185,9 @@ export const dictionaries = {
             loadError: "Tours could not be loaded right now. Please try again later.",
             loadMore: "Show More",
             shown: "Showing {shown} of {total} tours",
+            searchDate: "For {date}",
+            searchAdults: "{count} adults",
+            dateNote: "Your date carries over to the tour page, where you can check departures.",
         },
         tourDetail: {
             home: "Home",
@@ -1913,6 +1919,9 @@ export const dictionaries = {
             loadError: "تعذّر تحميل الجولات حاليًا. يرجى المحاولة لاحقًا.",
             loadMore: "عرض المزيد",
             shown: "عرض {shown} من {total} جولة",
+            searchDate: "لتاريخ {date}",
+            searchAdults: "{count} بالغ",
+            dateNote: "ينتقل التاريخ المختار إلى صفحة الجولة، حيث يمكنك التحقق من مواعيد الانطلاق.",
         },
         tourDetail: {
             home: "الرئيسية",

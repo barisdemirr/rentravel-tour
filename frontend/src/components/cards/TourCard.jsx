@@ -11,7 +11,7 @@ import SafeImage from "../ui/SafeImage";
 
 const DETAIL_PATH = { daily: "/gunubirlik-turlar", culture: "/konaklamali-turlar" };
 
-export default function TourCard({ tour, variant = "daily", mode = "slider" }) {
+export default function TourCard({ tour, variant = "daily", mode = "slider", query = "" }) {
     const { t, locale } = useLanguage();
     const isCulture = variant === "culture";
 
@@ -103,7 +103,7 @@ export default function TourCard({ tour, variant = "daily", mode = "slider" }) {
                         </div>
                     </div>
                     <Link
-                        href={`${DETAIL_PATH[variant]}/${tour.slug}`}
+                        href={`${DETAIL_PATH[variant]}/${tour.slug}${query}`}
                         className="inline-flex items-center justify-center gap-1 rounded-xl bg-charcoal-dark px-3.5 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
                     >
                         <span>{t.cards.view}</span>

@@ -14,6 +14,7 @@ import { localized } from "@/lib/i18n/localized";
 import { mediaAlt, mediaUrl } from "@/lib/media";
 import { quoteBungalow } from "@/services";
 import Link from "@/components/ui/LocalizedLink";
+import { isDate, readQuery, toInt } from "@/lib/query";
 
 const PAGE_SIZE = 12;
 const SLIDE_MS = 3000; // hero görselinin değişim süresi
@@ -43,9 +44,29 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [stays, setStays] = useState({}); // slug -> { status, data }
+    const [guests, setGuests] = useState({ adults: 2, children: 0 });
 
+    /* Anasayfadan gelindiyse URL'deki tarih ve kişi sayıları kullanılır */
     useEffect(() => {
-        const start = plusDays(todayISO(), 1);
+        const today = todayISO();
+        const q = readQuery();
+        const ci = q.get("checkIn");
+        const co = q.get("checkOut");
+
+        if (isDate(ci, today) && isDate(co) && co > ci) {
+            setCheckIn(ci);
+            setCheckOut(co);
+            setGuests({
+                adults: toInt(q.get("adults"), 1, 20, 2),
+                children: toInt(q.get("children"), 0, 20, 0),
+            });
+            requestAnimationFrame(() =>
+                catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            );
+            return;
+        }
+
+        const start = plusDays(today, 1);
         setCheckIn(start);
         setCheckOut(plusDays(start, 3));
     }, []);
@@ -126,7 +147,7 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
                         const data = await quoteBungalow(b.slug, {
                             checkInDate: checkIn,
                             checkOutDate: checkOut,
-                            adults: 1,
+                            adults: guests.adults,
                             childAges: [],
                         });
                         return [b.slug, { status: "ok", data }];
@@ -144,9 +165,16 @@ export default function BungalovClient({ bungalows = [], regions = [], failed = 
             clearTimeout(timer);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [datesValid, checkIn, checkOut, slugsKey]);
+    }, [datesValid, checkIn, checkOut, slugsKey, guests.adults]);
 
-    const query = datesValid ? `?checkIn=${checkIn}&checkOut=${checkOut}` : "";
+    const query = datesValid
+        ? `?${new URLSearchParams({
+            checkIn,
+            checkOut,
+            adults: String(guests.adults),
+            children: String(guests.children),
+        })}`
+        : "";
 
     const scrollToCatalog = () => catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 

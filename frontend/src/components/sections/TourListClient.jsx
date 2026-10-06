@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import TourCard from "@/components/cards/TourCard";
 import Icon from "@/components/ui/Icon";
-import { formatPrice } from "@/lib/format";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
+import { formatDate, formatPrice } from "@/lib/format";
+import { isDate, readQuery, toInt } from "@/lib/query";
+import { todayISO } from "@/lib/dates";
+
 
 const PAGE_SIZE = 12;
 const EMPTY_PRICE = { min: "", max: "" };
@@ -51,6 +54,22 @@ export default function TourListClient({
     const [price, setPrice] = useState(EMPTY_PRICE);
     const [priceOpen, setPriceOpen] = useState(false);
     const [nights, setNights] = useState("");
+
+    const [search, setSearch] = useState(null); // { date, adults } | null
+
+    /* Anasayfadan tarih ve kişi sayısıyla gelindiyse */
+    useEffect(() => {
+        const q = readQuery();
+        const date = q.get("date");
+        if (!isDate(date, todayISO())) return;
+
+        setSearch({ date, adults: toInt(q.get("adults"), 1, 50, 2) });
+        requestAnimationFrame(() =>
+            catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        );
+    }, []);
+
+    const cardQuery = search ? `?${new URLSearchParams({ date: search.date, adults: String(search.adults) })}` : "";
 
     const money = (amount) => formatPrice(amount, "TRY", locale);
     const hasPrice = Boolean(price.min || price.max);
@@ -222,8 +241,8 @@ export default function TourListClient({
                                     aria-pressed={selected}
                                     onClick={() => setCategory(c.key)}
                                     className={`flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 font-label-md text-label-md font-semibold transition-colors ${selected
-                                            ? "border-crimson-vivid bg-crimson-vivid text-on-primary"
-                                            : "border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid"
+                                        ? "border-crimson-vivid bg-crimson-vivid text-on-primary"
+                                        : "border-surface-variant bg-surface-white text-charcoal-dark hover:border-crimson-vivid"
                                         }`}
                                 >
                                     {c.icon && <Icon name={c.icon} className="text-[16px]" />}
@@ -337,6 +356,31 @@ export default function TourListClient({
                     </div>
                 )}
 
+                {/* Anasayfadan gelen tarih */}
+                {search && (
+                    <div className="mb-5 flex flex-col gap-2 rounded-2xl border border-crimson-vivid/20 bg-primary-container/5 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-container text-on-primary">
+                                <Icon name="event" className="text-[20px]" />
+                            </span>
+                            <div className="min-w-0">
+                                <div className="font-label-md text-label-md font-bold text-charcoal-dark">
+                                    {tpl(l.searchDate, { date: formatDate(search.date, locale) })} ·{" "}
+                                    {tpl(l.searchAdults, { count: search.adults })}
+                                </div>
+                                <div className="font-body-sm text-body-sm text-secondary">{l.dateNote}</div>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setSearch(null)}
+                            className="self-start font-label-md text-label-md font-semibold text-crimson-vivid underline-offset-4 hover:underline sm:self-center"
+                        >
+                            {l.clear}
+                        </button>
+                    </div>
+                )}
+
                 {/* Aktif filtreler */}
                 {hasFilters && (
                     <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -368,6 +412,7 @@ export default function TourListClient({
                         tours={visible}
                         variant={variant}
                         l={l}
+                        query={cardQuery}
                     />
                 ) : (
                     <Notice icon="search_off" title={l.emptyTitle} text={l.emptyText}>
@@ -386,7 +431,7 @@ export default function TourListClient({
 }
 
 /* Sayfalama: filtre değişince key ile sıfırlanır */
-function ResultsGrid({ tours, variant, l }) {
+function ResultsGrid({ tours, variant, l, query = "" }) {
     const { tpl } = useLanguage();
     const [limit, setLimit] = useState(PAGE_SIZE);
     const shown = tours.slice(0, limit);
@@ -395,7 +440,7 @@ function ResultsGrid({ tours, variant, l }) {
         <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {shown.map((tour) => (
-                    <TourCard key={tour.id} tour={tour} variant={variant} mode="grid" />
+                    <TourCard key={tour.id} tour={tour} variant={variant} mode="grid" query={query} />
                 ))}
             </div>
 

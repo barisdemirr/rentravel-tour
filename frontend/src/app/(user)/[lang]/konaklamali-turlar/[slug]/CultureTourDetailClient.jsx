@@ -23,6 +23,7 @@ import { localized } from "@/lib/i18n/localized";
 import { cultureTourMessage } from "@/lib/whatsapp";
 import { quoteCultureTour } from "@/services";
 import { toHtml } from "@/lib/richText";
+import { isDate, readQuery, toAges, toInt } from "@/lib/query";
 
 const MAX_ADULTS = 50;
 const MAX_CHILDREN = 10;
@@ -56,10 +57,25 @@ export default function CultureTourDetailClient({ tour, sessions = [], options =
     const [ages, setAges] = useState([]); // çocuk yaşları, "" = henüz seçilmedi
     const [quote, setQuote] = useState({ status: "idle" });
 
-    /* Seanssız turda yarın varsayılan (client'ta, hydration güvenliği) */
+    /* URL'den gelen seçimler; yoksa seanssız turda yarın varsayılan (client'ta, hydration güvenliği) */
     useEffect(() => {
-        if (!hasSessions) setDate((v) => v || plusDays(todayISO(), 1));
-    }, [hasSessions]);
+        const q = readQuery();
+        const wanted = q.get("date");
+
+        if (hasSessions) {
+            if (sessions.some((s) => s.date === wanted && s.seats > 0)) setDate(wanted);
+        } else {
+            setDate((v) => (isDate(wanted, todayISO()) ? wanted : v || plusDays(todayISO(), 1)));
+        }
+
+        const accommodation = q.get("accommodation");
+        if (options.some((o) => o.accommodationTypeId === accommodation)) setAccommodationId(accommodation);
+
+        setAdults(toInt(q.get("adults"), 1, MAX_ADULTS, 2));
+        const childAges = toAges(q.get("children"));
+        if (childAges.length) setAges(childAges.map(String));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const option = options.find((o) => o.accommodationTypeId === accommodationId);
     const session = sessions.find((s) => s.date === date);

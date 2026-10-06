@@ -18,6 +18,7 @@ import { mediaAlt, mediaUrl } from "@/lib/media";
 import { bungalowMessage } from "@/lib/whatsapp";
 import { quoteBungalow } from "@/services";
 import { toHtml } from "@/lib/richText";
+import { readQuery, toInt } from "@/lib/query";
 
 const MAX_ADULTS = 20;
 const MAX_CHILDREN = 10;
@@ -52,6 +53,14 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
         setCheckIn(ci);
         setCheckOut(co);
     }, [initialDates]);
+
+    /* Listeden veya anasayfadan gelen kişi sayıları */
+    useEffect(() => {
+        const q = readQuery();
+        setAdults(toInt(q.get("adults"), 1, MAX_ADULTS, 2));
+        const children = toInt(q.get("children"), 0, MAX_CHILDREN, 0);
+        if (children > 0) setAges(Array(children).fill(""));
+    }, []);
 
     const nights = nightsBetween(checkIn, checkOut);
     const datesFilled = Boolean(checkIn && checkOut);
