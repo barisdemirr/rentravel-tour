@@ -61,8 +61,18 @@ export default async function ContactPage({ params }) {
     ].filter(Boolean);
 
     const socials = [
-        SITE.instagram && { icon: "photo_camera", label: "Instagram", handle: SITE.instagramHandle, href: SITE.instagram },
-        SITE.tiktok && { icon: "music_note", label: "TikTok", handle: SITE.tiktokHandle, href: SITE.tiktok },
+        SITE.instagram && {
+            image: "/social_icons/instagram.png",
+            label: "Instagram",
+            handle: SITE.instagramHandle,
+            href: SITE.instagram,
+        },
+        SITE.tiktok && {
+            image: "/social_icons/tiktok.png",
+            label: "TikTok",
+            handle: SITE.tiktokHandle,
+            href: SITE.tiktok,
+        },
     ].filter(Boolean);
 
     const structuredData = {
@@ -147,14 +157,14 @@ export default async function ContactPage({ params }) {
                             href={q.href}
                             {...(q.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                             className={`group flex items-center gap-4 rounded-3xl p-5 shadow-[0_20px_40px_-15px_rgba(15,17,21,0.12)] transition-all duration-300 hover:-translate-y-1 sm:p-6 ${q.highlight
-                                    ? "bg-gradient-to-br from-primary-container to-[#8f0019] text-white"
-                                    : "bg-surface-white text-charcoal-dark"
+                                ? "bg-gradient-to-br from-primary-container to-[#8f0019] text-white"
+                                : "bg-surface-white text-charcoal-dark"
                                 }`}
                         >
                             <span
                                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${q.highlight
-                                        ? "bg-white/15 text-white"
-                                        : "bg-primary-container/10 text-crimson-vivid group-hover:bg-primary-container group-hover:text-on-primary"
+                                    ? "bg-white/15 text-white"
+                                    : "bg-primary-container/10 text-crimson-vivid group-hover:bg-primary-container group-hover:text-on-primary"
                                     } transition-colors`}
                             >
                                 <Icon name={q.icon} className="text-[24px]" />
@@ -221,8 +231,17 @@ export default async function ContactPage({ params }) {
                                             rel="noopener noreferrer"
                                             className="group flex items-center gap-3 rounded-2xl border border-surface-variant bg-surface-white p-4 transition-all hover:border-crimson-vivid hover:shadow-md"
                                         >
-                                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-charcoal-dark text-white transition-colors group-hover:bg-primary-container">
-                                                <Icon name={s.icon} className="text-[20px]" />
+                                            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-canvas-offwhite p-1.5 transition-transform duration-300 group-hover:scale-105">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src={s.image}
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                    width={32}
+                                                    height={32}
+                                                    loading="lazy"
+                                                    className="h-full w-full object-contain"
+                                                />
                                             </span>
                                             <div className="min-w-0">
                                                 <div className="font-label-md text-label-md text-secondary">{s.label}</div>
