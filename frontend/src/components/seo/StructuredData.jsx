@@ -3,9 +3,11 @@ import { SITE_URL } from "@/lib/siteUrl";
 
 /**
  * Google'a firmayı tanıtan yapısal veri. Yerel aramada ve bilgi kartında kullanılır.
- * Adres ve koordinatlar doğru olmalı, uydurma bilgi Google tarafından cezalandırılır.
+ * Adres ve TÜRSAB numarası doğru olmalı, uydurma bilgi Google tarafından cezalandırılır.
  */
 export default function StructuredData({ locale }) {
+    const logo = `${SITE_URL}/logo.png`;
+
     const data = {
         "@context": "https://schema.org",
         "@graph": [
@@ -15,12 +17,32 @@ export default function StructuredData({ locale }) {
                 name: "Rentravel Turizm",
                 alternateName: "Rentravel Agency",
                 url: SITE_URL,
-                logo: `${SITE_URL}/icon.png`,
-                image: `${SITE_URL}/og-image.jpg`,
+                logo: {
+                    "@type": "ImageObject",
+                    url: logo,
+                    width: 512,
+                    height: 512,
+                },
+                image: logo,
                 telephone: SITE.phone,
                 ...(SITE.email ? { email: SITE.email } : {}),
                 priceRange: "₺₺",
                 currenciesAccepted: "TRY",
+                // TÜRSAB belgesi: resmi yetki kaydı
+                ...(SITE.tursabNo
+                    ? {
+                        hasCredential: {
+                            "@type": "EducationalOccupationalCredential",
+                            credentialCategory: "TÜRSAB A Grubu Seyahat Acentesi Belgesi",
+                            identifier: SITE.tursabNo,
+                            recognizedBy: {
+                                "@type": "Organization",
+                                name: "TÜRSAB",
+                                url: "https://www.tursab.org.tr",
+                            },
+                        },
+                    }
+                    : {}),
                 address: {
                     "@type": "PostalAddress",
                     streetAddress: SITE.address,
@@ -35,14 +57,18 @@ export default function StructuredData({ locale }) {
                     { "@type": "AdministrativeArea", name: "Doğu Karadeniz" },
                 ],
                 knowsLanguage: ["tr", "en", "ar"],
-                sameAs: [SITE.instagram, SITE.facebook].filter(Boolean),
+                sameAs: [SITE.instagram, SITE.facebook, SITE.youtube, SITE.tiktok].filter(Boolean),
                 makesOffer: [
-                    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Araç kiralama" } },
-                    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Günübirlik tur" } },
-                    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Konaklamalı kültür turu" } },
-                    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Bungalov konaklama" } },
-                    { "@type": "Offer", itemOffered: { "@type": "Service", name: "Havalimanı transferi" } },
-                ],
+                    "Araç kiralama",
+                    "Günübirlik tur",
+                    "Konaklamalı kültür turu",
+                    "Bungalov konaklama",
+                    "Havalimanı transferi",
+                    "VIP transfer",
+                ].map((name) => ({
+                    "@type": "Offer",
+                    itemOffered: { "@type": "Service", name, provider: { "@id": `${SITE_URL}/#organization` } },
+                })),
             },
             {
                 "@type": "WebSite",

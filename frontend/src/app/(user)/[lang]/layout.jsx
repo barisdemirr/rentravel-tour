@@ -46,17 +46,28 @@ export async function generateMetadata({ params }) {
         category: "travel",
         // Telefon numaralarını tarayıcı kendi başına bağlantıya çevirmesin
         formatDetection: { telephone: false, address: false, email: false },
-        icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
+        // Tek kare logo: sekme ikonu, Android ve iOS ana ekranı
+        icons: {
+            icon: [{ url: "/logo.png", sizes: "512x512", type: "image/png" }],
+            shortcut: "/logo.png",
+            apple: [{ url: "/logo.png", sizes: "512x512", type: "image/png" }],
+        },
         openGraph: {
             title,
             description,
             siteName: "Rentravel Turizm",
-            url: SITE_URL,
-            images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Rentravel Turizm" }],
+            url: `${SITE_URL}${lang === "tr" ? "" : `/${lang}`}`,
+            images: [{ url: "/logo.png", width: 512, height: 512, alt: "Rentravel Turizm" }],
             locale: OG_LOCALES[lang],
             type: "website",
         },
-        twitter: { card: "summary_large_image", title, description, images: ["/og-image.jpg"] },
+        twitter: {
+            // Kare görselle geniş kart kırpılır, summary doğru olanı
+            card: "summary",
+            title,
+            description,
+            images: ["/logo.png"],
+        },
         robots: {
             index: true,
             follow: true,
