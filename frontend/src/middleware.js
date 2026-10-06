@@ -3,7 +3,10 @@ import { DEFAULT_LOCALE, LOCALES } from "@/lib/i18n/config";
 
 const ADMIN_COOKIE = "rt_admin";
 
-/** JWT süresini kontrol eder (imza backend'de doğrulanır). */
+/**
+ * JWT süresini kontrol eder. İmza burada doğrulanamaz (anahtar backend'de);
+ * imzası geçersiz bir token backend'den 401 alır ve login'e ?expired=1 ile döner.
+ */
 function tokenValid(token) {
     if (!token) return false;
     const parts = token.split(".");
@@ -16,10 +19,29 @@ function tokenValid(token) {
     }
 }
 
+/** Çerezi siler: ayar, oluşturulduğu yolla aynı olmalı */
+function clearSession(response) {
+    response.cookies.set(ADMIN_COOKIE, "", { path: "/", maxAge: 0 });
+    return response;
+}
+
+/** Panel yanıtları hiçbir koşulda önbelleğe alınmasın, dizine eklenmesin */
+function adminHeaders(response) {
+    response.headers.set("Cache-Control", "no-store, must-revalidate");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+}
+
 /* ───────────────────────────── ADMIN ───────────────────────────── */
 function handleAdmin(request) {
-    const { pathname, search } = request.nextUrl;
+    const { pathname, search, searchParams } = request.nextUrl;
     const isLoginPage = pathname === "/admin/login";
+
+    // Backend token'ı reddetti: çerezi sil, login'i göster, geri yönlendirme yapma (döngü kırılır)
+    if (isLoginPage && searchParams.get("expired") === "1") {
+        return adminHeaders(clearSession(NextResponse.next()));
+    }
+
     const signedIn = tokenValid(request.cookies.get(ADMIN_COOKIE)?.value);
 
     // Giriş yapılmışsa login sayfası görülmez
@@ -32,16 +54,10 @@ function handleAdmin(request) {
         const url = new URL("/admin/login", request.url);
         const from = pathname + search;
         if (from !== "/admin") url.searchParams.set("from", from); // girişten sonra geri dön
-        const response = NextResponse.redirect(url);
-        response.cookies.set(ADMIN_COOKIE, "", { path: "/", maxAge: 0 }); // süresi dolmuş çerezi temizle
-        return response;
+        return clearSession(NextResponse.redirect(url)); // süresi dolmuş çerezi temizle
     }
 
-    // Panel sayfaları hiçbir koşulda önbelleğe alınmasın
-    const response = NextResponse.next();
-    response.headers.set("Cache-Control", "no-store, must-revalidate");
-    response.headers.set("X-Robots-Tag", "noindex, nofollow");
-    return response;
+    return adminHeaders(NextResponse.next());
 }
 
 /* ───────────────────────────── SITE (i18n) ───────────────────────────── */

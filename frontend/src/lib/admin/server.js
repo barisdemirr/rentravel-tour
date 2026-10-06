@@ -9,7 +9,7 @@ const API = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://12
 export async function requireSession() {
     const token = (await cookies()).get(ADMIN_COOKIE)?.value;
     const payload = readToken(token);
-    if (!payload) redirect("/admin/login");
+    if (!payload) redirect("/admin/login?expired=1");
     return { token, payload };
 }
 

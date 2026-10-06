@@ -6,6 +6,11 @@ const API = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://lo
 // Panelden erişilebilecek yollar. Yeni bir uç eklersen buraya da ekle.
 const ALLOWED = /^(admin\/|auth\/me$|sitemap$)/;
 
+/** Oturum çerezini siler: ayar, oluşturulduğu yolla aynı olmalı */
+async function clearSession() {
+    (await cookies()).set(ADMIN_COOKIE, "", { path: "/", maxAge: 0 });
+}
+
 async function forward(request, context) {
     const { path = [] } = await context.params;
     const target = path.join("/");
@@ -16,6 +21,7 @@ async function forward(request, context) {
 
     const token = (await cookies()).get(ADMIN_COOKIE)?.value;
     if (!readToken(token)) {
+        await clearSession();
         return Response.json({ title: "Oturum süresi doldu." }, { status: 401 });
     }
 
@@ -45,7 +51,13 @@ async function forward(request, context) {
         return Response.json({ title: "Sunucuya ulaşılamadı." }, { status: 503 });
     }
 
-    // Hata durumunda sebebi terminale yaz
+    // Backend token'ı reddetti (imza geçersiz, anahtar değişmiş): çerez temizlenir,
+    // bir sonraki sayfa geçişinde middleware login'e yönlendirir
+    if (response.status === 401) {
+        await clearSession();
+    }
+
+    // Hata durumunda sebebi günlüğe yaz
     if (!response.ok) {
         const clone = response.clone();
         const detail = await clone.text().catch(() => "");
