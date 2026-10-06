@@ -36,7 +36,7 @@ export default function Footer({ pages = [] }) {
                     <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-4">
                         <div className="flex items-center gap-2.5">
                             <SafeImage
-                                src={IMG.logo}
+                                src={IMG.logoMobile}
                                 alt="Rentravel Turizm"
                                 className="h-8 w-auto shrink-0 object-contain"
                             />
