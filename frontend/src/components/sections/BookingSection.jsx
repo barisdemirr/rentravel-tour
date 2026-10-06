@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { localized } from "@/lib/i18n/localized";
@@ -20,16 +21,33 @@ const TABS = [
     { key: "bungalow", icon: "cottage" },
 ];
 
+/** Tur seçicide "tüm turlar" değeri */
+const ALL = "";
+
 /** Bugünden n gün sonrasının ISO tarihi (YYYY-MM-DD) */
 const dateISO = (offsetDays = 0) =>
     new Date(Date.now() - new Date().getTimezoneOffset() * 60000 + offsetDays * 86400000)
         .toISOString()
         .slice(0, 10);
 
+/** Boş değerleri atlayarak sorgu metni üretir; diziler virgülle birleşir */
+function toQuery(params) {
+    const q = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+        if (value == null || value === "") return;
+        if (Array.isArray(value)) {
+            if (value.length) q.set(key, value.join(","));
+            return;
+        }
+        q.set(key, String(value));
+    });
+    const s = q.toString();
+    return s ? `?${s}` : "";
+}
+
 const fieldCls =
     "w-full rounded-xl bg-canvas-offwhite px-4 py-3 font-body-md text-body-md text-charcoal-dark outline-none transition-all focus:ring-2 focus:ring-crimson-vivid/40 disabled:cursor-not-allowed disabled:opacity-60";
-const labelCls =
-    "flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary";
+const labelCls = "flex items-center gap-1.5 font-label-uppercase text-label-uppercase text-secondary";
 
 /* Çocuk yaşları: dinamik input dizisi */
 function ChildrenAgesInput({ ages, setAges, labels }) {
@@ -84,9 +102,11 @@ function ChildrenAgesInput({ ages, setAges, labels }) {
 
 export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
     const { t, locale } = useLanguage();
+    const router = useRouter();
     const b = t.booking;
     const [tab, setTab] = useState("car");
     const [today, setToday] = useState("");
+    const [navigating, setNavigating] = useState(false);
 
     // Her sekmenin kendi state'i: sekmeler arası geçişte veriler kaybolmaz
     const [carForm, setCarForm] = useState({
@@ -95,27 +115,17 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
         returnDate: "",
         returnTime: "10:00",
     });
-    const [dailyForm, setDailyForm] = useState({
-        slug: dailyTours[0]?.slug ?? "",
-        date: "",
-        adults: 2,
-        childAges: [],
-    });
+    const [dailyForm, setDailyForm] = useState({ slug: ALL, date: "", adults: 2, childAges: [] });
     const [cultureForm, setCultureForm] = useState({
-        slug: cultureTours[0]?.slug ?? "",
+        slug: ALL,
         date: "",
         accommodationId: "",
         adults: 2,
         childAges: [],
     });
-    const [bungalowForm, setBungalowForm] = useState({
-        checkIn: "",
-        checkOut: "",
-        adults: 2,
-        children: 0,
-    });
+    const [bungalowForm, setBungalowForm] = useState({ checkIn: "", checkOut: "", adults: 2, children: 0 });
 
-    // Kültür turunun konaklama seçenekleri (tur seçilince yüklenir)
+    // Kültür turunun konaklama seçenekleri (belirli bir tur seçilince yüklenir)
     const [options, setOptions] = useState([]);
     const [optionsLoading, setOptionsLoading] = useState(false);
 
@@ -131,7 +141,10 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
     }, []);
 
     useEffect(() => {
-        if (tab !== "culture" || !cultureForm.slug) return;
+        if (tab !== "culture" || !cultureForm.slug) {
+            setOptions([]);
+            return;
+        }
 
         let cancelled = false;
         setOptionsLoading(true);
@@ -156,13 +169,44 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
         };
     }, [tab, cultureForm.slug]);
 
+    /** Seçimlere göre gidilecek sayfa */
+    const buildTarget = () => {
+        const prefix = locale === "tr" ? "" : `/${locale}`;
+
+        if (tab === "car") {
+            return `${prefix}/arac-kiralama${toQuery(carForm)}`;
+        }
+
+        if (tab === "daily") {
+            const { slug, date, adults, childAges } = dailyForm;
+            return slug
+                ? `${prefix}/gunubirlik-turlar/${slug}${toQuery({ date, adults, children: childAges })}`
+                : `${prefix}/gunubirlik-turlar${toQuery({ date, adults })}`;
+        }
+
+        if (tab === "culture") {
+            const { slug, date, accommodationId, adults, childAges } = cultureForm;
+            return slug
+                ? `${prefix}/konaklamali-turlar/${slug}${toQuery({
+                    date,
+                    accommodation: accommodationId,
+                    adults,
+                    children: childAges,
+                })}`
+                : `${prefix}/konaklamali-turlar${toQuery({ date, adults })}`;
+        }
+
+        return `${prefix}/bungalov-konaklama${toQuery(bungalowForm)}`;
+    };
+
+    /** WhatsApp mesajı: ikincil seçenek olarak duruyor */
     const buildMessage = () => {
         if (tab === "car") return carMessage({ ...carForm, locale });
 
         if (tab === "daily") {
             const tour = dailyTours.find((x) => x.slug === dailyForm.slug);
             return dailyTourMessage({
-                tourTitle: localized(tour?.title, "tr"),
+                tourTitle: tour ? localized(tour.title, "tr") : "-",
                 date: dailyForm.date,
                 adults: dailyForm.adults,
                 childAges: dailyForm.childAges,
@@ -174,45 +218,52 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
             const tour = cultureTours.find((x) => x.slug === cultureForm.slug);
             const option = options.find((o) => o.accommodationTypeId === cultureForm.accommodationId);
             return cultureTourMessage({
-                tourTitle: localized(tour?.title, "tr"),
+                tourTitle: tour ? localized(tour.title, "tr") : "-",
                 date: cultureForm.date,
-                accommodation: localized(option?.label, "tr"),
+                accommodation: option ? localized(option.label, "tr") : "-",
                 adults: cultureForm.adults,
                 childAges: cultureForm.childAges,
                 locale,
             });
         }
 
-        return bungalowMessage({
-            checkIn: bungalowForm.checkIn,
-            checkOut: bungalowForm.checkOut,
-            adults: bungalowForm.adults,
-            children: bungalowForm.children,
-            locale,
-        });
+        return bungalowMessage({ ...bungalowForm, locale });
     };
 
     const submit = (e) => {
         e.preventDefault();
+        setNavigating(true);
+        router.push(buildTarget());
+    };
+
+    const openWhatsapp = () => {
         const url = waHref(buildMessage());
         if (url) window.open(url, "_blank", "noopener,noreferrer");
     };
 
-    const tourSelect = (id, icon, tours, value, onChange) => (
-        <div className="flex flex-col gap-2 md:col-span-2">
+    const selectedTour = tab === "daily" ? dailyForm.slug : tab === "culture" ? cultureForm.slug : ALL;
+    const submitLabel =
+        tab === "car"
+            ? b.submitCars
+            : tab === "bungalow"
+                ? b.submitBungalows
+                : selectedTour
+                    ? b.submitTour
+                    : b.submitTours;
+
+    const tourSelect = (id, icon, tours, value, onChange, span = "md:col-span-2") => (
+        <div className={`flex flex-col gap-2 ${span}`}>
             <label htmlFor={id} className={labelCls}>
                 <Icon name={icon} className="text-[14px] text-crimson-vivid" />
                 {b.tour}
             </label>
             <select
                 id={id}
-                required
-                disabled={tours.length === 0}
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 className={`${fieldCls} cursor-pointer`}
             >
-                {tours.length === 0 && <option value="">{b.noTours}</option>}
+                <option value={ALL}>{b.allTours}</option>
                 {tours.map((tour) => (
                     <option key={tour.slug} value={tour.slug}>
                         {localized(tour.title, locale)}
@@ -386,8 +437,13 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                 {/* ── KONAKLAMALI KÜLTÜR TURLARI ── */}
                                 {tab === "culture" && (
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                        {tourSelect("culture-tour", "castle", cultureTours, cultureForm.slug, (slug) =>
-                                            setCultureForm({ ...cultureForm, slug, accommodationId: "" })
+                                        {tourSelect(
+                                            "culture-tour",
+                                            "castle",
+                                            cultureTours,
+                                            cultureForm.slug,
+                                            (slug) => setCultureForm({ ...cultureForm, slug, accommodationId: "" }),
+                                            cultureForm.slug ? "md:col-span-2" : "md:col-span-2 lg:col-span-2"
                                         )}
                                         <div className="flex flex-col gap-2">
                                             <label htmlFor="culture-date" className={labelCls}>
@@ -403,55 +459,79 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                                 className={fieldCls}
                                             />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label htmlFor="culture-accom" className={labelCls}>
-                                                <Icon name="hotel" className="text-[14px] text-crimson-vivid" />
-                                                {b.accommodation}
-                                                {optionsLoading && (
-                                                    <Icon
-                                                        name="progress_activity"
-                                                        className="animate-spin text-[14px] text-crimson-vivid"
-                                                    />
-                                                )}
-                                            </label>
-                                            <select
-                                                id="culture-accom"
-                                                required
-                                                disabled={optionsLoading || options.length === 0}
-                                                value={cultureForm.accommodationId}
-                                                onChange={(e) =>
-                                                    setCultureForm({ ...cultureForm, accommodationId: e.target.value })
-                                                }
-                                                className={`${fieldCls} cursor-pointer`}
-                                            >
-                                                {optionsLoading && <option value="">{b.loading}</option>}
-                                                {!optionsLoading && options.length === 0 && (
-                                                    <option value="">{b.noAccommodation}</option>
-                                                )}
-                                                {options.map((o) => (
-                                                    <option key={o.accommodationTypeId} value={o.accommodationTypeId}>
-                                                        {localized(o.label, locale)}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label htmlFor="culture-adults" className={labelCls}>
-                                                <Icon name="group" className="text-[14px] text-crimson-vivid" />
-                                                {b.adults}
-                                            </label>
-                                            <input
-                                                id="culture-adults"
-                                                type="number"
-                                                min="1"
-                                                max="50"
-                                                required
-                                                value={cultureForm.adults}
-                                                onChange={(e) => setCultureForm({ ...cultureForm, adults: e.target.value })}
-                                                className={fieldCls}
-                                            />
-                                        </div>
-                                        <div className="md:col-span-2 lg:col-span-3">
+
+                                        {/* Konaklama tipi yalnızca belirli bir tur seçilince anlamlı */}
+                                        {cultureForm.slug ? (
+                                            <div className="flex flex-col gap-2">
+                                                <label htmlFor="culture-accom" className={labelCls}>
+                                                    <Icon name="hotel" className="text-[14px] text-crimson-vivid" />
+                                                    {b.accommodation}
+                                                    {optionsLoading && (
+                                                        <Icon
+                                                            name="progress_activity"
+                                                            className="animate-spin text-[14px] text-crimson-vivid"
+                                                        />
+                                                    )}
+                                                </label>
+                                                <select
+                                                    id="culture-accom"
+                                                    disabled={optionsLoading || options.length === 0}
+                                                    value={cultureForm.accommodationId}
+                                                    onChange={(e) =>
+                                                        setCultureForm({ ...cultureForm, accommodationId: e.target.value })
+                                                    }
+                                                    className={`${fieldCls} cursor-pointer`}
+                                                >
+                                                    {optionsLoading && <option value="">{b.loading}</option>}
+                                                    {!optionsLoading && options.length === 0 && (
+                                                        <option value="">{b.noAccommodation}</option>
+                                                    )}
+                                                    {options.map((o) => (
+                                                        <option key={o.accommodationTypeId} value={o.accommodationTypeId}>
+                                                            {localized(o.label, locale)}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col gap-2">
+                                                <label htmlFor="culture-adults" className={labelCls}>
+                                                    <Icon name="group" className="text-[14px] text-crimson-vivid" />
+                                                    {b.adults}
+                                                </label>
+                                                <input
+                                                    id="culture-adults"
+                                                    type="number"
+                                                    min="1"
+                                                    max="50"
+                                                    required
+                                                    value={cultureForm.adults}
+                                                    onChange={(e) => setCultureForm({ ...cultureForm, adults: e.target.value })}
+                                                    className={fieldCls}
+                                                />
+                                            </div>
+                                        )}
+
+                                        {cultureForm.slug && (
+                                            <div className="flex flex-col gap-2">
+                                                <label htmlFor="culture-adults" className={labelCls}>
+                                                    <Icon name="group" className="text-[14px] text-crimson-vivid" />
+                                                    {b.adults}
+                                                </label>
+                                                <input
+                                                    id="culture-adults"
+                                                    type="number"
+                                                    min="1"
+                                                    max="50"
+                                                    required
+                                                    value={cultureForm.adults}
+                                                    onChange={(e) => setCultureForm({ ...cultureForm, adults: e.target.value })}
+                                                    className={fieldCls}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="md:col-span-2 lg:col-span-4">
                                             <ChildrenAgesInput
                                                 ages={cultureForm.childAges}
                                                 setAges={(childAges) => setCultureForm({ ...cultureForm, childAges })}
@@ -533,14 +613,26 @@ export default function BookingSection({ dailyTours = [], cultureTours = [] }) {
                                     </div>
                                 )}
 
-                                {/* SUBMIT */}
-                                <div className="flex justify-end pt-2">
+                                {/* BUTONLAR: birincil listeleme, ikincil WhatsApp */}
+                                <div className="flex flex-col-reverse items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={openWhatsapp}
+                                        className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3.5 font-label-uppercase text-label-uppercase tracking-wider text-secondary transition-colors hover:bg-canvas-offwhite hover:text-charcoal-dark"
+                                    >
+                                        <Icon name="chat" className="text-[18px] text-emerald-600" />
+                                        {b.askWhatsapp}
+                                    </button>
                                     <button
                                         type="submit"
-                                        className="group inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container px-8 py-4 font-label-uppercase text-label-uppercase tracking-wider text-on-primary shadow-md transition-colors hover:bg-crimson-vivid sm:w-auto"
+                                        disabled={navigating}
+                                        className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-primary-container px-8 py-4 font-label-uppercase text-label-uppercase tracking-wider text-on-primary shadow-md transition-colors hover:bg-crimson-vivid disabled:opacity-70"
                                     >
-                                        <Icon name="chat" className="text-[20px]" />
-                                        <span>{t.submit}</span>
+                                        <Icon
+                                            name={navigating ? "progress_activity" : "search"}
+                                            className={`text-[20px] ${navigating ? "animate-spin" : ""}`}
+                                        />
+                                        <span>{submitLabel}</span>
                                         <Icon
                                             name="arrow_forward"
                                             className="text-[18px] transition-transform group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1"

@@ -16,6 +16,7 @@ import { mediaAlt, mediaUrl } from "@/lib/media";
 import { TONES } from "@/lib/tones";
 import DateField from "@/components/ui/DateField";
 import TimeField from "@/components/ui/TimeField";
+import { isDate, isTime, readQuery } from "@/lib/query";
 
 /* Hero arka plan görseli */
 const HERO_BG =
@@ -43,9 +44,25 @@ export default function CarRentalClient({ segments = [], vehicles = [], hasError
     const catalogRef = useRef(null);
     const corporateRef = useRef(null);
 
-    /* Tarihleri client'ta kur (hydration güvenliği) */
+    /* Tarihleri client'ta kur (hydration güvenliği). Anasayfadan gelindiyse URL'deki tarihler kullanılır. */
     useEffect(() => {
         const today = todayISO();
+        const q = readQuery();
+        const p = q.get("pickupDate");
+        const r = q.get("returnDate");
+
+        if (isDate(p, today) && isDate(r, p)) {
+            setPickupDate(p);
+            setReturnDate(r);
+            if (isTime(q.get("pickupTime"))) setPickupTime(q.get("pickupTime"));
+            if (isTime(q.get("returnTime"))) setReturnTime(q.get("returnTime"));
+            // Arama yapılarak gelindi: doğrudan listeye in
+            requestAnimationFrame(() =>
+                catalogRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+            );
+            return;
+        }
+
         setPickupDate(today);
         setReturnDate(plusDays(today, 3));
     }, []);
