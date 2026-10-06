@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "./progress";
+
 /** Panelden yapılan tüm istekler Next proxy'si üzerinden gider (token httpOnly cookie'de). */
 export class AdminError extends Error {
     constructor(status, body) {
@@ -32,7 +34,8 @@ async function request(method, path, body, { isForm = false } = {}) {
         }
     }
 
-    const response = await fetch(`/api/backend${path}`, init);
+    // Süren istekler üst çubuğa ve "işleniyor" rozetine yansır
+    const response = await track(fetch(`/api/backend${path}`, init));
 
     if (response.status === 401) {
         window.location.href = "/admin/login?expired=1";

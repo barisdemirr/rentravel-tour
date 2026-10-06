@@ -143,3 +143,66 @@
     outline: 2px solid var(--color-ad-brand);
     outline-offset: 2px;
 }
+
+
+
+/* ════════════════════════════════════════════
+   YÖNETİM PANELİ YÜKLEME ANİMASYONLARI
+   ════════════════════════════════════════════ */
+@keyframes admin-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes admin-breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.07); }
+}
+
+@keyframes admin-pulse {
+    0%, 100% { opacity: 0.45; transform: scale(0.95); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes admin-slide {
+    0% { transform: translateX(-110%); }
+    100% { transform: translateX(320%); }
+}
+
+@keyframes admin-dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75%, 100% { content: "..."; }
+}
+
+/* Kırmızı kuyruklu dönen halka */
+.admin-loader-ring {
+    background: conic-gradient(from 0deg, transparent 0deg, var(--color-crimson-vivid) 270deg, #ff6b7d 330deg, transparent 360deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+    animation: admin-spin 1s linear infinite;
+}
+
+.admin-loader-spin-rev { animation: admin-spin 6s linear infinite reverse; }
+.admin-loader-breathe { animation: admin-breathe 1.8s ease-in-out infinite; }
+.admin-loader-pulse { animation: admin-pulse 1.8s ease-in-out infinite; }
+.admin-loader-slide { animation: admin-slide 1.3s cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+.admin-loader-dots::after {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    text-align: start;
+    animation: admin-dots 1.2s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-loader-ring,
+    .admin-loader-spin-rev,
+    .admin-loader-breathe,
+    .admin-loader-pulse,
+    .admin-loader-slide,
+    .admin-loader-dots::after {
+        animation: none;
+    }
+}

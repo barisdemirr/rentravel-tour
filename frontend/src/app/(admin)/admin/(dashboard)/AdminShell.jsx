@@ -7,6 +7,7 @@ import Icon from "@/components/ui/Icon";
 import ToastProvider from "@/components/admin/Toast";
 import { logout } from "@/lib/admin/client";
 import { NAV_GROUPS, groupOf } from "@/lib/admin/nav";
+import AdminProgressBar from "@/components/admin/AdminProgressBar";
 
 export default function AdminShell({ user, children }) {
     const pathname = usePathname();
@@ -30,6 +31,8 @@ export default function AdminShell({ user, children }) {
 
     return (
         <div className="flex min-h-dvh">
+            <AdminProgressBar />
+            
             {/* Masaüstü sidebar */}
             <aside className="ad-nav fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col lg:flex">
                 <SidebarContent pathname={pathname} user={user} />
