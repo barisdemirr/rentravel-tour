@@ -18,7 +18,9 @@ public static class QuoteBungalow
     public record Response(
         Guid BungalowId, string Slug, LocalizedText Title, Currency Currency,
         DateOnly CheckInDate, DateOnly CheckOutDate, int Nights, int Adults,
+        int StandardCapacity, int MaxCapacity,
         List<PriceLine> NightLines, decimal AccommodationTotal,
+        BungalowExtraAdultLine? ExtraAdults,
         List<BungalowChildLine> Children, decimal ChildrenTotal, decimal Total);
 
     public class Handler(AppDbContext db)
@@ -34,12 +36,15 @@ public static class QuoteBungalow
                 return Result<Response>.Fail(Error.NotFound("Bungalov bulunamadı."));
 
             var ages = cmd.ChildAges ?? [];
+            var totalGuests = cmd.Adults + ages.Count;
 
             var validator = new Validator()
                 .Must("checkInDate", cmd.CheckInDate is not null, "checkInDate zorunludur.")
                 .Must("checkOutDate", cmd.CheckOutDate is not null, "checkOutDate zorunludur.")
                 .Must("adults", cmd.Adults is >= 1 and <= MaxAdults, $"adults 1 ile {MaxAdults} arasında olmalı.")
-                .Must("childAges", ages.Count <= MaxChildren, $"En fazla {MaxChildren} çocuk eklenebilir.");
+                .Must("childAges", ages.Count <= MaxChildren, $"En fazla {MaxChildren} çocuk eklenebilir.")
+                .Must("guests", totalGuests <= bungalow.MaxCapacity,
+                      $"Bu bungalov en fazla {bungalow.MaxCapacity} kişi kabul eder.");
 
             for (var i = 0; i < ages.Count && ages.Count <= MaxChildren; i++)
             {
@@ -68,9 +73,12 @@ public static class QuoteBungalow
                 .Where(x => x.OwnerType == PriceOwnerType.Bungalow && x.OwnerId == bungalow.Id && x.IsActive)
                 .ToListAsync(ct);
 
-            // Her gece, o gecenin tarihine uyan kuralla fiyatlanır (araçtaki günlük hesapla aynı mantık)
             var lines = PeriodPricing.BuildLines(checkIn, nights, bungalow.DefaultPricePerNight, priceRules);
             var accommodationTotal = lines.Sum(l => l.Subtotal);
+
+            var extraAdults = BungalowPricing.PriceExtraAdults(
+                cmd.Adults, bungalow.StandardCapacity, nights, bungalow.ExtraAdultPricePerNight);
+            var extraAdultsTotal = extraAdults?.Total ?? 0m;
 
             var children = BungalowPricing.PriceChildren(ages, nights, ageRules);
             var childrenTotal = children.Sum(c => c.Total);
@@ -78,7 +86,11 @@ public static class QuoteBungalow
             return Result<Response>.Success(new Response(
                 bungalow.Id, bungalow.Slug, bungalow.Title, bungalow.Currency,
                 checkIn, checkOut, nights, cmd.Adults,
-                lines, accommodationTotal, children, childrenTotal, accommodationTotal + childrenTotal));
+                bungalow.StandardCapacity, bungalow.MaxCapacity,
+                lines, accommodationTotal,
+                extraAdults,
+                children, childrenTotal,
+                accommodationTotal + extraAdultsTotal + childrenTotal));
         }
     }
 
