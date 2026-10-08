@@ -45,6 +45,7 @@ export const NAV_GROUPS = [
             { href: "/admin/medya", label: "Medya", icon: "photo_library" },
             { href: "/admin/yorumlar", label: "Müşteri Yorumları", icon: "reviews" },
             { href: "/admin/sayfalar", label: "Statik Sayfalar", icon: "description" },
+            { label: "Slider", href: "/admin/slider", icon: "view_carousel" },
             { href: "/admin/site-ayarlari", label: "Site Ayarları", icon: "settings" },
         ],
     },
