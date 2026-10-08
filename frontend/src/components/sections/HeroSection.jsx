@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { SITE, SLIDE_DURATION, waHref } from "@/lib/constants";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
@@ -11,6 +11,33 @@ import { TONES } from "@/lib/tones";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
 import { mediaUrl } from "@/lib/media";
+
+
+/** Metinden sabit bir sayı üretir: aynı slaytta hep aynı kelime vurgulanır, SSR ile uyumlu */
+function hashOf(value) {
+    let hash = 0;
+    for (const ch of String(value)) hash = (hash * 31 + ch.codePointAt(0)) >>> 0;
+    return hash;
+}
+
+/** Başlıktaki kelimelerden birini vurgu rengine boyar */
+function HighlightTitle({ text, seed }) {
+    const words = text.split(/\s+/).filter(Boolean);
+    if (words.length < 2) return text;
+
+    // "ve", "ile", "&" gibi kısa kelimeler boyanmasın
+    const all = words.map((word, i) => ({ word, i }));
+    const meaningful = all.filter(({ word }) => word.replace(/[^\p{L}\p{N}]/gu, "").length >= 4);
+    const pool = meaningful.length ? meaningful : all;
+    const target = pool[hashOf(seed) % pool.length].i;
+
+    return words.map((word, i) => (
+        <Fragment key={i}>
+            {i > 0 && " "}
+            {i === target ? <span className="text-primary">{word}</span> : word}
+        </Fragment>
+    ));
+}
 
 /**
  * API'den gelen hero slide'ı (HeroSlideDto) mevcut render yapısının beklediği
@@ -193,7 +220,7 @@ export default function HeroSection({ slides: apiSlides = [] }) {
                                 variants={itemVariants}
                                 className="break-words font-display-hero-mobile text-display-hero-mobile uppercase leading-none tracking-tight text-surface-white drop-shadow-md md:font-display-hero md:text-display-hero"
                             >
-                                {slide.line1}
+                                {slide.accent ? slide.line1 : <HighlightTitle text={slide.line1} seed={slide.id} />}
                                 {slide.accent && (
                                     <>
                                         <br />
