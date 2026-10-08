@@ -38,14 +38,17 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const title = localized(bungalow.title, locale);
     const money = (amount) => formatPrice(amount, bungalow.currency, locale);
 
+    /* Backend'den gelen kapasite bilgileri (fallback: 2 kişi) */
+    const standardCapacity = bungalow.standardCapacity ?? 2;
+    const maxCapacity = bungalow.maxCapacity ?? 2;
+
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [adults, setAdults] = useState(2);
-    const [ages, setAges] = useState([]); // "" = henüz seçilmedi
+    const [ages, setAges] = useState([]);
     const [quote, setQuote] = useState({ status: "idle" });
     const [copied, setCopied] = useState(false);
 
-    /* Tarihler client'ta kurulur (hydration güvenliği). Listeden gelen tarih geçmişse yarına çekilir. */
     useEffect(() => {
         const today = todayISO();
         const ci = initialDates?.checkIn && initialDates.checkIn >= today ? initialDates.checkIn : plusDays(today, 1);
@@ -54,7 +57,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
         setCheckOut(co);
     }, [initialDates]);
 
-    /* Listeden veya anasayfadan gelen kişi sayıları */
     useEffect(() => {
         const q = readQuery();
         setAdults(toInt(q.get("adults"), 1, MAX_ADULTS, 2));
@@ -66,10 +68,14 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const datesFilled = Boolean(checkIn && checkOut);
     const nightsValid = nights >= 1;
     const agesReady = ages.every((a) => a !== "");
-    const ready = datesFilled && nightsValid && agesReady;
+    const totalGuests = adults + ages.length;
+    const overCapacity = totalGuests > maxCapacity;
+    const canAddAdult = totalGuests < maxCapacity;
+    const canAddChild = ages.length < MAX_CHILDREN && totalGuests < maxCapacity;
+    const ready = datesFilled && nightsValid && agesReady && !overCapacity;
     const agesKey = ages.join(",");
 
-    /* Fiyat: backend quote (değişince 0,4 sn bekleyip) */
+    /* Fiyat: backend quote */
     useEffect(() => {
         if (!ready) {
             setQuote(datesFilled && !nightsValid ? { status: "invalid" } : { status: "idle" });
@@ -155,7 +161,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const hasBreakfast = Boolean(breakfast) || bungalow.breakfastIncluded;
     const hasLocation = (bungalow.distances?.length ?? 0) > 0 || Boolean(localized(bungalow.locationNote, locale));
 
-    /* Bölüm sekmeleri: sadece içeriği olanlar */
     const sections = [
         bungalow.featureStrip?.length > 0 && { id: "genel-bilgiler", label: d.anchorGeneral },
         { id: "konaklama", label: d.anchorStay },
@@ -168,7 +173,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     /* ───────── Rezervasyon paneli ───────── */
     const bookingPanel = (
         <div className="flex flex-col gap-5 rounded-3xl border border-surface-variant/60 bg-surface-white p-4 shadow-[0_16px_36px_-6px_rgba(15,17,21,0.08)] sm:p-6">
-            {/* Fiyat */}
             <div className="flex items-center justify-between gap-3 rounded-2xl bg-charcoal-dark px-4 py-4 text-white shadow-md sm:px-5">
                 <div className="flex min-w-0 items-baseline gap-1.5">
                     <span className="font-headline-md text-headline-md font-extrabold text-white">{money(nightly)}</span>
@@ -181,7 +185,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                 )}
             </div>
 
-            {/* Tarihler */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="flex min-w-0 flex-col gap-1 rounded-2xl bg-canvas-offwhite p-3">
                     <span className="font-label-uppercase text-label-uppercase text-secondary">{d.checkIn}</span>
@@ -215,21 +218,38 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                 </p>
             )}
 
-            {/* Kişiler */}
+            {/* Kişiler — kapasite kontrolü */}
             <div className="flex flex-col gap-3">
                 <GuestCounter
                     label={d.adults}
                     sub={d.adultsSub}
                     count={adults}
                     onDec={() => setAdults((n) => Math.max(1, n - 1))}
-                    onInc={() => setAdults((n) => Math.min(MAX_ADULTS, n + 1))}
+                    onInc={() => setAdults((n) => (totalGuests < maxCapacity ? Math.min(MAX_ADULTS, n + 1) : n))}
                     decLabel={`${d.adults}: ${d.decrease}`}
                     incLabel={`${d.adults}: ${d.increase}`}
+                    incDisabled={!canAddAdult}
                 />
-                <ChildAgesField ages={ages} setAges={setAges} sub={d.childrenSub} max={MAX_CHILDREN} />
+
+                <ChildAgesField ages={ages} setAges={setAges} sub={d.childrenSub} max={MAX_CHILDREN} canAdd={canAddChild} />
+
+                {/* Kapasite bilgisi ve uyarı */}
+                <div className="flex flex-col gap-1.5 rounded-2xl bg-canvas-offwhite px-3.5 py-3">
+                    <div className="flex items-center justify-between font-label-uppercase text-label-uppercase">
+                        <span className="text-secondary">{d.capacityLabel}</span>
+                        <span className={overCapacity ? "text-crimson-vivid font-bold" : "text-charcoal-dark font-bold"}>
+                            {totalGuests} / {maxCapacity}
+                        </span>
+                    </div>
+                    {overCapacity && (
+                        <p className="font-body-sm text-body-sm text-crimson-vivid">
+                            {tpl(d.capacityExceeded, { max: maxCapacity })}
+                        </p>
+                    )}
+                </div>
             </div>
 
-            {/* Fiyat dökümü (backend hesabı) */}
+            {/* Fiyat dökümü */}
             <div className="flex flex-col gap-2.5 rounded-2xl bg-canvas-offwhite p-4" aria-busy={loading}>
                 {quote.status === "error" && (
                     <p className="font-body-sm text-body-sm text-crimson-vivid">{quote.message}</p>
@@ -250,6 +270,27 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                                 <span className="shrink-0 font-semibold text-charcoal-dark">{money(line.subtotal)}</span>
                             </div>
                         ))}
+
+                        {/* Ekstra yetişkin satırı */}
+                        {q.extraAdults && q.extraAdults.count > 0 && (
+                            <div className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
+                                <span className="text-secondary">
+                                    {tpl(d.extraAdultLine, {
+                                        count: q.extraAdults.count,
+                                        price: money(q.extraAdults.nightlyCharge),
+                                    })}
+                                    <span className="block text-[11px] text-secondary/70">
+                                        {tpl(d.extraAdultSub, {
+                                            nights: q.extraAdults.nights,
+                                            standard: standardCapacity,
+                                        })}
+                                    </span>
+                                </span>
+                                <span className="shrink-0 font-semibold text-charcoal-dark">
+                                    {money(q.extraAdults.total)}
+                                </span>
+                            </div>
+                        )}
 
                         {q.children.map((c, i) => (
                             <div key={i} className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
@@ -288,13 +329,18 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
             {/* CTA'lar */}
             <div className="flex flex-col gap-3">
                 <a
-                    href={whatsappHref ?? "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-container py-4 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-all hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
+                    href={overCapacity ? "#" : whatsappHref ?? "#"}
+                    target={overCapacity ? undefined : "_blank"}
+                    rel={overCapacity ? undefined : "noopener noreferrer"}
+                    aria-disabled={overCapacity}
+                    onClick={(e) => overCapacity && e.preventDefault()}
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-md transition-all ${overCapacity
+                            ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
+                            : "bg-primary-container text-on-primary hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
+                        }`}
                 >
                     <Icon name="chat" className="text-[22px]" />
-                    <span>{d.whatsapp}</span>
+                    <span>{overCapacity ? d.capacityBlocked : d.whatsapp}</span>
                 </a>
                 <a
                     href={SITE.phoneHref}
@@ -305,7 +351,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                 </a>
             </div>
 
-            {/* Güvenceler */}
             <div className="flex flex-col gap-2.5 rounded-2xl bg-canvas-offwhite p-4">
                 <div className="flex items-center gap-2 font-label-md text-label-md font-semibold text-charcoal-dark">
                     <Icon name="verified" className="shrink-0 text-[18px] text-crimson-vivid" />
@@ -322,7 +367,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     return (
         <>
             <div className="mx-auto w-full max-w-[1280px] px-4 pb-28 pt-4 md:px-8 md:pb-16 md:pt-6">
-                {/* Breadcrumb */}
                 <nav
                     aria-label={d.breadcrumbLabel}
                     className="no-scrollbar mb-4 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap font-label-md text-label-md text-secondary"
@@ -338,7 +382,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                     <span className="font-semibold text-charcoal-dark">{title}</span>
                 </nav>
 
-                {/* Başlık */}
                 <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="flex min-w-0 flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -374,25 +417,19 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             <Icon name="share" className="text-[18px]" />
                             <span>{copied ? d.copied : d.share}</span>
                         </button>
-
-
                     </div>
                 </div>
 
-                {/* Galeri */}
                 <ImageGallery images={images} title={title} />
 
-                {/* Bölüm sekmeleri */}
                 <AnchorPills sections={sections} />
 
-                {/* İçerik + panel: mobilde panel önce, masaüstünde sağda sabit */}
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-x-8">
                     <div className="order-first min-w-0 lg:order-none lg:col-span-4 lg:col-start-9 lg:row-start-1">
                         <div className="lg:sticky lg:top-28">{bookingPanel}</div>
                     </div>
 
                     <div className="flex min-w-0 flex-col gap-5 lg:col-span-8 lg:col-start-1 lg:row-start-1">
-                        {/* Özellik şeridi */}
                         {bungalow.featureStrip?.length > 0 && (
                             <div
                                 id="genel-bilgiler"
@@ -412,7 +449,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             </div>
                         )}
 
-                        {/* Hakkında */}
                         <Block id="konaklama" title={d.aboutTitle}>
                             {longDescription ? (
                                 <div
@@ -426,7 +462,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             )}
                         </Block>
 
-                        {/* Kahvaltı */}
                         {hasBreakfast && (
                             <div
                                 id="kahvalti"
@@ -472,7 +507,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             </div>
                         )}
 
-                        {/* Olanaklar */}
                         {amenities.length > 0 && (
                             <Block
                                 id="olanaklar"
@@ -501,7 +535,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             </Block>
                         )}
 
-                        {/* Konum */}
                         {hasLocation && (
                             <Block id="harita" title={d.locationTitle}>
                                 {localized(bungalow.locationNote, locale) && (
@@ -530,7 +563,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             </Block>
                         )}
 
-                        {/* Kurallar */}
                         {bungalow.rules?.length > 0 && (
                             <Block id="kurallar" title={d.rulesTitle}>
                                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -572,23 +604,24 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                         </span>
                     </div>
                     <a
-                        href={whatsappHref ?? "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-primary-container px-6 py-3 font-label-uppercase text-label-uppercase font-bold tracking-wider text-on-primary shadow-md transition-colors active:scale-[0.98]"
+                        href={overCapacity ? "#" : whatsappHref ?? "#"}
+                        target={overCapacity ? undefined : "_blank"}
+                        rel={overCapacity ? undefined : "noopener noreferrer"}
+                        aria-disabled={overCapacity}
+                        onClick={(e) => overCapacity && e.preventDefault()}
+                        className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-6 py-3 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-md transition-colors ${overCapacity
+                                ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
+                                : "bg-primary-container text-on-primary active:scale-[0.98]"
+                            }`}
                     >
                         <Icon name="chat" className="text-[18px]" />
-                        <span>{d.reserve}</span>
+                        <span>{overCapacity ? d.capacityBlocked : d.reserve}</span>
                     </a>
                 </div>
             </div>
         </>
     );
 }
-
-/* ─────────────────────────────────────────────
-   ALT BİLEŞENLER
-   ───────────────────────────────────────────── */
 
 function Block({ id, title, aside, children }) {
     return (
