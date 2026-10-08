@@ -12,8 +12,14 @@ public static class QuoteBungalow
     private const int MaxNights = 90;
     private const int MaxAdults = 20;
     private const int MaxChildren = 20;
+    private const int MaxExtras = 20;
 
-    public record Command(DateOnly? CheckInDate, DateOnly? CheckOutDate, int Adults, List<int>? ChildAges);
+    // extraIds: sadece bungalovda tanımlı ekstra ID'leri
+    // extraCounts: Once mode'da adet, Daily mode'da yok sayılır (her zaman 1)
+    public record Command(
+        DateOnly? CheckInDate, DateOnly? CheckOutDate,
+        int Adults, List<int>? ChildAges,
+        List<Guid>? ExtraIds, Dictionary<Guid, int>? ExtraCounts);
 
     public record Response(
         Guid BungalowId, string Slug, LocalizedText Title, Currency Currency,
@@ -21,7 +27,9 @@ public static class QuoteBungalow
         int StandardCapacity, int MaxCapacity,
         List<PriceLine> NightLines, decimal AccommodationTotal,
         BungalowExtraAdultLine? ExtraAdults,
-        List<BungalowChildLine> Children, decimal ChildrenTotal, decimal Total);
+        List<BungalowChildLine> Children, decimal ChildrenTotal,
+        List<BungalowExtraLine> Extras, decimal ExtrasTotal,
+        decimal Total);
 
     public class Handler(AppDbContext db)
     {
@@ -63,6 +71,45 @@ public static class QuoteBungalow
                 .Must("checkOutDate", nights >= 1, "Çıkış tarihi giriş tarihinden sonra olmalı.")
                 .Must("checkOutDate", nights <= MaxNights, $"Konaklama süresi en fazla {MaxNights} gece olabilir.");
 
+            // Seçilen ekstralar bungalovun üzerindeki kopyalardan alınır
+            var selections = new List<(BungalowExtraSnapshot Extra, int Count)>();
+            var extraIds = cmd.ExtraIds ?? [];
+            var extraCounts = cmd.ExtraCounts ?? new Dictionary<Guid, int>();
+
+            if (extraIds.Count > MaxExtras)
+                validator.AddError("extraIds", $"En fazla {MaxExtras} ekstra seçilebilir.");
+            else if (extraIds.Count != extraIds.Distinct().Count())
+                validator.AddError("extraIds", "Aynı ekstra birden fazla kez seçilemez.");
+            else
+            {
+                for (var i = 0; i < extraIds.Count; i++)
+                {
+                    var extra = bungalow.Extras.FirstOrDefault(e => e.ExtraId == extraIds[i]);
+                    if (extra is null)
+                    {
+                        validator.AddError($"extraIds[{i}]", "Bu bungalovda böyle bir ekstra yok.");
+                        continue;
+                    }
+
+                    // Daily mode'da adet her zaman 1
+                    if (extra.ChargeMode == ExtraChargeMode.Daily)
+                    {
+                        selections.Add((extra, 1));
+                        continue;
+                    }
+
+                    // Once mode: adet zorunlu, 1-20 arası
+                    var count = extraCounts.TryGetValue(extra.ExtraId, out var c) ? c : 1;
+                    if (count is < 1 or > 20)
+                    {
+                        validator.AddError($"extraCounts[{extra.Key}]", "Adet 1 ile 20 arasında olmalı.");
+                        continue;
+                    }
+
+                    selections.Add((extra, count));
+                }
+            }
+
             if (!validator.IsValid) return validator.ToFailure<Response>();
 
             var priceRules = await db.PriceRules.AsNoTracking()
@@ -83,6 +130,9 @@ public static class QuoteBungalow
             var children = BungalowPricing.PriceChildren(ages, nights, ageRules);
             var childrenTotal = children.Sum(c => c.Total);
 
+            var extraLines = BungalowPricing.PriceExtras(selections, nights);
+            var extrasTotal = extraLines.Sum(e => e.Subtotal);
+
             return Result<Response>.Success(new Response(
                 bungalow.Id, bungalow.Slug, bungalow.Title, bungalow.Currency,
                 checkIn, checkOut, nights, cmd.Adults,
@@ -90,7 +140,8 @@ public static class QuoteBungalow
                 lines, accommodationTotal,
                 extraAdults,
                 children, childrenTotal,
-                accommodationTotal + extraAdultsTotal + childrenTotal));
+                extraLines, extrasTotal,
+                accommodationTotal + extraAdultsTotal + childrenTotal + extrasTotal));
         }
     }
 

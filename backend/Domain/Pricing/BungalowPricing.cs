@@ -9,6 +9,13 @@ public record BungalowChildLine(int Age, LocalizedText? Label, decimal NightlyCh
 // Standart kapasiteyi aşan yetişkinler için tek satır
 public record BungalowExtraAdultLine(int Count, decimal NightlyCharge, int Nights, decimal Total);
 
+// Rezervasyona seçilen ekstra hizmetlerin tek satırı
+//   Once  → Count × UnitPrice
+//   Daily → UnitPrice × Nights
+public record BungalowExtraLine(
+    Guid ExtraId, string Key, LocalizedText Title, ExtraChargeMode ChargeMode,
+    int Count, decimal UnitPrice, int Nights, decimal Subtotal);
+
 public static class BungalowPricing
 {
     // Çocuk başı gecelik ek ücret: yaşa uyan Fixed kuralın tutarı. Free veya kural yoksa ek ücret yok.
@@ -39,5 +46,40 @@ public static class BungalowPricing
         var extraCount = adults - standardCapacity;
         var total = extraAdultPrice * nights * extraCount;
         return new BungalowExtraAdultLine(extraCount, extraAdultPrice, nights, total);
+    }
+
+
+
+    // Bir bungalova seçilen ekstraların satırlarını üretir.
+    //   Once  → Count × UnitPrice (Count kullanıcı seçimi; 0 ise satır yok)
+    //   Daily → UnitPrice × Nights   (Count her zaman 1; adet seçilemez)
+    public static List<BungalowExtraLine> PriceExtras(
+        IEnumerable<(BungalowExtraSnapshot Extra, int Count)> selections, int nights)
+    {
+        var lines = new List<BungalowExtraLine>();
+
+        foreach (var (extra, count) in selections)
+        {
+            if (extra.ChargeMode == ExtraChargeMode.Daily)
+            {
+                // Daily: adet her zaman 1, fiyat = gecelik × gece
+                lines.Add(new BungalowExtraLine(
+                    extra.ExtraId, extra.Key, extra.Title, extra.ChargeMode,
+                    Count: 1, UnitPrice: extra.Price, Nights: nights,
+                    Subtotal: extra.Price * nights));
+            }
+            else
+            {
+                // Once: adet 0 ise satır üretilmez
+                if (count <= 0) continue;
+
+                lines.Add(new BungalowExtraLine(
+                    extra.ExtraId, extra.Key, extra.Title, extra.ChargeMode,
+                    Count: count, UnitPrice: extra.Price, Nights: nights,
+                    Subtotal: extra.Price * count));
+            }
+        }
+
+        return lines;
     }
 }
