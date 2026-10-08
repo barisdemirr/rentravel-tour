@@ -228,7 +228,7 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                     <p className="mt-1 text-sm text-ad-muted">
                         {isNew
                             ? "Zorunlu alanlar: ad, gecelik fiyat."
-                            : `Adres: /bungalovlar/${record.slug}`}
+                            : `Adres: /bungalov-konaklama/${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -253,12 +253,12 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
-                        hint="Sitede bu tesisin adresi: /bungalovlar/<adres>"
+                        hint="Sitede bu tesisin adresi: /bungalov-konaklama/<adres>"
                         error={fieldError("slug")}
                     >
                         <div className="flex items-stretch gap-2">
                             <span className="flex shrink-0 items-center rounded-xl bg-ad-sunken px-3 text-sm text-ad-muted">
-                                /bungalovlar/
+                                /bungalov-konaklama/
                             </span>
                             <input
                                 type="text"
