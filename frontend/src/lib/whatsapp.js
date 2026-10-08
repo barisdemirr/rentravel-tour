@@ -82,7 +82,12 @@ export function cultureTourMessage({ tourTitle, date, accommodation, adults, chi
     );
 }
 
-export function bungalowMessage({ bungalowTitle, checkIn, checkOut, nights, adults, children, childAges, total, currency, locale }) {
+export function bungalowMessage({
+    bungalowTitle, checkIn, checkOut, nights,
+    adults, children, childAges,
+    extras,                       // ← YENİ: hazır metin dizisi
+    total, currency, locale,
+}) {
     return compose(
         "Merhaba, bungalov konaklama rezervasyonu yapmak istiyorum.",
         [
@@ -92,6 +97,7 @@ export function bungalowMessage({ bungalowTitle, checkIn, checkOut, nights, adul
             row("Süre", nights ? `${nights} gece` : null),
             row("Yetişkin", adults),
             row("Çocuk", childAges?.length ? ages(childAges) : Number(children) > 0 ? children : null),
+            row("Ekstralar", extras?.length ? extras.join(" · ") : null),
             row("Toplam", money(total, currency)),
         ],
         locale

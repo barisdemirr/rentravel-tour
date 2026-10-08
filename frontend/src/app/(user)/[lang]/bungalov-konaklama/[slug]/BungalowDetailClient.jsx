@@ -22,6 +22,7 @@ import { readQuery, toInt } from "@/lib/query";
 
 const MAX_ADULTS = 20;
 const MAX_CHILDREN = 10;
+const MAX_EXTRA_COUNT = 20;
 
 const nightsBetween = (from, to) =>
     from && to ? Math.round((parseDateOnly(to) - parseDateOnly(from)) / 86400000) : 0;
@@ -38,14 +39,17 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const title = localized(bungalow.title, locale);
     const money = (amount) => formatPrice(amount, bungalow.currency, locale);
 
-    /* Backend'den gelen kapasite bilgileri (fallback: 2 kişi) */
     const standardCapacity = bungalow.standardCapacity ?? 2;
     const maxCapacity = bungalow.maxCapacity ?? 2;
+
+    /* Katalogdan gelen ekstra hizmetler (bungalova atanmış) */
+    const bungalowExtras = bungalow.extras ?? [];
 
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [adults, setAdults] = useState(2);
     const [ages, setAges] = useState([]);
+    const [extraCounts, setExtraCounts] = useState({}); // { [extraId]: count } — sadece Once modu için dolu
     const [quote, setQuote] = useState({ status: "idle" });
     const [copied, setCopied] = useState(false);
 
@@ -75,6 +79,39 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const ready = datesFilled && nightsValid && agesReady && !overCapacity;
     const agesKey = ages.join(",");
 
+    /* ── Ekstra seçim yönetimi ── */
+
+    // Once mode: adet toggle / değiştir. Daily mode: checkbox toggle (adet 1).
+    const toggleExtra = (extra) => {
+        setExtraCounts((c) => {
+            const next = { ...c };
+            if (next[extra.extraId]) delete next[extra.extraId];
+            else next[extra.extraId] = 1;
+            return next;
+        });
+    };
+
+    const setExtraCount = (extraId, count) => {
+        setExtraCounts((c) => {
+            if (count <= 0) {
+                const next = { ...c };
+                delete next[extraId];
+                return next;
+            }
+            return { ...c, [extraId]: Math.min(MAX_EXTRA_COUNT, count) };
+        });
+    };
+
+    const selectedExtraIds = Object.keys(extraCounts).filter((id) => extraCounts[id] > 0);
+    const selectedExtraCounts = Object.fromEntries(
+        selectedExtraIds.map((id) => [id, extraCounts[id]])
+    );
+    // useMemo key: seçili ekstra ve adetler değişince yeniden quote çekilsin
+    const extrasKey =
+        selectedExtraIds.slice().sort().join(",") +
+        "|" +
+        selectedExtraIds.map((id) => extraCounts[id]).join(",");
+
     /* Fiyat: backend quote */
     useEffect(() => {
         if (!ready) {
@@ -92,6 +129,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                     checkOutDate: checkOut,
                     adults,
                     childAges: ages.map(Number),
+                    extraIds: selectedExtraIds,
+                    extraCounts: selectedExtraCounts,
                 });
                 if (!cancelled) setQuote({ status: "ok", data });
             } catch (error) {
@@ -105,12 +144,29 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
             clearTimeout(timer);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ready, datesFilled, nightsValid, bungalow.slug, checkIn, checkOut, adults, agesKey]);
+    }, [ready, datesFilled, nightsValid, bungalow.slug, checkIn, checkOut, adults, agesKey, extrasKey]);
 
     const q = quote.status === "ok" || quote.status === "loading" ? quote.data : null;
     const loading = quote.status === "loading";
     const nightly = q ? q.accommodationTotal / q.nights : bungalow.defaultPricePerNight;
     const total = q?.total ?? null;
+
+    /* WhatsApp için ekstraları hazır metne çevir */
+    const extraLabelsForWhatsapp = useMemo(() => {
+        if (!bungalowExtras.length) return [];
+        return selectedExtraIds
+            .map((id) => {
+                const e = bungalowExtras.find((x) => x.extraId === id);
+                if (!e) return null;
+                const count = extraCounts[id] ?? 1;
+                const name = localized(e.title, "tr");
+                if (e.chargeMode === "Daily") {
+                    return `${name} (${nights || 0} gece × ${money(e.price)})`;
+                }
+                return count > 1 ? `${name} (${count} × ${money(e.price)})` : name;
+            })
+            .filter(Boolean);
+    }, [bungalowExtras, extrasKey, extraCounts, nights, locale]);
 
     const whatsappHref = useMemo(
         () =>
@@ -122,12 +178,13 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                     nights: nightsValid ? nights : null,
                     adults,
                     childAges: ages.filter((a) => a !== "").map(Number),
+                    extras: extraLabelsForWhatsapp,
                     total: q?.total,
                     currency: bungalow.currency,
                     locale,
                 })
             ),
-        [bungalow, checkIn, checkOut, nights, nightsValid, adults, ages, q, locale]
+        [bungalow, checkIn, checkOut, nights, nightsValid, adults, ages, extraLabelsForWhatsapp, q, locale]
     );
 
     const handleShare = async () => {
@@ -164,6 +221,7 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const sections = [
         bungalow.featureStrip?.length > 0 && { id: "genel-bilgiler", label: d.anchorGeneral },
         { id: "konaklama", label: d.anchorStay },
+        bungalowExtras.length > 0 && { id: "ekstralar", label: "Ekstra Hizmetler" },
         hasBreakfast && { id: "kahvalti", label: d.anchorBreakfast },
         amenities.length > 0 && { id: "olanaklar", label: d.anchorAmenities },
         hasLocation && { id: "harita", label: d.anchorLocation },
@@ -249,6 +307,100 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                 </div>
             </div>
 
+            {/* EKSTRA HİZMETLER */}
+            {bungalowExtras.length > 0 && (
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                        <Icon name="add_circle" className="text-[18px] text-crimson-vivid" />
+                        <span className="font-label-uppercase text-label-uppercase font-bold text-secondary">
+                            Ekstra Hizmetler
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        {bungalowExtras.map((extra) => {
+                            const selected = extraCounts[extra.extraId] > 0;
+                            const isDaily = extra.chargeMode === "Daily";
+                            const count = extraCounts[extra.extraId] ?? 0;
+
+                            return (
+                                <div
+                                    key={extra.extraId}
+                                    className={`flex flex-col gap-2 rounded-2xl border-2 p-3 transition-colors ${selected
+                                            ? "border-crimson-vivid bg-crimson-vivid/5"
+                                            : "border-transparent bg-canvas-offwhite"
+                                        }`}
+                                >
+                                    <button
+                                        type="button"
+                                        role={isDaily ? "checkbox" : undefined}
+                                        aria-checked={isDaily ? selected : undefined}
+                                        onClick={() => toggleExtra(extra)}
+                                        className="flex items-center gap-3 text-start"
+                                    >
+                                        <span
+                                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${selected
+                                                    ? "border-crimson-vivid bg-crimson-vivid text-white"
+                                                    : "border-secondary/40"
+                                                }`}
+                                        >
+                                            {selected && <Icon name="check" className="text-[13px]" />}
+                                        </span>
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-white text-crimson-vivid">
+                                            <Icon name={extra.icon || "add_circle"} className="text-[18px]" />
+                                        </span>
+                                        <span className="min-w-0 flex-1">
+                                            <span className="block font-label-md text-label-md font-bold text-charcoal-dark">
+                                                {localized(extra.title, locale)}
+                                            </span>
+                                            <span className="block text-[11px] text-secondary">
+                                                {money(extra.price)} ·{" "}
+                                                {isDaily ? "gecelik" : "tek seferlik"}
+                                            </span>
+                                        </span>
+                                    </button>
+
+                                    {selected && !isDaily && (
+                                        <div className="flex items-center justify-between gap-2 border-t border-crimson-vivid/15 pt-2">
+                                            <span className="font-body-sm text-body-sm text-secondary">Adet</span>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setExtraCount(extra.extraId, count - 1);
+                                                    }}
+                                                    disabled={count <= 1}
+                                                    aria-label="Azalt"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-white text-charcoal-dark shadow-sm transition-colors hover:bg-crimson-vivid hover:text-white disabled:opacity-30 disabled:hover:bg-surface-white disabled:hover:text-charcoal-dark"
+                                                >
+                                                    −
+                                                </button>
+                                                <span className="w-6 text-center font-headline-sm text-headline-sm font-bold text-charcoal-dark">
+                                                    {count}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setExtraCount(extra.extraId, count + 1);
+                                                    }}
+                                                    disabled={count >= MAX_EXTRA_COUNT}
+                                                    aria-label="Arttır"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-white text-charcoal-dark shadow-sm transition-colors hover:bg-crimson-vivid hover:text-white disabled:opacity-30 disabled:hover:bg-surface-white disabled:hover:text-charcoal-dark"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* Fiyat dökümü */}
             <div className="flex flex-col gap-2.5 rounded-2xl bg-canvas-offwhite p-4" aria-busy={loading}>
                 {quote.status === "error" && (
@@ -271,7 +423,6 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                             </div>
                         ))}
 
-                        {/* Ekstra yetişkin satırı */}
                         {q.extraAdults && q.extraAdults.count > 0 && (
                             <div className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
                                 <span className="text-secondary">
@@ -304,6 +455,23 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                                 </span>
                                 <span className="shrink-0 font-semibold text-charcoal-dark">
                                     {c.total > 0 ? money(c.total) : d.free}
+                                </span>
+                            </div>
+                        ))}
+
+                        {/* EKSTRA HİZMET SATIRLARI */}
+                        {q.extras?.map((ex, i) => (
+                            <div key={i} className="flex items-start justify-between gap-3 font-body-sm text-body-sm">
+                                <span className="text-secondary">
+                                    {localized(ex.title, locale)}
+                                    <span className="block text-[11px] text-secondary/70">
+                                        {ex.chargeMode === "Daily"
+                                            ? `${money(ex.unitPrice)} × ${ex.nights} gece`
+                                            : `${ex.count} × ${money(ex.unitPrice)}`}
+                                    </span>
+                                </span>
+                                <span className="shrink-0 font-semibold text-charcoal-dark">
+                                    {money(ex.subtotal)}
                                 </span>
                             </div>
                         ))}
@@ -461,6 +629,40 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                                 </p>
                             )}
                         </Block>
+
+                        {/* EKSTRA HİZMETLER BÖLÜMÜ */}
+                        {bungalowExtras.length > 0 && (
+                            <Block id="ekstralar" title="Ekstra Hizmetler">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    {bungalowExtras.map((extra) => (
+                                        <div
+                                            key={extra.extraId}
+                                            className="flex min-w-0 items-start gap-3 rounded-2xl bg-canvas-offwhite p-3"
+                                        >
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-white text-crimson-vivid">
+                                                <Icon name={extra.icon || "add_circle"} className="text-[20px]" />
+                                            </div>
+                                            <div className="flex min-w-0 flex-col">
+                                                <span className="font-label-md text-label-md font-bold text-charcoal-dark">
+                                                    {localized(extra.title, locale)}
+                                                </span>
+                                                {localized(extra.description, locale) && (
+                                                    <span className="font-body-sm text-body-sm leading-relaxed text-secondary">
+                                                        {localized(extra.description, locale)}
+                                                    </span>
+                                                )}
+                                                <span className="mt-1 font-label-md text-label-md font-bold text-crimson-vivid">
+                                                    {money(extra.price)}
+                                                    <span className="ms-1 font-body-sm text-body-sm font-normal text-secondary">
+                                                        / {extra.chargeMode === "Daily" ? "gece" : "adet"}
+                                                    </span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Block>
+                        )}
 
                         {hasBreakfast && (
                             <div
@@ -674,8 +876,8 @@ function AnchorPills({ sections }) {
                         key={s.id}
                         href={`#${s.id}`}
                         className={`whitespace-nowrap rounded-full px-4 py-1.5 font-label-md text-label-md transition-all ${active === s.id
-                            ? "bg-charcoal-dark text-white shadow-sm"
-                            : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
+                                ? "bg-charcoal-dark text-white shadow-sm"
+                                : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
                             }`}
                     >
                         {s.label}

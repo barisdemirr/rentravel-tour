@@ -20,8 +20,9 @@ export default async function BungalowFormPage({ params, searchParams }) {
     const isNew = id === "yeni";
     const isCopy = isNew && Boolean(kopya);
 
-    const [regions, list, record] = await Promise.all([
+    const [regions, extras, list, record] = await Promise.all([
         adminFetch("/admin/bungalow-regions", { fallback: [] }),
+        adminFetch("/admin/bungalow-extras", { fallback: [] }),
         isNew ? adminFetch("/admin/bungalows", { fallback: [] }) : Promise.resolve({ data: [] }),
         isNew
             ? isCopy
@@ -50,6 +51,7 @@ export default async function BungalowFormPage({ params, searchParams }) {
             record={initialRecord}
             isCopy={isCopy}
             regions={asList(regions.data)}
+            extras={asList(extras.data)} 
             nextOrder={isNew ? nextIndex(asList(list.data)) : 0}
         />
     );

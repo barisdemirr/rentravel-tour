@@ -7,7 +7,7 @@ import Icon from "@/components/ui/Icon";
 import IconField from "@/components/admin/IconField";
 import LocalizedListField from "@/components/admin/LocalizedListField";
 import MediaPicker from "@/components/admin/MediaPicker";
-import RepeaterField from "@/components/admin/RepeaterField";
+import RepeaterField, { MultiSelect } from "@/components/admin/RepeaterField";
 import { useToast } from "@/components/admin/Toast";
 import LocalizedField, {
     TranslateAllButton,
@@ -97,6 +97,7 @@ function initialState(record, nextOrder) {
         seoKeywords: toLocalized(record?.seoKeywords),
         isFeatured: record?.isFeatured ?? false,
         isActive: record?.isActive ?? true,
+        extraIds: (record?.extras ?? []).map((e) => e.extraId),
         orderIndex: record?.orderIndex ?? nextOrder,
     };
 }
@@ -106,7 +107,7 @@ const cleanSpecs = (list) =>
         .filter((s) => s.label?.tr?.trim())
         .map((s) => ({ icon: s.icon?.trim() ?? "", label: cleanLocalized(s.label), value: cleanLocalized(s.value) }));
 
-export default function BungalowForm({ record, isCopy = false, regions, nextOrder }) {
+export default function BungalowForm({ record, isCopy = false, regions, extras = [], nextOrder }) {
     const router = useRouter();
     const toast = useToast();
     const isNew = !record?.id;
@@ -218,6 +219,7 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
             currency: form.currency,
             isFeatured: form.isFeatured,
             isActive: form.isActive,
+            extraIds: form.extraIds,
             orderIndex: Number(form.orderIndex) || 0,
         };
 
@@ -532,6 +534,27 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                         errors={flatErrors}
                     />
                 </div>
+            </FormSection>
+
+            {/* EKSTRA HİZMETLER */}
+            <FormSection
+                title="Ekstra hizmetler"
+                description="Misafirlerin rezervasyon sırasında seçebileceği ek hizmetler. Fiyatlandırma modu katalogda tanımlanır (Tek seferlik / Günlük)."
+                columns={1}
+            >
+                <MultiSelect
+                    label="Bu bungalova eklenebilecek ekstralar"
+                    hint="Fiyatlar seçildiği andaki katalog değerinden kopyalanır. Katalogda fiyat değişirse bungalovu tekrar kaydedin."
+                    emptyText="Önce Katalog → Bungalov Ekstraları bölümünden ekstra tanımlayın."
+                    options={extras.map((e) => ({
+                        id: e.id,
+                        label: e.title?.tr,
+                        sub: `${e.price} ${e.currency} · ${e.chargeMode === "Daily" ? "Günlük" : "Tek Seferlik"}`,
+                        icon: e.icon,
+                    }))}
+                    value={form.extraIds}
+                    onChange={set("extraIds")}
+                />
             </FormSection>
 
             {/* KAHVALTI */}
