@@ -79,10 +79,10 @@ const cleanSpecs = (list) =>
         .filter((s) => s.label?.tr?.trim())
         .map((s) => ({ icon: s.icon?.trim() ?? "", label: cleanLocalized(s.label), value: cleanLocalized(s.value) }));
 
-export default function BungalowForm({ record, regions, nextOrder }) {
+export default function BungalowForm({ record, isCopy = false, regions, nextOrder }) {
     const router = useRouter();
     const toast = useToast();
-    const isNew = !record;
+    const isNew = !record?.id;
 
     const [form, setForm] = useState(() => initialState(record, nextOrder));
     const [errors, setErrors] = useState({});
@@ -183,7 +183,7 @@ export default function BungalowForm({ record, regions, nextOrder }) {
             if (isNew) await adminPost("/admin/bungalows", body);
             else await adminPut(`/admin/bungalows/${record.id}`, body);
 
-            toast.success(isNew ? "Bungalov eklendi." : "Değişiklikler kaydedildi.");
+            toast.success(isCopy ? "Bungalov kopyalandı." : isNew ? "Bungalov eklendi." : "Değişiklikler kaydedildi.");
             router.push("/admin/bungalovlar");
             router.refresh();
         } catch (e) {
@@ -223,15 +223,30 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                 </Link>
                 <div className="min-w-0">
                     <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-                        {isNew ? "Yeni Bungalov" : form.title.tr || "Bungalov Düzenle"}
+                        {isCopy ? "Bungalov Kopyala" : isNew ? "Yeni Bungalov" : form.title.tr || "Bungalov Düzenle"}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew
-                            ? "Zorunlu alanlar: ad, gecelik fiyat."
-                            : `Adres: /bungalov-konaklama/${record.slug}`}
+                        {isCopy
+                            ? "Mevcut bir tesisin kopyasından önceden dolduruldu. Kaydedince yeni bir tesis oluşur."
+                            : isNew
+                                ? "Zorunlu alanlar: ad, gecelik fiyat."
+                                : `Adres: /bungalov-konaklama/${record.slug}`}
                     </p>
                 </div>
             </div>
+
+            {isCopy && (
+                <div className="flex items-start gap-3 rounded-xl border border-ad-brand-line bg-ad-brand-soft px-4 py-3">
+                    <Icon name="content_copy" className="mt-0.5 shrink-0 text-[20px] text-ad-brand" />
+                    <div className="min-w-0 text-sm text-ad-body">
+                        <strong className="font-semibold">Bu bir kopya.</strong> Kaydettiğinizde{" "}
+                        <strong>yeni bir tesis</strong> oluşturulur; orijinal tesis etkilenmez. Kopya{" "}
+                        <strong>taslak</strong> olarak kaydedilir (yayında değil). Başlıktaki{" "}
+                        <code className="rounded bg-ad-sunken px-1.5 py-0.5 text-xs">(Kopya)</code> ekini
+                        düzenleyebilirsiniz.
+                    </div>
+                </div>
+            )}
 
             {/* TEMEL */}
             <FormSection title="Temel bilgiler" columns={2}>
@@ -253,7 +268,11 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
-                        hint="Sitede bu tesisin adresi: /bungalov-konaklama/<adres>"
+                        hint={
+                            isCopy
+                                ? "Kopyada boş bırakırsanız addan yeni adres üretilir: /bungalov-konaklama/<adres>"
+                                : "Sitede bu tesisin adresi: /bungalov-konaklama/<adres>"
+                        }
                         error={fieldError("slug")}
                     >
                         <div className="flex items-stretch gap-2">
@@ -684,7 +703,7 @@ export default function BungalowForm({ record, regions, nextOrder }) {
             <FormActions
                 busy={busy}
                 onCancel={() => router.push("/admin/bungalovlar")}
-                saveLabel={isNew ? "Oluştur" : "Kaydet"}
+                saveLabel={isCopy ? "Kopyayı Oluştur" : isNew ? "Oluştur" : "Kaydet"}
                 extra={<TranslateAllButton fields={translatable} />}
             />
         </form>

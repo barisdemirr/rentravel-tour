@@ -206,6 +206,7 @@ export default function BungalowList({ rows, failed }) {
                                 href: `/admin/yas-fiyatlari?ownerType=Bungalow&ownerId=${row.id}`,
                             },
                             { label: "Düzenle", icon: "edit", href: `/admin/bungalovlar/${row.id}` },
+                            { label: "Kopyala", icon: "content_copy", href: `/admin/bungalovlar/yeni?kopya=${row.id}` },
                             { label: "Sil", icon: "delete", danger: true, onClick: () => setTarget(row) },
                         ]}
                     />
