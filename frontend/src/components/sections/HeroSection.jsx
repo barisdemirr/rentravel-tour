@@ -10,6 +10,7 @@ import { containerVariants, itemVariants } from "@/lib/motion";
 import { TONES } from "@/lib/tones";
 import Icon from "../ui/Icon";
 import SafeImage from "../ui/SafeImage";
+import { mediaUrl } from "@/lib/media";
 
 /**
  * API'den gelen hero slide'ı (HeroSlideDto) mevcut render yapısının beklediği
@@ -23,7 +24,7 @@ function mapApiSlide(s, i, locale, tpl, tursabNo) {
 
     return {
         id: s.id ?? `api-${i}`,
-        image: s.image?.url ?? "",
+        image: mediaUrl(s.image, "lg") ?? "",
         badge,
         // Başlık iki parçaya ayrılamıyorsa tamamını line1'e koy, accent boş kalsın
         line1: title,
