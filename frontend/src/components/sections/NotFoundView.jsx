@@ -1,9 +1,6 @@
-"use client";
-
 import Icon from "@/components/ui/Icon";
 import Link from "@/components/ui/LocalizedLink";
 import { SITE, waHref } from "@/lib/constants";
-import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import { infoMessage } from "@/lib/whatsapp";
 
 const LINKS = [
@@ -13,9 +10,8 @@ const LINKS = [
     { href: "/bungalov-konaklama", icon: "cottage", key: "bungalow" },
 ];
 
-export default function NotFoundView() {
-    const { t, locale } = useLanguage();
-    const n = t.notFound;
+export default function NotFoundView({ dict, locale }) {
+    const n = dict.notFound;
     const whatsapp = waHref(infoMessage({ locale }));
 
     return (
@@ -60,7 +56,7 @@ export default function NotFoundView() {
                                 <Icon name={link.icon} className="text-[22px]" />
                             </span>
                             <span className="min-w-0 flex-1 truncate font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                                {t.nav[link.key]}
+                                {dict.nav[link.key]}
                             </span>
                             <Icon
                                 name="arrow_forward"

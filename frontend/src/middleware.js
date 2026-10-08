@@ -74,15 +74,22 @@ function handleSite(request) {
 
     // /en/... ve /ar/... doğrudan [lang] rotasına gider
     if (LOCALES.includes(first)) {
-        const response = NextResponse.next();
-        response.headers.set("x-locale", first);
+        const requestHeaders = new Headers(request.headers);
+        requestHeaders.set("x-locale", first);
+
+        const response = NextResponse.next({ request: { headers: requestHeaders } });
+        response.headers.set("x-locale", first); // analytics/debug için yanıtta da kalsın
         return response;
     }
 
     // Öneksiz adresler Türkçedir: içeride /tr/... olarak yeniden yazılır, tarayıcıda adres değişmez
     const url = request.nextUrl.clone();
     url.pathname = pathname === "/" ? `/${DEFAULT_LOCALE}` : `/${DEFAULT_LOCALE}${pathname}`;
-    const response = NextResponse.rewrite(url);
+
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-locale", DEFAULT_LOCALE);
+
+    const response = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     response.headers.set("x-locale", DEFAULT_LOCALE);
     return response;
 }
