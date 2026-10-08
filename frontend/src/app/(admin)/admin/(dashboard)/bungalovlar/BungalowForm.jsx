@@ -63,6 +63,9 @@ function initialState(record, nextOrder) {
             title: toLocalized(r.title),
             text: toLocalized(r.text),
         })),
+        standardCapacity: record?.standardCapacity ?? 2,
+        maxCapacity: record?.maxCapacity ?? 2,
+        extraAdultPricePerNight: record?.extraAdultPricePerNight ?? "",
         defaultPricePerNight: record?.defaultPricePerNight ?? "",
         currency: record?.currency ?? "TRY",
         seoTitle: toLocalized(record?.seoTitle),
@@ -172,6 +175,9 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
             seoDescription: cleanLocalized(form.seoDescription),
             seoKeywords: cleanLocalized(form.seoKeywords),
             ogImage: form.image, // paylaşımda kapak görseli kullanılır
+            standardCapacity: Number(form.standardCapacity) || 1,
+            maxCapacity: Number(form.maxCapacity) || 1,
+            extraAdultPricePerNight: Number(form.extraAdultPricePerNight) || 0,
             defaultPricePerNight: Number(form.defaultPricePerNight) || 0,
             currency: form.currency,
             isFeatured: form.isFeatured,
@@ -421,6 +427,74 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                         sayfasını kullanın.
                     </p>
                 </div>
+            </FormSection>
+
+            {/* KAPASİTE VE EKSTRA ÜCRET */}
+            <FormSection
+                title="Kapasite ve ekstra ücret"
+                description="Standart kapasite fiyata dahildir. Üzerindeki her yetişkin için ekstra ücret uygulanır. Toplam kişi (yetişkin + çocuk) maksimum kapasiteyi geçemez."
+                columns={2}
+            >
+                <Field
+                    label="Standart Kapasite"
+                    required
+                    hint="Fiyata dahil olan kişi sayısı (yetişkin + çocuk)"
+                    error={fieldError("standardCapacity")}
+                >
+                    <NumberInput
+                        min="1"
+                        step="1"
+                        suffix="kişi"
+                        value={form.standardCapacity}
+                        error={fieldError("standardCapacity")}
+                        onChange={(e) => set("standardCapacity")(e.target.value)}
+                    />
+                </Field>
+
+                <Field
+                    label="Maksimum Kapasite"
+                    required
+                    hint="Toplam kabul edilen en fazla kişi. Bu sınır aşılamaz."
+                    error={fieldError("maxCapacity")}
+                >
+                    <NumberInput
+                        min="1"
+                        step="1"
+                        suffix="kişi"
+                        value={form.maxCapacity}
+                        error={fieldError("maxCapacity")}
+                        onChange={(e) => set("maxCapacity")(e.target.value)}
+                    />
+                </Field>
+
+                <div className="sm:col-span-2">
+                    <Field
+                        label="Ekstra Yetişkin Ücreti"
+                        hint="Standart kapasite üzerindeki her yetişkin için gecelik ek ücret. Kişi başıdır. Örn: 3. ve 4. yetişkin için aynı ücret."
+                        error={fieldError("extraAdultPricePerNight")}
+                    >
+                        <NumberInput
+                            min="0"
+                            step="0.01"
+                            value={form.extraAdultPricePerNight}
+                            error={fieldError("extraAdultPricePerNight")}
+                            onChange={(e) => set("extraAdultPricePerNight")(e.target.value)}
+                        />
+                    </Field>
+                </div>
+
+                {Number(form.maxCapacity) > Number(form.standardCapacity) &&
+                    Number(form.extraAdultPricePerNight) <= 0 && (
+                        <div className="sm:col-span-2">
+                            <p className="flex items-start gap-2 rounded-xl bg-amber-500/10 px-3.5 py-3 text-xs text-amber-800">
+                                <Icon name="warning" className="mt-px shrink-0 text-[15px]" />
+                                <span>
+                                    Maksimum kapasite standarttan büyük. Kaydetmek için ekstra yetişkin ücretini
+                                    0'dan büyük girin.
+                                </span>
+                            </p>
+                        </div>
+                    )}
             </FormSection>
 
             {/* KAHVALTI */}
