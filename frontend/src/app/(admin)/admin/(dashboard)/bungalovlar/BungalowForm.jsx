@@ -29,6 +29,7 @@ const toSpec = (s) => ({ icon: s.icon ?? "", label: toLocalized(s.label), value:
 
 function initialState(record, nextOrder) {
     return {
+        slug: record?.slug ?? "",
         regionId: record?.region?.id ?? "",
         title: toLocalized(record?.title),
         description: toLocalized(record?.description),
@@ -119,9 +120,11 @@ export default function BungalowForm({ record, regions, nextOrder }) {
         setBusy(true);
         setErrors({});
 
+        const trimmedSlug = form.slug.trim();
+
         const body = {
-            // Yeni kayıtta adres addan üretilir, düzenlemede mevcut adres korunur
-            slug: isNew ? null : record.slug,
+            // Boş bırakılırsa backend addan üretir
+            slug: trimmedSlug || null,
             regionId: form.regionId || null,
             title: cleanLocalized(form.title),
             description: cleanLocalized(form.description),
@@ -223,7 +226,9 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                         {isNew ? "Yeni Bungalov" : form.title.tr || "Bungalov Düzenle"}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew ? "Zorunlu alanlar: ad, gecelik fiyat." : `Adres: /${record.slug}`}
+                        {isNew
+                            ? "Zorunlu alanlar: ad, gecelik fiyat."
+                            : `Adres: /bungalov-konaklama/${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -242,6 +247,29 @@ export default function BungalowForm({ record, regions, nextOrder }) {
                         errors={flatErrors}
                         translateHint="Tesis adı, özel isimler çevrilmez"
                     />
+                </div>
+
+                {/* URL / Slug — tek dilli */}
+                <div className="sm:col-span-2">
+                    <Field
+                        label="Bağlantı Adresi (URL)"
+                        hint="Sitede bu tesisin adresi: /bungalov-konaklama/<adres>"
+                        error={fieldError("slug")}
+                    >
+                        <div className="flex items-stretch gap-2">
+                            <span className="flex shrink-0 items-center rounded-xl bg-ad-sunken px-3 text-sm text-ad-muted">
+                                /bungalov-konaklama/
+                            </span>
+                            <input
+                                type="text"
+                                value={form.slug}
+                                placeholder="Boş bırakılırsa tesis adından üretilir"
+                                maxLength={150}
+                                onChange={(e) => set("slug")(e.target.value)}
+                                className="h-11 w-full rounded-xl border border-ad-line bg-surface-white px-3 text-sm text-ad-ink outline-none transition-colors focus:border-ad-brand"
+                            />
+                        </div>
+                    </Field>
                 </div>
 
                 <Field label="Bölge" error={fieldError("regionId")}>
