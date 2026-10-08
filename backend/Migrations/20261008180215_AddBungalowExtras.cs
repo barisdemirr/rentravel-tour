@@ -16,7 +16,7 @@ namespace rentravel.Migrations
                 table: "Bungalows",
                 type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: "");
+                defaultValue: "[]");
 
             migrationBuilder.CreateTable(
                 name: "BungalowExtras",
