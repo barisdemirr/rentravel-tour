@@ -25,6 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<StaticPage> StaticPages => Set<StaticPage>();
     public DbSet<Testimonial> Testimonials => Set<Testimonial>();
     public DbSet<SiteSetting> SiteSettings => Set<SiteSetting>();
+    public DbSet<HeroSlide> HeroSlides => Set<HeroSlide>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
