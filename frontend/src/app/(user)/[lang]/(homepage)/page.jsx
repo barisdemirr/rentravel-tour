@@ -12,13 +12,15 @@ import {
     getBungalows,
     getCultureTours,
     getDailyTours,
+    getHeroSlides,
     getTestimonials,
     getVehicles,
 } from "@/services";
 
 export default async function HomePage() {
     // Bir istek hata verirse yalnızca o bölüm boş kalır, sayfa açılır
-    const [vehicles, dailyTours, cultureTours, bungalows, testimonials] = await Promise.all([
+    const [heroSlides, vehicles, dailyTours, cultureTours, bungalows, testimonials] = await Promise.all([
+        safe(getHeroSlides(), []),
         safe(getVehicles()),
         safe(getDailyTours()),
         safe(getCultureTours()),
@@ -28,7 +30,7 @@ export default async function HomePage() {
 
     return (
         <>
-            <HeroSection />
+            <HeroSection slides={heroSlides} />
             <BookingSection dailyTours={dailyTours} cultureTours={cultureTours} />
             <FeaturedVehicles vehicles={featuredOf(vehicles)} />
             <DailyTours tours={featuredOf(dailyTours)} />
