@@ -231,7 +231,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                     <p className="mt-1 text-sm text-ad-muted">
                         {isNew
                             ? "Zorunlu alanlar: ad, günlük fiyat, depozito."
-                            : `Adres: /araclar/${record.slug}`}
+                            : `Adres: /arac-kiralama/${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -256,12 +256,12 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
-                        hint="Sitede bu aracın adresi: /araclar/<adres>"
+                        hint="Sitede bu aracın adresi: /arac-kiralama/<adres>"
                         error={fieldError("slug")}
                     >
                         <div className="flex items-stretch gap-2">
                             <span className="flex shrink-0 items-center rounded-xl bg-ad-sunken px-3 text-sm text-ad-muted">
-                                /araclar/
+                                /arac-kiralama/
                             </span>
                             <input
                                 type="text"
