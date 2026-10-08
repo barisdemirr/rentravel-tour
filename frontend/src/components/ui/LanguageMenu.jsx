@@ -33,7 +33,7 @@ const FLAGS = {
     ),
 };
 
-export default function LanguageMenu({ variant = "light" }) {
+export default function LanguageMenu({ variant = "light", hideIconOnMobile = false }) {
     const { lang, setLang, supported } = useLanguage();
     const [open, setOpen] = useState(false);
     const ref = useRef(null);
@@ -75,7 +75,11 @@ export default function LanguageMenu({ variant = "light" }) {
                 onClick={() => setOpen((v) => !v)}
                 className={`flex items-center gap-2 rounded-xl px-3 py-2 font-label-uppercase text-label-uppercase transition-colors ${triggerCls}`}
             >
-                <Icon name="language" className="text-[16px]" />
+                {/* Dünya ikonu: mobilde gizle, 2xl'de göster */}
+                <Icon
+                    name="language"
+                    className={`text-[16px] ${hideIconOnMobile ? "hidden 2xl:inline-block" : ""}`}
+                />
                 <span className="flex items-center gap-1.5">
                     {FLAGS[lang]}
                     <span>{lang}</span>

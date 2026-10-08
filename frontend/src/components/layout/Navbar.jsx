@@ -58,18 +58,8 @@ export default function Navbar({ onOpenMenu }) {
                 }`}
         >
             <div className="relative mx-auto flex h-16 max-w-[1440px] items-center gap-2 px-margin md:h-20 md:px-margin-tablet 2xl:h-24 2xl:px-margin-desktop">
-                {/* Hamburger: sadece telefon ve tablet */}
-                <button
-                    type="button"
-                    aria-label={t.nav.openMenu}
-                    onClick={onOpenMenu}
-                    className="-ms-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-charcoal-dark transition-colors hover:bg-canvas-offwhite 2xl:hidden"
-                >
-                    <Icon name="menu" className="text-[28px]" />
-                </button>
-
-                {/* Logo: telefonda ortada, masaüstünde başta */}
-                <div className="flex flex-1 justify-center 2xl:flex-none 2xl:justify-start">
+                {/* Logo: mobilde en solda, masaüstünde başta */}
+                <div className="flex shrink-0 items-center 2xl:flex-none">
                     <Link href="/" aria-label="Rentravel" className="flex items-center">
                         <SafeImage
                             src={IMG.logo}
@@ -115,9 +105,19 @@ export default function Navbar({ onOpenMenu }) {
                     />
                 </nav>
 
-                {/* Sağ taraf: masaüstünde en sağa yapışır */}
-                <div className="flex shrink-0 items-center gap-1.5 2xl:ms-auto 2xl:gap-3">
-                    <LanguageMenu />
+                {/* Sağ taraf: mobilde dil + hamburger en sağda, masaüstünde en sağa yapışır */}
+                <div className="ms-auto flex shrink-0 items-center gap-1.5 2xl:gap-3">
+                    <LanguageMenu hideIconOnMobile />
+
+                    {/* Hamburger: sadece telefon ve tablet, en sağda */}
+                    <button
+                        type="button"
+                        aria-label={t.nav.openMenu}
+                        onClick={onOpenMenu}
+                        className="-me-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-charcoal-dark transition-colors hover:bg-canvas-offwhite 2xl:hidden"
+                    >
+                        <Icon name="menu" className="text-[28px]" />
+                    </button>
 
                     <Link
                         href="/vip-talep"
