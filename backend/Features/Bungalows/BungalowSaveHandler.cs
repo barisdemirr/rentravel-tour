@@ -31,7 +31,16 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
             .Must("ratingCount", input.RatingCount is null or >= 0, "ratingCount negatif olamaz.")
             .Must("defaultPricePerNight", input.DefaultPricePerNight >= 0, "defaultPricePerNight negatif olamaz.")
             .Must("currency", input.Currency is { } c && Enum.IsDefined(c),
-                  "currency zorunlu ve geçerli olmalı (TRY, USD, EUR).");
+                  "currency zorunlu ve geçerli olmalı (TRY, USD, EUR).")
+            .Must("standardCapacity", input.StandardCapacity >= 1,
+                  "Standart kapasite en az 1 olmalı.")
+            .Must("maxCapacity", input.MaxCapacity >= input.StandardCapacity,
+                  "Maksimum kapasite, standart kapasiteden küçük olamaz.")
+            .Must("extraAdultPricePerNight", input.ExtraAdultPricePerNight >= 0,
+                  "Ekstra yetişkin ücreti negatif olamaz.")
+            .Must("extraAdultPricePerNight",
+                  input.MaxCapacity == input.StandardCapacity || input.ExtraAdultPricePerNight > 0,
+                  "Ekstra kapasite tanımlıysa ekstra yetişkin ücreti 0'dan büyük olmalı.");
 
         // Liste alanları
         validator
@@ -60,12 +69,12 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
         if (input.RegionId is { } regionId && !await db.BungalowRegions.AnyAsync(x => x.Id == regionId, ct))
             validator.AddError("regionId", "Bölge bulunamadı.");
 
-        // Görseller: id kütüphaneden doğrulanır, url sunucuda üretilir
+        // Görseller
         var image = await media.ResolveAsync(input.Image, "image", validator, ct);
         var gallery = await media.ResolveManyAsync(input.Gallery, "gallery", validator, ct);
         var ogImage = await media.ResolveAsync(input.OgImage, "ogImage", validator, ct);
 
-        // Kahvaltı kartı: tamamen boşsa "verilmedi", boş etiketler atılır
+        // Kahvaltı kartı
         BreakfastCard? breakfastCard = null;
         var card = input.BreakfastCard;
         if (card is not null)
@@ -99,6 +108,9 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
                 validator.AddError("image", "Yayınlamak için kapak görseli gerekli.");
             if (input.DefaultPricePerNight <= 0)
                 validator.AddError("defaultPricePerNight", "Yayınlamak için gecelik fiyat 0'dan büyük olmalı.");
+            if (input.MaxCapacity > input.StandardCapacity && input.ExtraAdultPricePerNight <= 0)
+                validator.AddError("extraAdultPricePerNight",
+                    "Yayınlamak için ekstra kapasiteye bir ücret tanımlanmalı.");
         }
 
         var plan = SlugResolver.Plan(input.Slug, existing?.Slug, input.Title?.Tr, validator);
@@ -141,6 +153,9 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
         bungalow.OgImage = ogImage;
         bungalow.DefaultPricePerNight = input.DefaultPricePerNight;
         bungalow.Currency = input.Currency!.Value;
+        bungalow.StandardCapacity = input.StandardCapacity;
+        bungalow.MaxCapacity = input.MaxCapacity;
+        bungalow.ExtraAdultPricePerNight = input.ExtraAdultPricePerNight;
         bungalow.IsFeatured = input.IsFeatured;
         bungalow.IsActive = input.IsActive;
         bungalow.OrderIndex = input.OrderIndex;
@@ -148,7 +163,6 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
         if (existing is null) db.Bungalows.Add(bungalow);
         await db.SaveChangesAsync(ct);
 
-        // Bölge bilgisiyle birlikte yeniden oku (silinmiş bölge null görünür)
         var saved = await db.Bungalows.AsNoTracking()
             .Include(x => x.Region)
             .FirstAsync(x => x.Id == bungalow.Id, ct);
