@@ -11,4 +11,4 @@ export * from "./corporateRequests";
 export * from "./siteSettings";
 export * from "./sitemap";
 export * from "./staticPages";
-export * from "./heroSliders";
+export * from "./heroSlides";
