@@ -35,6 +35,9 @@ public class Bungalow : BaseEntity
     public LocalizedText? LocationNote { get; set; }
     public List<RuleItem> Rules { get; set; } = [];
 
+    // Katalogdan kopyalanan ekstra hizmetler (snapshot)
+    public List<BungalowExtraSnapshot> Extras { get; set; } = [];
+
     // Puanlama
     public LocalizedText? RatingLabel { get; set; }
     public decimal? RatingScore { get; set; }

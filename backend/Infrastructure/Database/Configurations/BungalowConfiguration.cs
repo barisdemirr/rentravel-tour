@@ -28,6 +28,7 @@ public class BungalowConfiguration : IEntityTypeConfiguration<Bungalow>
         builder.Property(x => x.Distances).HasJsonConversion();
         builder.Property(x => x.LocationNote).HasJsonConversion();
         builder.Property(x => x.Rules).HasJsonConversion();
+        builder.Property(x => x.Extras).HasJsonConversion();
         builder.Property(x => x.RatingLabel).HasJsonConversion();
         builder.Property(x => x.SeoTitle).HasJsonConversion();
         builder.Property(x => x.SeoDescription).HasJsonConversion();
