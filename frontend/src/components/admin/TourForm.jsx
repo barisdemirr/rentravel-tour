@@ -97,7 +97,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
     const api = isCulture ? "culture-tours" : "daily-tours";
     const base = isCulture ? "/admin/kultur-turlari" : "/admin/gunubirlik-turlar";
     const label = isCulture ? "Kültür Turu" : "Günübirlik Tur";
-    const publicBase = isCulture ? "/kultur-turlari" : "/gunubirlik-turlar";
+    const publicBase = isCulture ? "/konaklamali-turlar" : "/gunubirlik-turlar";
 
     const [form, setForm] = useState(() => initialState(record, variant, nextOrder));
     const [errors, setErrors] = useState({});
