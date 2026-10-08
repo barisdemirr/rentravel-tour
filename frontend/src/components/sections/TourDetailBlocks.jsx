@@ -21,7 +21,7 @@ export function SectionTitle({ eyebrow, title }) {
     );
 }
 
-export function GuestCounter({ label, sub, count, onDec, onInc, decLabel, incLabel }) {
+export function GuestCounter({ label, sub, count, onDec, onInc, decLabel, incLabel, incDisabled = false }) {
     const btn =
         "flex h-10 w-10 items-center justify-center rounded-full bg-surface-white text-[20px] font-bold text-charcoal-dark shadow-sm transition-all hover:bg-crimson-vivid hover:text-white active:scale-90";
 
@@ -38,7 +38,13 @@ export function GuestCounter({ label, sub, count, onDec, onInc, decLabel, incLab
                 <span className="w-7 text-center font-headline-sm text-headline-sm font-bold text-charcoal-dark">
                     {count}
                 </span>
-                <button type="button" onClick={onInc} aria-label={incLabel} className={btn}>
+                <button
+                    type="button"
+                    onClick={onInc}
+                    aria-label={incLabel}
+                    disabled={incDisabled}
+                    className={`${btn} ${incDisabled ? "cursor-not-allowed opacity-40 hover:bg-surface-white hover:text-charcoal-dark" : ""}`}
+                >
                     +
                 </button>
             </div>
@@ -58,8 +64,8 @@ export function QuickSpecs({ specs = [] }) {
                     <div key={i} className="flex min-w-0 items-center gap-2.5 rounded-xl p-1.5 sm:p-2">
                         <span
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11 ${emerald
-                                    ? "bg-emerald-500/10 text-emerald-600"
-                                    : "bg-crimson-vivid/10 text-crimson-vivid"
+                                ? "bg-emerald-500/10 text-emerald-600"
+                                : "bg-crimson-vivid/10 text-crimson-vivid"
                                 }`}
                         >
                             <Icon name={s.icon} className="text-[20px] sm:text-[22px]" />

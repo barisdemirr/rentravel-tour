@@ -6,7 +6,7 @@ import Icon from "./Icon";
 const AGES = Array.from({ length: 18 }, (_, i) => i); // 0-17
 
 /** ages: "" = henüz seçilmedi. Yaş seçilene kadar uyarı gösterir. */
-export default function ChildAgesField({ ages, setAges, sub, max = 10 }) {
+export default function ChildAgesField({ ages, setAges, sub, max = 10, canAdd = true }) {
     const { t, tpl } = useLanguage();
     const d = t.tourDetail;
     const agesReady = ages.every((a) => a !== "");
@@ -20,14 +20,13 @@ export default function ChildAgesField({ ages, setAges, sub, max = 10 }) {
                     </span>
                     <span className="block font-body-sm text-body-sm text-secondary">{sub ?? d.childrenSub}</span>
                 </div>
-                {ages.length < max && (
+                {ages.length < max && canAdd && (
                     <button
                         type="button"
                         onClick={() => setAges((a) => [...a, ""])}
-                        className="flex shrink-0 items-center gap-1 rounded-full bg-surface-white px-3.5 py-2 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors hover:bg-crimson-vivid hover:text-white active:scale-95"
+                        className="..."
                     >
-                        <Icon name="add" className="text-[16px]" />
-                        {d.addChild}
+                        {/* ... */}
                     </button>
                 )}
             </div>
