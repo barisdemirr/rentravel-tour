@@ -225,6 +225,7 @@ export default function TourList({ variant, rows, failed }) {
                                 href: `/admin/tur-seferleri?tourType=${isCulture ? "Culture" : "Daily"}&tourId=${row.id}`,
                             },
                             { label: "Düzenle", icon: "edit", href: `${base}/${row.id}` },
+                            { label: "Kopyala", icon: "content_copy", href: `${base}/yeni?kopya=${row.id}` },
                             { label: "Sil", icon: "delete", danger: true, onClick: () => setTarget(row) },
                         ]}
                     />

@@ -88,10 +88,10 @@ function initialState(record, variant, nextOrder) {
 const cleanList = (list) =>
     list.filter((i) => i.text?.tr?.trim()).map((i) => ({ icon: i.icon?.trim() || null, text: cleanLocalized(i.text) }));
 
-export default function TourForm({ variant, record, categories, nextOrder }) {
+export default function TourForm({ variant, record, isCopy = false, categories, nextOrder }) {
     const router = useRouter();
     const toast = useToast();
-    const isNew = !record;
+    const isNew = !record?.id; // kopya modunda record var ama id yok → yeni kayıt
     const isCulture = variant === "culture";
 
     const api = isCulture ? "culture-tours" : "daily-tours";
@@ -181,7 +181,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
             if (isNew) await adminPost(`/admin/${api}`, body);
             else await adminPut(`/admin/${api}/${record.id}`, body);
 
-            toast.success(isNew ? `${label} eklendi.` : "Değişiklikler kaydedildi.");
+            toast.success(isCopy ? `${label} kopyalandı.` : isNew ? `${label} eklendi.` : "Değişiklikler kaydedildi.");
             router.push(base);
             router.refresh();
         } catch (e) {
@@ -219,15 +219,30 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 </Link>
                 <div className="min-w-0">
                     <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-                        {isNew ? `Yeni ${label}` : form.title.tr || `${label} Düzenle`}
+                        {isCopy ? `${label} Kopyala` : isNew ? `Yeni ${label}` : form.title.tr || `${label} Düzenle`}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew
-                            ? "Zorunlu alanlar: ad, taban fiyat."
-                            : `Adres: ${publicBase}/${record.slug}`}
+                        {isCopy
+                            ? `Mevcut bir ${label.toLowerCase()} kopyasından önceden dolduruldu. Kaydedince yeni bir kayıt oluşur.`
+                            : isNew
+                                ? "Zorunlu alanlar: ad, taban fiyat."
+                                : `Adres: ${publicBase}/${record.slug}`}
                     </p>
                 </div>
             </div>
+
+            {isCopy && (
+                <div className="flex items-start gap-3 rounded-xl border border-ad-brand-line bg-ad-brand-soft px-4 py-3">
+                    <Icon name="content_copy" className="mt-0.5 shrink-0 text-[20px] text-ad-brand" />
+                    <div className="min-w-0 text-sm text-ad-body">
+                        <strong className="font-semibold">Bu bir kopya.</strong> Kaydettiğinizde{" "}
+                        <strong>yeni bir {label.toLowerCase()}</strong> oluşturulur; orijinal kayıt etkilenmez. Kopya{" "}
+                        <strong>taslak</strong> olarak kaydedilir (yayında değil). Başlıktaki{" "}
+                        <code className="rounded bg-ad-sunken px-1.5 py-0.5 text-xs">(Kopya)</code> ekini
+                        düzenleyebilirsiniz.
+                    </div>
+                </div>
+            )}
 
             {/* TEMEL */}
             <FormSection title="Temel bilgiler" columns={2}>
@@ -249,7 +264,11 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
-                        hint={`Sitede bu turun adresi: ${publicBase}/<adres>`}
+                        hint={
+                            isCopy
+                                ? `Kopyada boş bırakırsanız addan yeni adres üretilir: ${publicBase}/<adres>`
+                                : `Sitede bu turun adresi: ${publicBase}/<adres>`
+                        }
                         error={fieldError("slug")}
                     >
                         <div className="flex items-stretch gap-2">
@@ -726,7 +745,7 @@ export default function TourForm({ variant, record, categories, nextOrder }) {
             <FormActions
                 busy={busy}
                 onCancel={() => router.push(base)}
-                saveLabel={isNew ? "Oluştur" : "Kaydet"}
+                saveLabel={isCopy ? "Kopyayı Oluştur" : isNew ? "Oluştur" : "Kaydet"}
                 extra={<TranslateAllButton fields={translatable} />}
             />
         </form>
