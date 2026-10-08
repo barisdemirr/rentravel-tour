@@ -1,5 +1,6 @@
-export async function getHeroSlides() {
-    const res = await fetch(`${API_URL}/api/hero-slides`, { next: { revalidate: 60 } });
-    if (!res.ok) return [];
-    return res.json();
+import { apiGet } from "@/lib/api";
+
+/** GET /api/hero-slides — anasayfa slaytları (yalnızca aktifler, sıralı) */
+export function getHeroSlides() {
+    return apiGet("/api/hero-slides");
 }
