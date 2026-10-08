@@ -36,6 +36,7 @@ public class BungalowConfiguration : IEntityTypeConfiguration<Bungalow>
 
         builder.Property(x => x.RatingScore).HasPrecision(4, 2);
         builder.Property(x => x.DefaultPricePerNight).HasPrecision(18, 2);
+        builder.Property(x => x.ExtraAdultPricePerNight).HasPrecision(18, 2);
         builder.Property(x => x.Currency).HasConversion<string>().HasMaxLength(3);
 
         // Bölge silinirse bungalov bozulmaz, RegionId null olur

@@ -6,6 +6,9 @@ namespace Rentravel.Domain.Pricing;
 
 public record BungalowChildLine(int Age, LocalizedText? Label, decimal NightlyCharge, int Nights, decimal Total);
 
+// Standart kapasiteyi aşan yetişkinler için tek satır
+public record BungalowExtraAdultLine(int Count, decimal NightlyCharge, int Nights, decimal Total);
+
 public static class BungalowPricing
 {
     // Çocuk başı gecelik ek ücret: yaşa uyan Fixed kuralın tutarı. Free veya kural yoksa ek ücret yok.
@@ -24,5 +27,17 @@ public static class BungalowPricing
         }
 
         return lines;
+    }
+
+    // Standart kapasiteyi aşan her yetişkin için sabit gecelik ek ücret.
+    // extraAdultPrice <= 0 ise ya da yetişkin sayısı standart kapasiteyi aşmıyorsa null döner.
+    public static BungalowExtraAdultLine? PriceExtraAdults(
+        int adults, int standardCapacity, int nights, decimal extraAdultPrice)
+    {
+        if (extraAdultPrice <= 0 || adults <= standardCapacity) return null;
+
+        var extraCount = adults - standardCapacity;
+        var total = extraAdultPrice * nights * extraCount;
+        return new BungalowExtraAdultLine(extraCount, extraAdultPrice, nights, total);
     }
 }

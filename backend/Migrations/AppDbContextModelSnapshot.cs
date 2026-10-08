@@ -224,6 +224,10 @@ namespace rentravel.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("ExtraAdultPricePerNight")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("FeatureStrip")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -249,6 +253,9 @@ namespace rentravel.Migrations
 
                     b.Property<string>("LongDescription")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaxCapacity")
+                        .HasColumnType("int");
 
                     b.Property<string>("OgImage")
                         .HasColumnType("nvarchar(max)");
@@ -286,6 +293,9 @@ namespace rentravel.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("StandardCapacity")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
