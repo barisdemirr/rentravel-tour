@@ -47,6 +47,7 @@ const toBlock = (b) =>
 
 function initialState(record, nextOrder) {
     return {
+        slug: record?.slug ?? "",
         name: toLocalized(record?.name),
         segmentId: record?.segment?.id ?? "",
         tagline: toLocalized(record?.tagline),
@@ -126,9 +127,11 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
         setBusy(true);
         setErrors({});
 
+        const trimmedSlug = form.slug.trim();
+
         const body = {
-            // Yeni kayıtta adres addan üretilir, düzenlemede mevcut adres korunur
-            slug: isNew ? null : record.slug,
+            // Boş bırakılırsa backend addan üretir
+            slug: trimmedSlug || null,
             segmentId: form.segmentId || null,
             name: cleanLocalized(form.name),
             tagline: cleanLocalized(form.tagline),
@@ -226,7 +229,9 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                         {isNew ? "Yeni Araç" : form.name.tr || "Araç Düzenle"}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew ? "Zorunlu alanlar: ad, günlük fiyat, depozito." : `Adres: /${record.slug}`}
+                        {isNew
+                            ? "Zorunlu alanlar: ad, günlük fiyat, depozito."
+                            : `Adres: /arac-kiralama/${record.slug}`}
                     </p>
                 </div>
             </div>
@@ -245,6 +250,29 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                         errors={flatErrors}
                         translateHint="Araç modeli, marka adları çevrilmez"
                     />
+                </div>
+
+                {/* URL / Slug — tek dilli */}
+                <div className="sm:col-span-2">
+                    <Field
+                        label="Bağlantı Adresi (URL)"
+                        hint="Sitede bu aracın adresi: /arac-kiralama/<adres>"
+                        error={fieldError("slug")}
+                    >
+                        <div className="flex items-stretch gap-2">
+                            <span className="flex shrink-0 items-center rounded-xl bg-ad-sunken px-3 text-sm text-ad-muted">
+                                /arac-kiralama/
+                            </span>
+                            <input
+                                type="text"
+                                value={form.slug}
+                                placeholder="Boş bırakılırsa araç adından üretilir"
+                                maxLength={120}
+                                onChange={(e) => set("slug")(e.target.value)}
+                                className="h-11 w-full rounded-xl border border-ad-line bg-surface-white px-3 text-sm text-ad-ink outline-none transition-colors focus:border-ad-brand"
+                            />
+                        </div>
+                    </Field>
                 </div>
 
                 <Field label="Segment" error={fieldError("segmentId")}>
