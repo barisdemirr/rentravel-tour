@@ -20,7 +20,9 @@ public record BungalowDto(
     LocalizedText? LocationNote, List<RuleItem> Rules,
     LocalizedText? RatingLabel, decimal? RatingScore, int? RatingCount,
     LocalizedText? SeoTitle, LocalizedText? SeoDescription, LocalizedText? SeoKeywords, MediaItem? OgImage,
-    decimal DefaultPricePerNight, Currency Currency, bool IsFeatured, bool IsActive, int OrderIndex)
+    decimal DefaultPricePerNight, Currency Currency,
+    int StandardCapacity, int MaxCapacity, decimal ExtraAdultPricePerNight,
+    bool IsFeatured, bool IsActive, int OrderIndex)
 {
     public static BungalowDto From(Bungalow b) => new(
         b.Id, b.Slug, BungalowRegionRef.From(b.Region),
@@ -32,7 +34,9 @@ public record BungalowDto(
         b.LocationNote, b.Rules,
         b.RatingLabel, b.RatingScore, b.RatingCount,
         b.SeoTitle, b.SeoDescription, b.SeoKeywords, b.OgImage,
-        b.DefaultPricePerNight, b.Currency, b.IsFeatured, b.IsActive, b.OrderIndex);
+        b.DefaultPricePerNight, b.Currency,
+        b.StandardCapacity, b.MaxCapacity, b.ExtraAdultPricePerNight,
+        b.IsFeatured, b.IsActive, b.OrderIndex);
 }
 
 // Liste kartları için hafif sürüm
@@ -41,12 +45,16 @@ public record BungalowListItemDto(
     LocalizedText Title, LocalizedText? Description, LocalizedText? Location,
     MediaItem? Image, LocalizedText? Capacity, List<SpecItem> Amenities, bool BreakfastIncluded,
     LocalizedText? RatingLabel, decimal? RatingScore, int? RatingCount,
-    decimal DefaultPricePerNight, Currency Currency, bool IsFeatured, bool IsActive, int OrderIndex)
+    decimal DefaultPricePerNight, Currency Currency,
+    int StandardCapacity, int MaxCapacity,
+    bool IsFeatured, bool IsActive, int OrderIndex)
 {
     public static BungalowListItemDto From(Bungalow b) => new(
         b.Id, b.Slug, BungalowRegionRef.From(b.Region),
         b.Title, b.Description, b.Location,
         b.Image, b.Capacity, b.Amenities, b.BreakfastIncluded,
         b.RatingLabel, b.RatingScore, b.RatingCount,
-        b.DefaultPricePerNight, b.Currency, b.IsFeatured, b.IsActive, b.OrderIndex);
+        b.DefaultPricePerNight, b.Currency,
+        b.StandardCapacity, b.MaxCapacity,
+        b.IsFeatured, b.IsActive, b.OrderIndex);
 }

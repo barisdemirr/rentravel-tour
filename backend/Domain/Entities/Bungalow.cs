@@ -11,11 +11,11 @@ public class Bungalow : BaseEntity
 
     // Çok dilli içerik
     public LocalizedText Title { get; set; } = new();
-    public LocalizedText? Description { get; set; }          // kart açıklaması
-    public LocalizedHtml? LongDescription { get; set; }      // detay sayfası
+    public LocalizedText? Description { get; set; }
+    public LocalizedHtml? LongDescription { get; set; }
     public LocalizedText? Location { get; set; }
 
-    // Medya: kapak + galeri
+    // Medya
     public MediaItem? Image { get; set; }
     public List<MediaItem> Gallery { get; set; } = [];
 
@@ -25,8 +25,8 @@ public class Bungalow : BaseEntity
     public BreakfastCard? BreakfastCard { get; set; }
 
     // Kart
-    public LocalizedText? Capacity { get; set; }             // "2-4 Kişilik"
-    public List<SpecItem> Amenities { get; set; } = [];      // kart üstü 3-4 ikon
+    public LocalizedText? Capacity { get; set; }
+    public List<SpecItem> Amenities { get; set; } = [];
 
     // Detay sayfası
     public List<FeatureItem> FeatureStrip { get; set; } = [];
@@ -35,8 +35,8 @@ public class Bungalow : BaseEntity
     public LocalizedText? LocationNote { get; set; }
     public List<RuleItem> Rules { get; set; } = [];
 
-    // Puanlama (opsiyonel)
-    public LocalizedText? RatingLabel { get; set; }          // "Mükemmel"
+    // Puanlama
+    public LocalizedText? RatingLabel { get; set; }
     public decimal? RatingScore { get; set; }
     public int? RatingCount { get; set; }
 
@@ -46,9 +46,14 @@ public class Bungalow : BaseEntity
     public LocalizedText? SeoKeywords { get; set; }
     public MediaItem? OgImage { get; set; }
 
-    // Fiyat: gecelik, bungalov başına. Tarihe ve yaşa göre kurallar ayrı tablolarda.
+    // Fiyat
     public decimal DefaultPricePerNight { get; set; }
     public Currency Currency { get; set; } = Currency.TRY;
+
+    // Kapasite ve ekstra ücret
+    public int StandardCapacity { get; set; } = 2;               // fiyata dahil kişi sayısı
+    public int MaxCapacity { get; set; } = 2;                    // toplam üst sınır (yetişkin + çocuk)
+    public decimal ExtraAdultPricePerNight { get; set; } = 0m;   // standart üstü yetişkin başına gecelik
 
     public bool IsFeatured { get; set; }
 }

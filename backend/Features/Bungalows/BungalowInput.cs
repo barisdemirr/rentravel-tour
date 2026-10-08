@@ -41,6 +41,11 @@ public record BungalowInput
     public decimal DefaultPricePerNight { get; init; }
     public Currency? Currency { get; init; }
 
+    // Kapasite ve ekstra ücret
+    public int StandardCapacity { get; init; } = 2;
+    public int MaxCapacity { get; init; } = 2;
+    public decimal ExtraAdultPricePerNight { get; init; } = 0m;
+
     public bool IsFeatured { get; init; }
     public bool IsActive { get; init; }
     public int OrderIndex { get; init; }
