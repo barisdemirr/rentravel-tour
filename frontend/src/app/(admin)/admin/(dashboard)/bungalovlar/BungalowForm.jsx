@@ -27,6 +27,30 @@ const emptyRule = () => ({ icon: "", title: emptyLocalized(), text: emptyLocaliz
 
 const toSpec = (s) => ({ icon: s.icon ?? "", label: toLocalized(s.label), value: toLocalized(s.value) });
 
+/**
+ * Kapasite sayılarından otomatik "2-4 kişilik" / "4 kişilik" metni üretir.
+ * Eşitse: "{n} kişilik"
+ * Farklıysa: "{standard}-{max} kişilik"
+ */
+function buildCapacityLabel(standard, max) {
+    const s = Number(standard) || 0;
+    const m = Number(max) || 0;
+    if (s <= 0 && m <= 0) return "";
+    if (s === m) return `${s} kişilik`;
+    return `${s}-${m} kişilik`;
+}
+
+/** Otomatik üretilen metni mevcut çok dilli yapıya uygular; boş dilleri de doldurur. */
+function applyCapacityLabel(current, nextLabel) {
+    const base = current ?? {};
+    return {
+        tr: nextLabel,
+        en: nextLabel,
+        ar: nextLabel,
+        ...(base.en ? {} : {}),
+    };
+}
+
 function initialState(record, nextOrder) {
     return {
         slug: record?.slug ?? "",
@@ -95,7 +119,20 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
     const fieldError = (name) => errors[name]?.[0] ?? errors[`${name}.tr`]?.[0] ?? null;
     const flatErrors = Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, v[0]]));
 
-    /* Kart etiketlerini detay listesine kopyala: aynı şeyi iki kez yazmaya gerek kalmasın */
+    /**
+     * Kapasite sayılarını güncelle ve capacity etiketini otomatik yeniden üret.
+     * Kullanıcı daha sonra capacity'yi elle düzenleyebilir; sonraki sayı değişiminde yeniden üretilir.
+     */
+    const setCapacityNumber = (name) => (value) => {
+        setForm((f) => {
+            const next = { ...f, [name]: value };
+            const label = buildCapacityLabel(next.standardCapacity, next.maxCapacity);
+            if (label) next.capacity = applyCapacityLabel(next.capacity, label);
+            return next;
+        });
+    };
+
+    /* Kart etiketlerini detay listesine kopyala */
     const copyAmenities = () => {
         const source = form.amenities.filter((a) => a.label?.tr?.trim());
 
@@ -126,7 +163,6 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
         const trimmedSlug = form.slug.trim();
 
         const body = {
-            // Boş bırakılırsa backend addan üretir
             slug: trimmedSlug || null,
             regionId: form.regionId || null,
             title: cleanLocalized(form.title),
@@ -168,13 +204,13 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                     title: cleanLocalized(r.title),
                     text: cleanLocalized(r.text),
                 })),
-            ratingLabel: null, // puan gösterilmiyor
+            ratingLabel: null,
             ratingScore: null,
             ratingCount: null,
             seoTitle: cleanLocalized(form.seoTitle),
             seoDescription: cleanLocalized(form.seoDescription),
             seoKeywords: cleanLocalized(form.seoKeywords),
-            ogImage: form.image, // paylaşımda kapak görseli kullanılır
+            ogImage: form.image,
             standardCapacity: Number(form.standardCapacity) || 1,
             maxCapacity: Number(form.maxCapacity) || 1,
             extraAdultPricePerNight: Number(form.extraAdultPricePerNight) || 0,
@@ -270,7 +306,7 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                     />
                 </div>
 
-                {/* URL / Slug — tek dilli */}
+                {/* URL / Slug */}
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
@@ -321,18 +357,6 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                         onChange={set("location")}
                         errors={flatErrors}
                         translateHint="Yer adı, sadece gerekirse uyarlanmalı"
-                    />
-                </div>
-
-                <div className="sm:col-span-2">
-                    <LocalizedField
-                        name="capacity"
-                        label="Kapasite"
-                        hint="Serbest metin: 4 misafir, 2 yatak odası"
-                        maxLength={50}
-                        value={form.capacity}
-                        onChange={set("capacity")}
-                        errors={flatErrors}
                     />
                 </div>
 
@@ -447,7 +471,7 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                         suffix="kişi"
                         value={form.standardCapacity}
                         error={fieldError("standardCapacity")}
-                        onChange={(e) => set("standardCapacity")(e.target.value)}
+                        onChange={(e) => setCapacityNumber("standardCapacity")(e.target.value)}
                     />
                 </Field>
 
@@ -463,7 +487,7 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                         suffix="kişi"
                         value={form.maxCapacity}
                         error={fieldError("maxCapacity")}
-                        onChange={(e) => set("maxCapacity")(e.target.value)}
+                        onChange={(e) => setCapacityNumber("maxCapacity")(e.target.value)}
                     />
                 </Field>
 
@@ -495,6 +519,19 @@ export default function BungalowForm({ record, isCopy = false, regions, nextOrde
                             </p>
                         </div>
                     )}
+
+                {/* Kapasite metni: otomatik doldurulur, elle düzenlenebilir */}
+                <div className="sm:col-span-2">
+                    <LocalizedField
+                        name="capacity"
+                        label="Kapasite Metni"
+                        hint="Kartta görünür. Yukarıdaki standart/maksimum değerlere göre otomatik oluşturulur; istediğiniz gibi düzenleyebilirsiniz."
+                        maxLength={50}
+                        value={form.capacity}
+                        onChange={set("capacity")}
+                        errors={flatErrors}
+                    />
+                </div>
             </FormSection>
 
             {/* KAHVALTI */}
