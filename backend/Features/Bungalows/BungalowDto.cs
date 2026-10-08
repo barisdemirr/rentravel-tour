@@ -18,6 +18,7 @@ public record BungalowDto(
     LocalizedText? Capacity, List<SpecItem> Amenities,
     List<FeatureItem> FeatureStrip, List<SpecItem> DetailedAmenities, List<DistanceItem> Distances,
     LocalizedText? LocationNote, List<RuleItem> Rules,
+    List<BungalowExtraSnapshot> Extras,                        // ← YENİ
     LocalizedText? RatingLabel, decimal? RatingScore, int? RatingCount,
     LocalizedText? SeoTitle, LocalizedText? SeoDescription, LocalizedText? SeoKeywords, MediaItem? OgImage,
     decimal DefaultPricePerNight, Currency Currency,
@@ -32,6 +33,7 @@ public record BungalowDto(
         b.Capacity, b.Amenities,
         b.FeatureStrip, b.DetailedAmenities, b.Distances,
         b.LocationNote, b.Rules,
+        b.Extras ?? [],                                         
         b.RatingLabel, b.RatingScore, b.RatingCount,
         b.SeoTitle, b.SeoDescription, b.SeoKeywords, b.OgImage,
         b.DefaultPricePerNight, b.Currency,

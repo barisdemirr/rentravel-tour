@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Rentravel.Domain.Entities;
+using Rentravel.Domain.Enums;
 using Rentravel.Domain.ValueObjects;
 using Rentravel.Infrastructure.Database;
 using Rentravel.Infrastructure.Services;
@@ -113,6 +114,9 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
                     "Yayınlamak için ekstra kapasiteye bir ücret tanımlanmalı.");
         }
 
+        // Ekstralar: mevcut kopyalar korunur, yeniler katalogdan kopyalanır
+        var extras = await BuildExtras(existing?.Extras, input.ExtraIds, input.Currency, validator, ct);
+
         var plan = SlugResolver.Plan(input.Slug, existing?.Slug, input.Title?.Tr, validator);
 
         if (!validator.IsValid) return validator.ToFailure<BungalowDto>();
@@ -144,6 +148,7 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
         bungalow.Distances = input.Distances ?? [];
         bungalow.LocationNote = input.LocationNote.OrNull();
         bungalow.Rules = input.Rules ?? [];
+        bungalow.Extras = extras;
         bungalow.RatingLabel = input.RatingLabel.OrNull();
         bungalow.RatingScore = input.RatingScore;
         bungalow.RatingCount = input.RatingCount;
@@ -171,4 +176,56 @@ public class BungalowSaveHandler(AppDbContext db, MediaItemResolver media, HtmlC
     }
 
     private static int Len(string? s) => s?.Length ?? 0;
+
+
+
+    private async Task<List<BungalowExtraSnapshot>> BuildExtras(
+    List<BungalowExtraSnapshot>? current, List<Guid>? ids, Currency? currency,
+    Validator validator, CancellationToken ct)
+    {
+        var result = new List<BungalowExtraSnapshot>();
+        if (ids is null || ids.Count == 0) return result;
+
+        if (ids.Count > 20)
+        {
+            validator.AddError("extraIds", "En fazla 20 ekstra eklenebilir.");
+            return result;
+        }
+
+        if (ids.Count != ids.Distinct().Count())
+        {
+            validator.AddError("extraIds", "Aynı ekstra birden fazla kez eklenemez.");
+            return result;
+        }
+
+        var kept = (current ?? []).ToDictionary(x => x.ExtraId);
+        var newIds = ids.Where(id => !kept.ContainsKey(id)).ToList();
+
+        var catalog = await db.BungalowExtras.AsNoTracking()
+            .Where(x => x.IsActive && newIds.Contains(x.Id))
+            .ToDictionaryAsync(x => x.Id, ct);
+
+        for (var i = 0; i < ids.Count; i++)
+        {
+            BungalowExtraSnapshot snapshot;
+
+            if (kept.TryGetValue(ids[i], out var existingSnapshot))
+                snapshot = existingSnapshot; // bungalova daha önce eklenmiş: kopya aynen korunur
+            else if (catalog.TryGetValue(ids[i], out var extra))
+                snapshot = BungalowExtraSnapshot.From(extra); // yeni: katalogdan kopyala
+            else
+            {
+                validator.AddError($"extraIds[{i}]", "Ekstra bulunamadı veya pasif.");
+                continue;
+            }
+
+            if (currency is { } cur && snapshot.Currency != cur)
+                validator.AddError($"extraIds[{i}]",
+                    $"'{snapshot.Key}' ekstrasının para birimi ({snapshot.Currency}) bungalovla ({cur}) aynı olmalı.");
+
+            result.Add(snapshot);
+        }
+
+        return result;
+    }
 }

@@ -37,6 +37,7 @@ public record BungalowInput
     public LocalizedText? SeoDescription { get; init; }
     public LocalizedText? SeoKeywords { get; init; }
     public MediaItem? OgImage { get; init; }
+    public List<Guid>? ExtraIds { get; init; }
 
     public decimal DefaultPricePerNight { get; init; }
     public Currency? Currency { get; init; }
