@@ -63,6 +63,13 @@ export default function CatalogList({ slug, catalog, rows, failed }) {
             ),
         appliesTo: (row) =>
             ({ Daily: "Günübirlik", Culture: "Kültür", Both: "İkisi de" })[row.appliesTo] ?? row.appliesTo,
+
+        chargeMode: (row) =>
+            row.chargeMode === "Daily" ? "Günlük" : "Tek Seferlik",
+        bungalowExtraPrice: (row) =>
+            new Intl.NumberFormat("tr-TR", { style: "currency", currency: row.currency || "TRY" }).format(
+                row.price ?? 0
+            ),
     };
 
     const columns = [

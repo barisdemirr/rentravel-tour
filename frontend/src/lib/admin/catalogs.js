@@ -59,6 +59,61 @@ export const CATALOGS = {
         extraColumns: [{ key: "price", header: "Günlük", render: "money" }],
     },
 
+    "bungalov-ekstralari": {
+        api: "bungalow-extras",
+        title: "Bungalov Ekstraları",
+        singular: "Ekstra",
+        description: "Bungalov rezervasyonlarına eklenebilen ek hizmetler. Fiyatlandırma modu 'Tek Seferlik' veya 'Günlük' olabilir.",
+        icon: "add_circle",
+        titleField: "title",
+        fields: [
+            {
+                name: "key",
+                type: "key",
+                label: "Anahtar",
+                required: true,
+                lowercase: false,
+                hint: "Küçük/büyük harf korunur: roomDecoration, airportTransfer",
+            },
+            { name: "title", type: "localized", label: "Başlık", required: true, maxLength: 80 },
+            {
+                name: "description",
+                type: "localized",
+                label: "Açıklama",
+                required: true,
+                multiline: true,
+                maxLength: 200,
+            },
+            {
+                name: "tooltip",
+                type: "localized",
+                label: "Bilgi balonu",
+                hint: "Kart üzerindeki (i) simgesinde çıkar, boş bırakılabilir",
+                maxLength: 200,
+            },
+            { name: "icon", type: "icon", label: "İkon", required: true },
+            {
+                name: "chargeMode",
+                type: "select",
+                label: "Fiyatlandırma",
+                required: true,
+                default: "Once",
+                hint: "Tek seferlik: adet × fiyat. Günlük: gece × fiyat.",
+                options: [
+                    { value: "Once", label: "Tek Seferlik (adet başına)" },
+                    { value: "Daily", label: "Günlük (gece başına)" },
+                ],
+            },
+            { name: "price", type: "money", label: "Fiyat", required: true },
+            { name: "currency", type: "currency", label: "Para Birimi", required: true },
+            { name: "orderIndex", type: "order" },
+        ],
+        extraColumns: [
+            { key: "chargeMode", header: "Mod", render: "chargeMode" },
+            { key: "price", header: "Fiyat", render: "bungalowExtraPrice" },
+        ],
+    },
+
     "tur-kategorileri": {
         api: "tour-categories",
         title: "Tur Kategorileri",

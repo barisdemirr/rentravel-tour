@@ -22,6 +22,7 @@ export const NAV_GROUPS = [
         items: [
             { href: "/admin/katalog/arac-segmentleri", label: "Araç Segmentleri", icon: "label" },
             { href: "/admin/katalog/arac-ekstralari", label: "Araç Ekstraları", icon: "add_circle" },
+            { href: "/admin/katalog/bungalov-ekstralari", label: "Bungalov Ekstraları", icon: "add_circle" },
             { href: "/admin/katalog/tur-kategorileri", label: "Tur Kategorileri", icon: "sell" },
             { href: "/admin/katalog/bungalov-bolgeleri", label: "Bungalov Bölgeleri", icon: "map" },
             { href: "/admin/katalog/konaklama-tipleri", label: "Konaklama Tipleri", icon: "hotel" },
