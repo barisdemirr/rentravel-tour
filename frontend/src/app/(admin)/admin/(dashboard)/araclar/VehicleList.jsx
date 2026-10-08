@@ -196,6 +196,7 @@ export default function VehicleList({ rows, failed }) {
                             { label: "Fiyatlar", icon: "payments", href: `/admin/fiyat-kurallari?ownerType=Vehicle&ownerId=${row.id}` },
                             { label: "Düzenle", icon: "edit", href: `/admin/araclar/${row.id}` },
                             { label: "Sil", icon: "delete", danger: true, onClick: () => setTarget(row) },
+                            { label: "Kopyala", icon: "content_copy", href: `/admin/araclar/yeni?kopya=${row.id}` },
                         ]}
                     />
                 </>

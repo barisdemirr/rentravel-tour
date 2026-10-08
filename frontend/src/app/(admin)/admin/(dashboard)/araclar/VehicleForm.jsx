@@ -85,10 +85,10 @@ const cleanSpecs = (list) =>
         .filter((s) => s.label?.tr?.trim() || s.value?.tr?.trim())
         .map((s) => ({ icon: s.icon?.trim() ?? "", label: cleanLocalized(s.label), value: cleanLocalized(s.value) }));
 
-export default function VehicleForm({ record, segments, extras, nextOrder }) {
+export default function VehicleForm({ record, isCopy = false, segments, extras, nextOrder }) {
     const router = useRouter();
     const toast = useToast();
-    const isNew = !record;
+    const isNew = !record?.id;
 
     const [form, setForm] = useState(() => initialState(record, nextOrder));
     const [errors, setErrors] = useState({});
@@ -187,7 +187,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
             if (isNew) await adminPost("/admin/vehicles", body);
             else await adminPut(`/admin/vehicles/${record.id}`, body);
 
-            toast.success(isNew ? "Araç eklendi." : "Değişiklikler kaydedildi.");
+            toast.success(isCopy ? "Araç kopyalandı." : isNew ? "Araç eklendi." : "Değişiklikler kaydedildi.");
             router.push("/admin/araclar");
             router.refresh();
         } catch (e) {
@@ -226,15 +226,30 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 </Link>
                 <div className="min-w-0">
                     <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-                        {isNew ? "Yeni Araç" : form.name.tr || "Araç Düzenle"}
+                        {isCopy ? "Araç Kopyala" : isNew ? "Yeni Araç" : form.name.tr || "Araç Düzenle"}
                     </h1>
                     <p className="mt-1 text-sm text-ad-muted">
-                        {isNew
-                            ? "Zorunlu alanlar: ad, günlük fiyat, depozito."
-                            : `Adres: /arac-kiralama/${record.slug}`}
+                        {isCopy
+                            ? "Mevcut bir aracın kopyasından önceden dolduruldu. Kaydedince yeni bir araç oluşur."
+                            : isNew
+                                ? "Zorunlu alanlar: ad, günlük fiyat, depozito."
+                                : `Adres: /arac-kiralama/${record.slug}`}
                     </p>
                 </div>
             </div>
+
+            {isCopy && (
+                <div className="flex items-start gap-3 rounded-xl border border-ad-brand-line bg-ad-brand-soft px-4 py-3">
+                    <Icon name="content_copy" className="mt-0.5 shrink-0 text-[20px] text-ad-brand" />
+                    <div className="min-w-0 text-sm text-ad-body">
+                        <strong className="font-semibold">Bu bir kopya.</strong> Kaydettiğinizde{" "}
+                        <strong>yeni bir araç</strong> oluşturulur; orijinal araç etkilenmez. Kopya{" "}
+                        <strong>taslak</strong> olarak kaydedilir (yayında değil). Başlıktaki{" "}
+                        <code className="rounded bg-ad-sunken px-1.5 py-0.5 text-xs">(Kopya)</code> ekini
+                        düzenleyebilirsiniz.
+                    </div>
+                </div>
+            )}
 
             {/* TEMEL BİLGİLER */}
             <FormSection title="Temel bilgiler" columns={2}>
@@ -256,7 +271,11 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
                 <div className="sm:col-span-2">
                     <Field
                         label="Bağlantı Adresi (URL)"
-                        hint="Sitede bu aracın adresi: /arac-kiralama/<adres>"
+                        hint={
+                            isCopy
+                                ? "Kopyada boş bırakırsanız addan yeni adres üretilir: /arac-kiralama/<adres>"
+                                : "Sitede bu aracın adresi: /arac-kiralama/<adres>"
+                        }
                         error={fieldError("slug")}
                     >
                         <div className="flex items-stretch gap-2">
@@ -590,7 +609,7 @@ export default function VehicleForm({ record, segments, extras, nextOrder }) {
             <FormActions
                 busy={busy}
                 onCancel={() => router.push("/admin/araclar")}
-                saveLabel={isNew ? "Oluştur" : "Kaydet"}
+                saveLabel={isCopy ? "Kopyayı Oluştur" : isNew ? "Oluştur" : "Kaydet"}
                 extra={<TranslateAllButton fields={translatable} />}
             />
         </form>
