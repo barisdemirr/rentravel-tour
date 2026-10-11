@@ -8,7 +8,6 @@ import { stripLocale } from "@/lib/i18n/config";
 import { useLanguage } from "@/lib/i18n/LanguageProvider";
 import Icon from "../ui/Icon";
 import LanguageMenu from "../ui/LanguageMenu";
-import SafeImage from "../ui/SafeImage";
 
 /* Menü öğelerinin ortak kutusu: ikonlu ve ikonsuz öğeler aynı hizada dursun */
 const ITEM_BASE =
@@ -17,6 +16,12 @@ const ITEM_BASE =
 /* Alt çizgi: kutunun ortasından başlar, her öğede aynı genişlikte */
 const UNDERLINE =
     "pointer-events-none absolute bottom-1 left-1/2 h-[2px] w-[calc(100%-1.5rem)] -translate-x-1/2 rounded-full bg-crimson-vivid transition-transform duration-300 ease-out";
+
+/**
+ * Logo yolu her zaman kökten başlar: "logo.png" gibi göreli bir yol /en/... veya
+ * /arac-kiralama/... altında yanlış adrese çözülüp kaybolmasın.
+ */
+const rootPath = (src) => (!src || src.startsWith("/") || src.startsWith("http") ? src : `/${src}`);
 
 export default function Navbar({ onOpenMenu }) {
     const { t } = useLanguage();
@@ -61,9 +66,13 @@ export default function Navbar({ onOpenMenu }) {
                 {/* Logo: mobilde en solda, masaüstünde başta */}
                 <div className="flex shrink-0 items-center 2xl:flex-none">
                     <Link href="/" aria-label="Rentravel" className="flex items-center">
-                        <SafeImage
-                            src={IMG.logo}
+                        {/* Düz img: yükleme durumuna bağlı gizleme yok, önbellekten gelse de hep görünür */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={rootPath(IMG.logo)}
                             alt="Rentravel Turizm"
+                            fetchPriority="high"
+                            decoding="async"
                             className="h-10 w-auto object-contain md:h-12 2xl:h-14"
                         />
                     </Link>

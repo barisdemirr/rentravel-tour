@@ -11,7 +11,9 @@ import { EASE } from "@/lib/motion";
 import { infoMessage } from "@/lib/whatsapp";
 import Icon from "../ui/Icon";
 import LanguageMenu from "../ui/LanguageMenu";
-import SafeImage from "../ui/SafeImage";
+
+/** Logo yolu her zaman kökten başlar: dil önekli sayfalarda yanlış adrese çözülmesin */
+const rootPath = (src) => (!src || src.startsWith("/") || src.startsWith("http") ? src : `/${src}`);
 
 export default function MobileDrawer({ open, onClose, pages = [] }) {
     const { t, locale } = useLanguage();
@@ -94,9 +96,12 @@ export default function MobileDrawer({ open, onClose, pages = [] }) {
                 >
                     {/* Üst çubuk: sabit */}
                     <div className="flex shrink-0 items-center justify-between px-5 py-4">
-                        <SafeImage
-                            src={IMG.logoMobile || IMG.logo}
+                        {/* Düz img: yükleme durumuna bağlı gizleme yok */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src={rootPath(IMG.logoMobile || IMG.logo)}
                             alt="Rentravel"
+                            decoding="async"
                             className="h-11 w-auto object-contain"
                         />
                         <button
@@ -189,7 +194,7 @@ export default function MobileDrawer({ open, onClose, pages = [] }) {
                         </motion.div>
                     </nav>
 
-                    {/* Alt: sabit eylemler (VIP Talep kaldırıldı, artık menüde) */}
+                    {/* Alt: sabit eylemler */}
                     <div className="shrink-0 border-t border-white/10 px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
                         <div className="mb-3 flex items-center justify-between font-label-uppercase text-label-uppercase text-surface-variant/70">
                             <span>{t.nav.langSelect}</span>
