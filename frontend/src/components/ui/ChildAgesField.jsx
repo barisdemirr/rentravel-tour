@@ -10,6 +10,7 @@ export default function ChildAgesField({ ages, setAges, sub, max = 10, canAdd = 
     const { t, tpl } = useLanguage();
     const d = t.tourDetail;
     const agesReady = ages.every((a) => a !== "");
+    const addDisabled = ages.length >= max || !canAdd;
 
     return (
         <div className="flex flex-col gap-2 rounded-2xl bg-canvas-offwhite p-3">
@@ -20,15 +21,17 @@ export default function ChildAgesField({ ages, setAges, sub, max = 10, canAdd = 
                     </span>
                     <span className="block font-body-sm text-body-sm text-secondary">{sub ?? d.childrenSub}</span>
                 </div>
-                {ages.length < max && canAdd && (
-                    <button
-                        type="button"
-                        onClick={() => setAges((a) => [...a, ""])}
-                        className="..."
-                    >
-                        {/* ... */}
-                    </button>
-                )}
+
+                {/* Buton hiçbir zaman gizlenmez; limit/kapasite dolunca pasif görünür */}
+                <button
+                    type="button"
+                    disabled={addDisabled}
+                    onClick={() => setAges((a) => [...a, ""])}
+                    className="flex shrink-0 items-center gap-1 rounded-full bg-surface-white px-3.5 py-2 font-label-md text-label-md font-semibold text-charcoal-dark shadow-sm transition-colors hover:bg-crimson-vivid hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-surface-white disabled:hover:text-charcoal-dark disabled:active:scale-100"
+                >
+                    <Icon name="add" className="text-[16px]" />
+                    {d.addChild}
+                </button>
             </div>
 
             {ages.map((age, i) => (
