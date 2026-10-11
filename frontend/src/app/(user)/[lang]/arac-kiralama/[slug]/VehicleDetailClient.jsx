@@ -105,6 +105,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
     }, [vehicle, selected, pickupDate, pickupTime, returnDate, returnTime, q, locale]);
 
     const specs = vehicle.detailedSpecs ?? [];
+    const driverRequirements = vehicle.driverRequirements ?? [];
 
     /* Rezervasyon paneli: mobilde hero kartının hemen altında, masaüstünde sağda sabit */
     const bookingPanel = (
@@ -289,7 +290,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                                 )}
                             </div>
 
-                            {/* Araç görseli (+ galeri küçük resimleri) */}
+                            {/* Araç görseli */}
                             <div className="relative mb-4 flex w-full items-center justify-center overflow-hidden rounded-2xl bg-canvas-offwhite/60 px-3 py-4 sm:mb-5 sm:px-4 sm:py-6">
                                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-surface-white/40 to-surface-white/80" />
                                 <SafeImage
@@ -329,7 +330,7 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
 
                     {/* ═══ DİĞER BÖLÜMLER ═══ */}
                     <div className="flex min-w-0 flex-col gap-5 lg:col-span-8 lg:col-start-1 lg:row-start-2">
-                        {/* Açıklama (backend'de girildiyse, HTML sunucuda temizlenmiş) */}
+                        {/* Açıklama (backend'de girildiyse) */}
                         {localized(vehicle.description, locale) && (
                             <div className="rounded-3xl bg-surface-white p-4 shadow-sm sm:p-7">
                                 <h2 className="mb-3 font-headline-sm text-headline-sm font-bold text-charcoal-dark md:font-headline-md md:text-headline-md">
@@ -350,14 +351,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
                         )}
 
-                        {/* KİRALAMA KOŞULLARI */}
+                        {/* KİRALAMA KOŞULLARI: metin sabit, kartlar araç verisinden */}
                         <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
                             <SectionHeader icon="policy" title={d.conditionsTitle} sub={d.conditionsSub} />
                             <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.conditionsText}</p>
 
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <ConditionCard
-                                    icon="credit_card"
+                                    icon="payments"
                                     label={d.deposit}
                                     value={money(vehicle.deposit)}
                                     badge={d.depositReturn}
@@ -373,14 +374,14 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
                         </div>
 
-                        {/* SÜRÜCÜ GEREKSİNİMLERİ */}
-                        {vehicle.driverRequirements.length > 0 && (
-                            <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
-                                <SectionHeader icon="badge" title={d.driverTitle} sub={d.driverSub} />
-                                <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.driverText}</p>
+                        {/* SÜRÜCÜ GEREKSİNİMLERİ: metin her zaman görünür, kartlar girildiyse eklenir */}
+                        <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
+                            <SectionHeader icon="badge" title={d.driverTitle} sub={d.driverSub} />
+                            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.driverText}</p>
 
+                            {driverRequirements.length > 0 && (
                                 <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-                                    {vehicle.driverRequirements.map((r, i) => (
+                                    {driverRequirements.map((r, i) => (
                                         <div key={i} className="flex min-w-0 flex-col rounded-2xl bg-canvas-offwhite p-3 sm:p-4">
                                             <span className="font-label-uppercase text-label-uppercase text-[10px] text-secondary">
                                                 {localized(r.label, locale)}
@@ -394,8 +395,8 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                                         </div>
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* EKSTRA HİZMETLER */}
                         {vehicle.extras.length > 0 && (
