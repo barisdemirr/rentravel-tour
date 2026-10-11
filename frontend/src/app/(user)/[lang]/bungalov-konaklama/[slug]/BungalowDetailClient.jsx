@@ -39,8 +39,9 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const title = localized(bungalow.title, locale);
     const money = (amount) => formatPrice(amount, bungalow.currency, locale);
 
-    const standardCapacity = bungalow.standardCapacity ?? 2;
-    const maxCapacity = bungalow.maxCapacity ?? 2;
+    // 0 veya boş gelirse de varsayılana düşsün; maksimum, standarttan küçük olamaz
+    const standardCapacity = bungalow.standardCapacity || 2;
+    const maxCapacity = Math.max(bungalow.maxCapacity || 0, standardCapacity);
 
     /* Katalogdan gelen ekstra hizmetler (bungalova atanmış) */
     const bungalowExtras = bungalow.extras ?? [];
@@ -75,7 +76,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
     const totalGuests = adults + ages.length;
     const overCapacity = totalGuests > maxCapacity;
     const canAddAdult = totalGuests < maxCapacity;
-    const canAddChild = ages.length < MAX_CHILDREN && totalGuests < maxCapacity;
+    // Buton her zaman görünür; kapasite aşılırsa aşağıdaki uyarı çıkar ve rezervasyon kilitlenir
+    const canAddChild = ages.length < MAX_CHILDREN;
     const ready = datesFilled && nightsValid && agesReady && !overCapacity;
     const agesKey = ages.join(",");
 
@@ -166,6 +168,7 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                 return count > 1 ? `${name} (${count} × ${money(e.price)})` : name;
             })
             .filter(Boolean);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bungalowExtras, extrasKey, extraCounts, nights, locale]);
 
     const whatsappHref = useMemo(
@@ -327,8 +330,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                                 <div
                                     key={extra.extraId}
                                     className={`flex flex-col gap-2 rounded-2xl border-2 p-3 transition-colors ${selected
-                                            ? "border-crimson-vivid bg-crimson-vivid/5"
-                                            : "border-transparent bg-canvas-offwhite"
+                                        ? "border-crimson-vivid bg-crimson-vivid/5"
+                                        : "border-transparent bg-canvas-offwhite"
                                         }`}
                                 >
                                     <button
@@ -340,8 +343,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                                     >
                                         <span
                                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${selected
-                                                    ? "border-crimson-vivid bg-crimson-vivid text-white"
-                                                    : "border-secondary/40"
+                                                ? "border-crimson-vivid bg-crimson-vivid text-white"
+                                                : "border-secondary/40"
                                                 }`}
                                         >
                                             {selected && <Icon name="check" className="text-[13px]" />}
@@ -503,8 +506,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                     aria-disabled={overCapacity}
                     onClick={(e) => overCapacity && e.preventDefault()}
                     className={`flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-md transition-all ${overCapacity
-                            ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
-                            : "bg-primary-container text-on-primary hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
+                        ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
+                        : "bg-primary-container text-on-primary hover:scale-[1.01] hover:bg-crimson-vivid active:scale-[0.98]"
                         }`}
                 >
                     <Icon name="chat" className="text-[22px]" />
@@ -812,8 +815,8 @@ export default function BungalowDetailClient({ bungalow, initialDates }) {
                         aria-disabled={overCapacity}
                         onClick={(e) => overCapacity && e.preventDefault()}
                         className={`inline-flex shrink-0 items-center gap-2 rounded-2xl px-6 py-3 font-label-uppercase text-label-uppercase font-bold tracking-wider shadow-md transition-colors ${overCapacity
-                                ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
-                                : "bg-primary-container text-on-primary active:scale-[0.98]"
+                            ? "cursor-not-allowed bg-surface-variant text-secondary opacity-60"
+                            : "bg-primary-container text-on-primary active:scale-[0.98]"
                             }`}
                     >
                         <Icon name="chat" className="text-[18px]" />
@@ -876,8 +879,8 @@ function AnchorPills({ sections }) {
                         key={s.id}
                         href={`#${s.id}`}
                         className={`whitespace-nowrap rounded-full px-4 py-1.5 font-label-md text-label-md transition-all ${active === s.id
-                                ? "bg-charcoal-dark text-white shadow-sm"
-                                : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
+                            ? "bg-charcoal-dark text-white shadow-sm"
+                            : "text-secondary hover:bg-surface-variant hover:text-charcoal-dark"
                             }`}
                     >
                         {s.label}
