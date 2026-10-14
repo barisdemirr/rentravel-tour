@@ -16,10 +16,88 @@ import { carMessage } from "@/lib/whatsapp";
 import { quoteVehicle } from "@/services";
 import { toHtml } from "@/lib/richText";
 
+/* ─────────────────────────────────────────────
+   KİRALAMA KOŞULLARI VE SÜRÜCÜ GEREKSİNİMLERİ
+   Müşterinin (Rentravel) verdiği sabit metinler. Araç verisinden gelmez.
+   Metni değiştirmek için sadece burayı düzenle.
+   ───────────────────────────────────────────── */
+const RENTAL_COPY = {
+    tr: {
+        conditionsTitle: "Araç Kiralama Koşulları",
+        conditionsSub: "Depozito, kasko, kilometre ve yakıt bilgileri",
+        conditionsText:
+            "Araç tesliminde belirtilen depozito tutarı nakit olarak alınır ve kiralama süresi sonunda, sözleşme koşullarının sağlanması halinde araç iadesi esnasında geri ödenir. Araçlarımız %3 muafiyetli kiralama kaskosu ile güvence altındadır. Günlük kullanım limiti 250 km olup, araçlar teslim alındığı yakıt seviyesinde iade edilmelidir.",
+        conditionCards: [
+            { icon: "payments", label: "Depozito", badge: "Sadece nakit" },
+            { icon: "speed", label: "Günlük km limiti", value: "250 km", badge: "Günlük" },
+            { icon: "verified_user", label: "Kiralama kaskosu", value: "%3 muafiyet", badge: "Güvence altında" },
+            { icon: "local_gas_station", label: "Yakıt", value: "Teslim seviyesi", badge: "Aynı seviyede iade" },
+        ],
+        cash: "Nakit",
+        driverTitle: "Sürücü Yaşı ve Ehliyet Gereksinimleri",
+        driverSub: "Aracı kiralamak için gerekli şartlar",
+        driverText:
+            "Araç kiralayabilmek için en az 23 yaşında olmanız ve minimum 3 yıllık geçerli B Sınıfı sürücü belgesine sahip olmanız gerekmektedir. Araç tesliminde T.C. kimlik kartı veya pasaport ile geçerli sürücü belgesi ibraz edilmelidir. Aracı kullanacak tüm ek sürücüler aynı şartları karşılamalı ve kiralama sözleşmesine eklenmelidir.",
+        driverCards: [
+            { label: "Minimum yaş", value: "23", sub: "yaş ve üzeri", highlight: true },
+            { label: "Ehliyet", value: "B Sınıfı", sub: "en az 3 yıllık, geçerli" },
+            { label: "Teslimde ibraz", value: "Kimlik / Pasaport", sub: "+ geçerli sürücü belgesi" },
+            { label: "Ek sürücü", value: "Aynı şartlar", sub: "sözleşmeye eklenmeli" },
+        ],
+    },
+    en: {
+        conditionsTitle: "Car Rental Conditions",
+        conditionsSub: "Deposit, insurance, mileage and fuel information",
+        conditionsText:
+            "The deposit amount stated at vehicle delivery is collected in cash and refunded at the end of the rental period, upon vehicle return, provided the contract terms have been met. Our vehicles are covered by rental collision insurance with a 3% deductible. The daily mileage limit is 250 km, and vehicles must be returned with the same fuel level as at delivery.",
+        conditionCards: [
+            { icon: "payments", label: "Deposit", badge: "Cash only" },
+            { icon: "speed", label: "Daily mileage limit", value: "250 km", badge: "Per day" },
+            { icon: "verified_user", label: "Rental insurance", value: "3% deductible", badge: "Covered" },
+            { icon: "local_gas_station", label: "Fuel", value: "Same as delivery", badge: "Return at same level" },
+        ],
+        cash: "Cash",
+        driverTitle: "Driver Age and License Requirements",
+        driverSub: "Requirements to rent a vehicle",
+        driverText:
+            "To rent a vehicle you must be at least 23 years old and hold a valid Class B driving license for a minimum of 3 years. A national ID card or passport together with a valid driving license must be presented at vehicle delivery. All additional drivers must meet the same requirements and be added to the rental agreement.",
+        driverCards: [
+            { label: "Minimum age", value: "23", sub: "years or older", highlight: true },
+            { label: "License", value: "Class B", sub: "valid, at least 3 years" },
+            { label: "At delivery", value: "ID / Passport", sub: "+ valid driving license" },
+            { label: "Additional driver", value: "Same rules", sub: "added to the contract" },
+        ],
+    },
+    ar: {
+        conditionsTitle: "شروط تأجير السيارات",
+        conditionsSub: "معلومات التأمين والمبلغ المسترد والكيلومترات والوقود",
+        conditionsText:
+            "يُستلم مبلغ التأمين (الوديعة) المحدد عند تسليم السيارة نقدًا فقط، ويُعاد عند إرجاع السيارة في نهاية مدة الإيجار شريطة الالتزام ببنود العقد. سياراتنا مشمولة بتأمين إيجار شامل بنسبة تحمّل 3%. الحد اليومي للاستخدام 250 كم، ويجب إعادة السيارة بنفس مستوى الوقود الذي استُلمت به.",
+        conditionCards: [
+            { icon: "payments", label: "مبلغ التأمين", badge: "نقدًا فقط" },
+            { icon: "speed", label: "الحد اليومي للكيلومترات", value: "250 كم", badge: "يوميًا" },
+            { icon: "verified_user", label: "تأمين الإيجار", value: "تحمّل 3%", badge: "مؤمَّنة" },
+            { icon: "local_gas_station", label: "الوقود", value: "نفس مستوى التسليم", badge: "الإرجاع بنفس المستوى" },
+        ],
+        cash: "نقدًا",
+        driverTitle: "شروط عمر السائق ورخصة القيادة",
+        driverSub: "الشروط المطلوبة لاستئجار السيارة",
+        driverText:
+            "لاستئجار سيارة يجب ألا يقل عمرك عن 23 عامًا وأن تحمل رخصة قيادة سارية من الفئة B لمدة 3 سنوات على الأقل. يجب إبراز بطاقة الهوية الوطنية أو جواز السفر مع رخصة قيادة سارية عند تسليم السيارة. ويجب أن يستوفي جميع السائقين الإضافيين الشروط نفسها وأن يُضافوا إلى عقد الإيجار.",
+        driverCards: [
+            { label: "الحد الأدنى للعمر", value: "23", sub: "عامًا فأكثر", highlight: true },
+            { label: "رخصة القيادة", value: "الفئة B", sub: "سارية لمدة 3 سنوات على الأقل" },
+            { label: "عند التسليم", value: "هوية / جواز سفر", sub: "+ رخصة قيادة سارية" },
+            { label: "سائق إضافي", value: "الشروط نفسها", sub: "يُضاف إلى العقد" },
+        ],
+    },
+};
+
 export default function VehicleDetailClient({ vehicle, initialDates }) {
     const { t, tpl, locale } = useLanguage();
     const d = t.vehicleDetail;
     const p = d.panel;
+    const rules = RENTAL_COPY[locale] ?? RENTAL_COPY.tr;
 
     const name = localized(vehicle.name, locale);
     const money = (amount) => formatPrice(amount, vehicle.currency, locale);
@@ -105,7 +183,6 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
     }, [vehicle, selected, pickupDate, pickupTime, returnDate, returnTime, q, locale]);
 
     const specs = vehicle.detailedSpecs ?? [];
-    const driverRequirements = vehicle.driverRequirements ?? [];
 
     /* Rezervasyon paneli: mobilde hero kartının hemen altında, masaüstünde sağda sabit */
     const bookingPanel = (
@@ -351,51 +428,44 @@ export default function VehicleDetailClient({ vehicle, initialDates }) {
                             </div>
                         )}
 
-                        {/* KİRALAMA KOŞULLARI: metin sabit, kartlar araç verisinden */}
+                        {/* KİRALAMA KOŞULLARI: tamamen sabit metin (müşteri bilgisi), sadece depozito tutarı araçtan gelir */}
                         <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
-                            <SectionHeader icon="policy" title={d.conditionsTitle} sub={d.conditionsSub} />
-                            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.conditionsText}</p>
+                            <SectionHeader icon="policy" title={rules.conditionsTitle} sub={rules.conditionsSub} />
+                            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{rules.conditionsText}</p>
 
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <ConditionCard
-                                    icon="payments"
-                                    label={d.deposit}
-                                    value={money(vehicle.deposit)}
-                                    badge={d.depositReturn}
-                                />
-                                {vehicle.kmLimit && (
+                                {rules.conditionCards.map((c, i) => (
                                     <ConditionCard
-                                        icon="speed"
-                                        label={d.kmLimit}
-                                        value={tpl(d.kmLimitValue, { km: vehicle.kmLimit.toLocaleString("tr-TR") })}
-                                        badge={vehicle.extraKmPrice ? tpl(d.extraKm, { price: money(vehicle.extraKmPrice) }) : null}
+                                        key={i}
+                                        icon={c.icon}
+                                        label={c.label}
+                                        value={c.icon === "payments" ? (vehicle.deposit > 0 ? money(vehicle.deposit) : rules.cash) : c.value}
+                                        badge={c.badge}
                                     />
-                                )}
+                                ))}
                             </div>
                         </div>
 
-                        {/* SÜRÜCÜ GEREKSİNİMLERİ: metin her zaman görünür, kartlar girildiyse eklenir */}
+                        {/* SÜRÜCÜ GEREKSİNİMLERİ: tamamen sabit metin ve kartlar */}
                         <div className="flex flex-col gap-4 rounded-3xl bg-surface-white p-4 shadow-sm sm:gap-5 sm:p-7">
-                            <SectionHeader icon="badge" title={d.driverTitle} sub={d.driverSub} />
-                            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{d.driverText}</p>
+                            <SectionHeader icon="badge" title={rules.driverTitle} sub={rules.driverSub} />
+                            <p className="font-body-sm text-body-sm leading-relaxed text-secondary">{rules.driverText}</p>
 
-                            {driverRequirements.length > 0 && (
-                                <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-                                    {driverRequirements.map((r, i) => (
-                                        <div key={i} className="flex min-w-0 flex-col rounded-2xl bg-canvas-offwhite p-3 sm:p-4">
-                                            <span className="font-label-uppercase text-label-uppercase text-[10px] text-secondary">
-                                                {localized(r.label, locale)}
-                                            </span>
-                                            <span className="mt-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
-                                                {localized(r.value, locale)}
-                                            </span>
-                                            <span className={`mt-1 text-[10px] ${r.highlight ? "font-semibold text-crimson-vivid" : "text-secondary/70"}`}>
-                                                {localized(r.sub, locale)}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+                                {rules.driverCards.map((r, i) => (
+                                    <div key={i} className="flex min-w-0 flex-col rounded-2xl bg-canvas-offwhite p-3 sm:p-4">
+                                        <span className="font-label-uppercase text-label-uppercase text-[10px] text-secondary">
+                                            {r.label}
+                                        </span>
+                                        <span className="mt-1 font-headline-sm text-headline-sm font-bold text-charcoal-dark">
+                                            {r.value}
+                                        </span>
+                                        <span className={`mt-1 text-[10px] ${r.highlight ? "font-semibold text-crimson-vivid" : "text-secondary/70"}`}>
+                                            {r.sub}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
 
                         {/* EKSTRA HİZMETLER */}
