@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ApiError, settle } from "@/lib/api";
 import { isLocale } from "@/lib/i18n/config";
@@ -6,9 +7,7 @@ import { mediaUrl } from "@/lib/media";
 import { buildAlternates } from "@/lib/seo";
 import { getBungalowBySlug } from "@/services";
 import BungalowDetailClient from "./BungalowDetailClient";
-
-const ISO = /^\d{4}-\d{2}-\d{2}$/;
-const pickDate = (value) => (typeof value === "string" && ISO.test(value) ? value : undefined);
+import BungalowDetailEntry from "./BungalowDetailEntry";
 
 export async function generateMetadata({ params }) {
     const { lang, slug } = await params;
@@ -33,9 +32,8 @@ export async function generateMetadata({ params }) {
     };
 }
 
-export default async function BungalowDetailPage({ params, searchParams }) {
+export default async function BungalowDetailPage({ params }) {
     const { slug } = await params;
-    const sp = await searchParams;
 
     const bungalow = await settle(getBungalowBySlug(slug), null);
 
@@ -43,8 +41,10 @@ export default async function BungalowDetailPage({ params, searchParams }) {
     if (bungalow.error) throw bungalow.error; // başka hata: Next hata sayfası
     if (!bungalow.data) notFound();
 
-    // Liste sayfasından gelen tarihler (?checkIn=2027-07-15&checkOut=2027-07-18)
-    const initialDates = { checkIn: pickDate(sp?.checkIn), checkOut: pickDate(sp?.checkOut) };
-
-    return <BungalowDetailClient bungalow={bungalow.data} initialDates={initialDates} />;
+    // searchParams sunucuda okunmaz: sayfa statik (ISR) kalır, tarihleri BungalowDetailEntry tarayıcıda okur.
+    return (
+        <Suspense fallback={<BungalowDetailClient bungalow={bungalow.data} initialDates={{}} />}>
+            <BungalowDetailEntry bungalow={bungalow.data} />
+        </Suspense>
+    );
 }

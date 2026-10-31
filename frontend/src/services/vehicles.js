@@ -1,13 +1,14 @@
 import { apiGet, apiPost, buildQuery } from "@/lib/api";
+import { PUBLIC_CACHE } from "@/lib/api/cache";
 
 /** GET /api/vehicles?segment=suv&featured=true&limit=8 */
 export function getVehicles(params) {
-    return apiGet(`/api/vehicles${buildQuery(params)}`);
+    return apiGet(`/api/vehicles${buildQuery(params)}`, PUBLIC_CACHE);
 }
 
 /** GET /api/vehicles/{slug} */
 export function getVehicleBySlug(slug) {
-    return apiGet(`/api/vehicles/${encodeURIComponent(slug)}`);
+    return apiGet(`/api/vehicles/${encodeURIComponent(slug)}`, PUBLIC_CACHE);
 }
 
 /**

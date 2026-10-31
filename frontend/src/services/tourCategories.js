@@ -1,4 +1,5 @@
 import { apiGet } from "@/lib/api";
+import { PUBLIC_CACHE } from "@/lib/api/cache";
 
 /**
  * GET /api/tour-categories
@@ -9,5 +10,5 @@ import { apiGet } from "@/lib/api";
  */
 export async function getTourCategories(scope) {
     const query = scope ? `?scope=${encodeURIComponent(scope)}` : "";
-    return apiGet(`/api/tour-categories${query}`);
+    return apiGet(`/api/tour-categories${query}`, PUBLIC_CACHE);
 }

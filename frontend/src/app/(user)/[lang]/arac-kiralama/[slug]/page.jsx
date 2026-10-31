@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { isLocale } from "@/lib/i18n/config";
@@ -6,6 +7,7 @@ import { mediaUrl } from "@/lib/media";
 import { buildAlternates } from "@/lib/seo";
 import { getVehicleBySlug } from "@/services";
 import VehicleDetailClient from "./VehicleDetailClient";
+import VehicleDetailEntry from "./VehicleDetailEntry";
 
 // 404 ise null, diğer hatalar fırlatılır (aynı istek önbellekten gelir)
 async function loadVehicle(slug) {
@@ -36,26 +38,16 @@ export async function generateMetadata({ params }) {
     };
 }
 
-// Listeden gelen tarihler: ?pickupDate=2027-07-15&pickupTime=10:00&returnDate=2027-07-18&returnTime=10:00
-function parseDates(search) {
-    const date = /^\d{4}-\d{2}-\d{2}$/;
-    const time = /^\d{2}:\d{2}$/;
-    const { pickupDate, pickupTime, returnDate, returnTime } = search;
-
-    if (!date.test(pickupDate ?? "") || !date.test(returnDate ?? "")) return null;
-
-    return {
-        pickupDate,
-        returnDate,
-        pickupTime: time.test(pickupTime ?? "") ? pickupTime : "10:00",
-        returnTime: time.test(returnTime ?? "") ? returnTime : "10:00",
-    };
-}
-
-export default async function VehicleDetailPage({ params, searchParams }) {
+export default async function VehicleDetailPage({ params }) {
     const { slug } = await params;
     const vehicle = await loadVehicle(slug);
     if (!vehicle) notFound();
 
-    return <VehicleDetailClient vehicle={vehicle} initialDates={parseDates(await searchParams)} />;
+    // searchParams sunucuda okunmaz: sayfa statik (ISR) kalır, tarihleri VehicleDetailEntry tarayıcıda okur.
+    // Suspense yedeği tarihsiz sürümdür; böylece HTML yine tam gelir.
+    return (
+        <Suspense fallback={<VehicleDetailClient vehicle={vehicle} initialDates={null} />}>
+            <VehicleDetailEntry vehicle={vehicle} />
+        </Suspense>
+    );
 }

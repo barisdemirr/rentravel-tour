@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
+import { PUBLIC_TAGS } from "@/lib/api/cache";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 
 const API = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5252";
@@ -62,6 +64,13 @@ async function forward(request, context) {
         const clone = response.clone();
         const detail = await clone.text().catch(() => "");
         console.error("[proxy]", response.status, request.method, target, detail.slice(0, 400));
+    }
+
+    // Panelden başarılı bir değişiklik yapıldı: herkese açık sayfaların önbelleği süre dolmasını beklemeden tazelenir.
+    // Böylece önbellek süresi uzun tutulabilir (sayfalar sürekli yeniden üretilmez, CPU harcanmaz)
+    // ama panelde kaydedilen şey sitede hemen görünür.
+    if (response.ok && !["GET", "HEAD"].includes(request.method) && target.startsWith("admin/")) {
+        for (const tag of PUBLIC_TAGS) revalidateTag(tag);
     }
 
     const outHeaders = new Headers();

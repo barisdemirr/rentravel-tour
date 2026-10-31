@@ -12,7 +12,7 @@ import { getStaticPageBySlug, getStaticPages } from "@/services/staticPages";
 import { formatDateTime } from "@/lib/format";
 import { toHtml } from "@/lib/richText";
 
-export const revalidate = 300;
+export const revalidate = 1800;
 
 /**
  * Statik sayfa olamayacak adresler: bot taramaları ve yanlış yazımlar
