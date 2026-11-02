@@ -2,6 +2,9 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 import "@/styles/admin.css";
 
+// Panel sayfaları backend'i bekler; kilitlenirse istek en fazla 30 sn açık kalır
+export const maxDuration = 30;
+
 export const metadata = {
     title: "Yönetim Paneli | Rentravel",
     robots: { index: false, follow: false },

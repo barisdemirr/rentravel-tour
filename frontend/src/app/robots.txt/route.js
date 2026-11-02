@@ -1,6 +1,7 @@
 import { SITE_URL } from "@/lib/siteUrl";
 import { getSiteSettings } from "@/services";
 
+export const maxDuration = 20; // istek en fazla bu kadar saniye açık kalır
 export const revalidate = 3600;
 
 const DEFAULT = `User-agent: *

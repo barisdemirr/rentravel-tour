@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { isKnownSlug, slugParams } from "@/lib/staticParams";
 import { notFound } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { isLocale } from "@/lib/i18n/config";
@@ -8,6 +9,12 @@ import { buildAlternates } from "@/lib/seo";
 import { getVehicleBySlug } from "@/services";
 import VehicleDetailClient from "./VehicleDetailClient";
 import VehicleDetailEntry from "./VehicleDetailEntry";
+
+// Mevcut kayıtlar derlemede hazır HTML olarak üretilir, sonradan eklenenler ilk ziyarette üretilip
+// önbelleğe alınır (ISR). Bu fonksiyon olmadan [slug] sayfaları her istekte yeniden render ediliyordu.
+export function generateStaticParams() {
+    return slugParams("vehicles");
+}
 
 // 404 ise null, diğer hatalar fırlatılır (aynı istek önbellekten gelir)
 async function loadVehicle(slug) {
@@ -21,7 +28,7 @@ async function loadVehicle(slug) {
 
 export async function generateMetadata({ params }) {
     const { lang, slug } = await params;
-    if (!isLocale(lang)) return {};
+    if (!isLocale(lang) || !(await isKnownSlug("vehicles", slug))) return {};
 
     const vehicle = await loadVehicle(slug);
     if (!vehicle) return {};
@@ -40,6 +47,8 @@ export async function generateMetadata({ params }) {
 
 export default async function VehicleDetailPage({ params }) {
     const { slug } = await params;
+    if (!(await isKnownSlug("vehicles", slug))) notFound();
+
     const vehicle = await loadVehicle(slug);
     if (!vehicle) notFound();
 

@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, cookieOptions, readToken } from "@/lib/admin/session";
 
+export const maxDuration = 20;
+
 const API = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5252";
 
 export async function POST(request) {
@@ -18,6 +20,7 @@ export async function POST(request) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: body?.email ?? "", password: body?.password ?? "" }),
             cache: "no-store",
+            signal: AbortSignal.timeout(15000),
         });
     } catch {
         return Response.json({ title: "Sunucuya ulaşılamadı." }, { status: 503 });

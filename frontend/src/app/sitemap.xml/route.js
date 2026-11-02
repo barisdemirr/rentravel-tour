@@ -2,6 +2,7 @@ import { SITE_URL } from "@/lib/siteUrl";
 import { LOCALES } from "@/lib/i18n/config";
 import { getSitemapData } from "@/services";
 
+export const maxDuration = 20; // istek en fazla bu kadar saniye açık kalır
 export const revalidate = 3600; // saatte bir yenilenir
 
 /** Dil öneki: TR kökte, diğerleri /en, /ar */

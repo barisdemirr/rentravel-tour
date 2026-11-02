@@ -3,6 +3,9 @@ import { revalidateTag } from "next/cache";
 import { PUBLIC_TAGS } from "@/lib/api/cache";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 
+// Dosya yüklemeleri yavaş hostinge uzun sürebilir; yine de bir istek en fazla 60 sn açık kalır.
+export const maxDuration = 60;
+
 const API = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:5252";
 
 // Panelden erişilebilecek yollar. Yeni bir uç eklersen buraya da ekle.
@@ -47,10 +50,16 @@ async function forward(request, context) {
             headers,
             body: body && body.byteLength > 0 ? body : undefined,
             cache: "no-store",
+            // Backend cevap vermezse 50 sn sonra vazgeç (eskiden sınırsız bekliyordu)
+            signal: AbortSignal.timeout(50000),
         });
     } catch (error) {
-        console.error("[proxy] bağlantı hatası:", target, error?.cause?.code || error?.message);
-        return Response.json({ title: "Sunucuya ulaşılamadı." }, { status: 503 });
+        const timedOut = error?.name === "TimeoutError" || error?.name === "AbortError";
+        console.error("[proxy] bağlantı hatası:", target, timedOut ? "zaman aşımı" : error?.cause?.code || error?.message);
+        return Response.json(
+            { title: timedOut ? "Sunucu zamanında cevap vermedi, tekrar deneyin." : "Sunucuya ulaşılamadı." },
+            { status: timedOut ? 504 : 503 }
+        );
     }
 
     // Backend token'ı reddetti (imza geçersiz, anahtar değişmiş): çerez temizlenir,

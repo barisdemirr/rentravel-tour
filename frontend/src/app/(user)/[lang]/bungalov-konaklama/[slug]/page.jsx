@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { isKnownSlug, slugParams } from "@/lib/staticParams";
 import { notFound } from "next/navigation";
 import { ApiError, settle } from "@/lib/api";
 import { isLocale } from "@/lib/i18n/config";
@@ -9,9 +10,15 @@ import { getBungalowBySlug } from "@/services";
 import BungalowDetailClient from "./BungalowDetailClient";
 import BungalowDetailEntry from "./BungalowDetailEntry";
 
+// Mevcut kayıtlar derlemede hazır HTML olarak üretilir, sonradan eklenenler ilk ziyarette üretilip
+// önbelleğe alınır (ISR). Bu fonksiyon olmadan [slug] sayfaları her istekte yeniden render ediliyordu.
+export function generateStaticParams() {
+    return slugParams("bungalows");
+}
+
 export async function generateMetadata({ params }) {
     const { lang, slug } = await params;
-    if (!isLocale(lang)) return {};
+    if (!isLocale(lang) || !(await isKnownSlug("bungalows", slug))) return {};
 
     const { data: bungalow } = await settle(getBungalowBySlug(slug), null);
     if (!bungalow) return {};
@@ -34,6 +41,7 @@ export async function generateMetadata({ params }) {
 
 export default async function BungalowDetailPage({ params }) {
     const { slug } = await params;
+    if (!(await isKnownSlug("bungalows", slug))) notFound();
 
     const bungalow = await settle(getBungalowBySlug(slug), null);
 

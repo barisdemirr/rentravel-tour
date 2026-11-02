@@ -23,6 +23,8 @@ export async function adminFetch(path, { fallback = null } = {}) {
         response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}` },
             cache: "no-store",
+            // Backend kilitlenirse sonsuza dek bekleme (bekleme süresi Vercel'de ücretli)
+            signal: AbortSignal.timeout(15000),
         });
     } catch (error) {
         // Sunucuya hiç ulaşılamadı: port kapalı, yanlış adres, sertifika sorunu

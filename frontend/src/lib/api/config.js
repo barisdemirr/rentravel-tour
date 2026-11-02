@@ -4,8 +4,8 @@ export const API_CONFIG = {
         process.env.API_URL ||
         process.env.NEXT_PUBLIC_API_URL ||
         "http://localhost:5252",
-    defaultRevalidate: 60, // saniye — sayfa cache süresi
-    timeout: 15000, // ms — fetch timeout
+    defaultRevalidate: 1800, // saniye — açıkça süre verilmeyen GET'ler de 30 dk önbellekte kalır
+    timeout: 8000, // ms — backend bu sürede cevap vermezse vazgeç (bekleyen her saniye Vercel'de ücretli)
 };
 
 export function buildApiUrl(path) {

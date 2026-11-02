@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, readToken } from "@/lib/admin/session";
 
+export const maxDuration = 60; // istek en fazla bu kadar saniye açık kalır
 const MODEL = "gemini-3.5-flash-lite";
 const MAX_CHARS = 30000; // longDescription üst sınırıyla aynı
 

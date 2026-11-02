@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { slugParams } from "@/lib/staticParams";
 import Icon from "@/components/ui/Icon";
 import Link from "@/components/ui/LocalizedLink";
 import { ApiError, settle } from "@/lib/api";
@@ -13,6 +14,12 @@ import { formatDateTime } from "@/lib/format";
 import { toHtml } from "@/lib/richText";
 
 export const revalidate = 1800;
+
+// Mevcut kayıtlar derlemede hazır HTML olarak üretilir, sonradan eklenenler ilk ziyarette üretilip
+// önbelleğe alınır (ISR). Bu fonksiyon olmadan [slug] sayfaları her istekte yeniden render ediliyordu.
+export function generateStaticParams() {
+    return slugParams("staticPages");
+}
 
 /**
  * Statik sayfa olamayacak adresler: bot taramaları ve yanlış yazımlar
@@ -33,9 +40,21 @@ const BLOCKED = new Set([
 
 const isLikelySlug = (slug) => !BLOCKED.has(slug) && !INVALID_SLUG.test(slug);
 
+/**
+ * Slug yayındaki sayfalardan biri mi? Liste layout'ta zaten çekiliyor (önbellekten gelir).
+ * Bot taramalarındaki uydurma adresler böylece backend'e tek tek istek atmaz.
+ * Liste alınamazsa (backend kapalı) eski davranışa düşer: sayfa doğrudan sorulur.
+ */
+async function isKnownSlug(slug) {
+    if (!isLikelySlug(slug)) return false;
+    const { data, error } = await settle(getStaticPages(), []);
+    if (error || !Array.isArray(data)) return true;
+    return data.some((p) => p.slug === slug);
+}
+
 export async function generateMetadata({ params }) {
     const { lang, slug } = await params;
-    if (!isLocale(lang) || !isLikelySlug(slug)) return {};
+    if (!isLocale(lang) || !(await isKnownSlug(slug))) return {};
 
     const { data: page } = await settle(getStaticPageBySlug(slug), null);
     if (!page) return {};
@@ -53,7 +72,7 @@ export async function generateMetadata({ params }) {
 
 export default async function StaticPage({ params }) {
     const { lang, slug } = await params;
-    if (!isLikelySlug(slug)) notFound();
+    if (!(await isKnownSlug(slug))) notFound();
     const locale = isLocale(lang) ? lang : "tr";
     const t = getDictionary(locale).staticPage;
 

@@ -21,6 +21,10 @@ export const viewport = {
     themeColor: "#d90429",
 };
 
+// Güvenlik ağı: backend (paylaşımlı hosting) kilitlenirse bir istek en fazla 20 sn sürer.
+// Vercel bellek ücretini istek açık kaldığı sürece yazar; varsayılan sınır 300 sn idi.
+export const maxDuration = 20;
+
 export function generateStaticParams() {
     return LOCALES.map((lang) => ({ lang }));
 }
