@@ -31,10 +31,14 @@ export default function BungalowCard({ bungalow, mode = "slider", stay = null, q
             ? "w-full"
             : "w-[300px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]";
 
+    // Kartın tamamı tek bağlantı: her yerine tıklanınca detay sayfası açılır (VehicleCard ile aynı yapı)
     return (
-        <article
-            className={`group flex h-full ${wrapperCls} flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl`}
-        >
+        <article className={`h-full ${wrapperCls}`}>
+            <Link
+                href={`/bungalov-konaklama/${bungalow.slug}${query}`}
+                aria-label={title}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson-vivid"
+            >
             {/* Görsel */}
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal-dark">
                 <SafeImage
@@ -114,14 +118,13 @@ export default function BungalowCard({ bungalow, mode = "slider", stay = null, q
                             </div>
                         )}
                     </div>
-                    <Link
-                        href={`/bungalov-konaklama/${bungalow.slug}${query}`}
-                        className="inline-flex shrink-0 items-center justify-center rounded-xl bg-charcoal-dark px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
-                    >
+                    {/* CTA: kartın kendisi bağlantı, bu yalnızca görsel ipucu */}
+                    <span className="inline-flex shrink-0 items-center justify-center rounded-xl bg-charcoal-dark px-4 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container">
                         {t.cards.details}
-                    </Link>
+                    </span>
                 </div>
             </div>
+            </Link>
         </article>
     );
 }

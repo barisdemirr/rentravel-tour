@@ -25,10 +25,14 @@ export default function TourCard({ tour, variant = "daily", mode = "slider", que
             ? "w-full h-full" // grid içinde otomatik genişlik
             : "w-[300px] shrink-0 snap-start sm:w-[340px] lg:w-[360px]"; // slider modu
 
+    // Kartın tamamı tek bağlantı: her yerine tıklanınca detay sayfası açılır (VehicleCard ile aynı yapı)
     return (
-        <article
-            className={`group flex ${wrapperCls} flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl`}
-        >
+        <article className={wrapperCls}>
+            <Link
+                href={`${DETAIL_PATH[variant]}/${tour.slug}${query}`}
+                aria-label={title}
+                className="group flex h-full flex-col overflow-hidden rounded-2xl bg-surface-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson-vivid"
+            >
             {/* Görsel */}
             <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal-dark">
                 <SafeImage
@@ -102,15 +106,14 @@ export default function TourCard({ tour, variant = "daily", mode = "slider", que
                             {formatPrice(tour.defaultBasePrice, tour.currency, locale)}
                         </div>
                     </div>
-                    <Link
-                        href={`${DETAIL_PATH[variant]}/${tour.slug}${query}`}
-                        className="inline-flex items-center justify-center gap-1 rounded-xl bg-charcoal-dark px-3.5 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container"
-                    >
+                    {/* CTA: kartın kendisi bağlantı, bu yalnızca görsel ipucu */}
+                    <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-charcoal-dark px-3.5 py-2.5 font-label-uppercase text-label-uppercase tracking-wider text-surface-white transition-colors group-hover:bg-primary-container">
                         <span>{t.cards.view}</span>
                         <Icon name="arrow_forward" className="text-[14px] rtl:-scale-x-100" />
-                    </Link>
+                    </span>
                 </div>
             </div>
+            </Link>
         </article>
     );
 }
